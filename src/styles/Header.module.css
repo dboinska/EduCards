@@ -1,0 +1,95 @@
+.header {
+  height: 56px;
+  background-color: var(--mantine-color-body);
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.inner {
+  height: rem(56px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1000px;
+}
+
+.link {
+  display: block;
+  line-height: 1;
+  padding: 20px 0;
+  margin: 0 20px;
+  width: fit-content;
+  text-decoration: none;
+  color: black;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  transition: all 0.4s ease;
+  border-bottom: 2px solid transparent;
+
+  @mixin hover {
+    color: var(--main-color);
+    border-color: var(--main-color);
+  }
+
+  [data-mantine-color-scheme] &[data-active] {
+    border-color: var(--main-color);
+    color: var(--main-color);
+  }
+}
+
+.linkCatalouges {
+  display: flex;
+  justify-content: center;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  transition: all 0.4s ease;
+
+  [data-mantine-color-scheme] &[data-active] {
+    border-color: var(--main-color);
+  }
+}
+
+.linkLimeColor {
+  background-color: var(--lime-color);
+  border-color: var(--lime-color);
+  border-radius: var(--mantine-radius-sm);
+  color: var(--white-color);
+  transition: all 0.4s ease;
+  padding: 8px;
+  height: auto;
+
+  @mixin hover {
+    background-color: black;
+    color: var(--white-color);
+    border-color: transparent;
+  }
+
+  [data-mantine-color-scheme] &[data-active] {
+    border-color: transparent;
+    background-color: black;
+    color: var(--white-color);
+  }
+}
+
+.linkLimeLight {
+  @mixin hover {
+    color: var(--lime-color);
+    border-color: var(--lime-color);
+  }
+}
+
+.user {
+  margin-left: 12px;
+}
+
+.userImg {
+  border: 2px solid var(--lime-color);
+}
+
+.menuLinksBox {
+  flex: 1 0 auto;
+}

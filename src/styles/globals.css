@@ -1,0 +1,38 @@
+:root {
+  --border-radius: 0.75rem;
+  --screen-width: 90vmin;
+  /* --main-color: #865ef4; */
+  /* 
+  --main-color: #009ba2;
+  --second-color: #90fff9;
+  --white-color: #ffffff; */
+
+  --main-color: var(--mantine-color-blue-8);
+  --secondary-color: var(--mantine-color-blue-2);
+  --white-color: #ffffff;
+  --lime-color: #94d82d;
+  --dark-background-color: #0f0f0f;
+  --dark-card-border-color: #d1d1d1;
+  --dark-card-background-color: #585757;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell,
+    Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+i {
+  font-size: 0.8rem;
+}
+
+* {
+  box-sizing: border-box;
+}
