@@ -1,22 +1,16 @@
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 import { useDisclosure } from "@mantine/hooks"
 import classes from "../styles/Header.module.css"
 import { usePathname } from "next/navigation"
-import { useCurrentUser } from "src/users/hooks/useCurrentUser"
 import logout from "src/auth/mutations/logout"
 import { useMutation } from "@blitzjs/rpc"
-import { authRoutes, routes } from "@/routes"
 import Link from "next/link"
 
 import {
   Group,
   UnstyledButton,
   Text,
-  Divider,
   Box,
-  Burger,
-  Drawer,
-  ScrollArea,
   rem,
   useMantineTheme,
   Container,
@@ -35,53 +29,44 @@ import {
   IconSwitchHorizontal,
   IconChevronDown,
 } from "@tabler/icons-react"
+import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 
 export function Header() {
-  const currentUser = useCurrentUser()
   const [logoutMutation] = useMutation(logout)
-
-  const pathname = usePathname()
 
   const [userMenuOpened, setUserMenuOpened] = useState(false)
 
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false)
 
-  useEffect(() => {
-    // TODO: redirect to HOME after successful login
-    console.log({ currentUser })
-  }, [currentUser])
+  const { menuLinks, authLinks, isCurrentPath, currentUser } = useNavigationLinks()
 
-  const menuLinks = routes
-    .filter((route) => (!currentUser && !route.protected) || true)
-    .map((link) => (
-      <Link
-        key={link.alias}
-        className={`${classes.link} ${link.className ? classes[link.className] : ""}`}
-        data-active={pathname === link.path.pathname || undefined}
-        onClick={() => {
-          closeDrawer()
-        }}
-        href={link.path}
-      >
-        {link.alias}
-      </Link>
-    ))
+  const menu = menuLinks.map((link) => (
+    <Link
+      key={link.alias}
+      className={`${classes.link} ${link.className ? classes[link.className] : ""}`}
+      data-active={isCurrentPath(link)}
+      onClick={() => {
+        closeDrawer()
+      }}
+      href={link.path}
+    >
+      {link.alias}
+    </Link>
+  ))
 
-  const authLinks = !currentUser
-    ? authRoutes.map((link) => (
-        <Link
-          key={link.alias}
-          className={`${classes.link} ${link.className ? classes[link.className] : ""}`}
-          data-active={pathname === link.path.pathname || undefined}
-          onClick={() => {
-            closeDrawer()
-          }}
-          href={link.path}
-        >
-          {link.alias}
-        </Link>
-      ))
-    : null
+  const auth = authLinks.map((link) => (
+    <Link
+      key={link.alias}
+      className={`${classes.link} ${link.className ? classes[link.className] : ""}`}
+      data-active={isCurrentPath(link)}
+      onClick={() => {
+        closeDrawer()
+      }}
+      href={link.path}
+    >
+      {link.alias}
+    </Link>
+  ))
 
   const UserAccount = () => {
     const theme = useMantineTheme()
@@ -208,10 +193,7 @@ export function Header() {
           <Container size="md" className={classes.inner}>
             <Link
               key={"Home"}
-              // className={`${classes.link} ${classes[link.linkClassName]}`}
-              // data-active={activeTab === link.label || undefined}
               onClick={() => {
-                // setActiveTab(link.label)
                 closeDrawer()
               }}
               href={"/"}
@@ -220,47 +202,15 @@ export function Header() {
             </Link>
             <Flex>
               <Group gap={5} visibleFrom="md">
-                {menuLinks}
+                {menu}
               </Group>
             </Flex>
             <Flex>
-              <Group gap={5} visibleFrom="md">
-                {authLinks}
-              </Group>
-              <Group visibleFrom="md">{currentUser && <UserAccount />}</Group>
+              <Group gap={5}>{!currentUser && auth}</Group>
+              <Group>{currentUser && <UserAccount />}</Group>
             </Flex>
-            <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="md" />
           </Container>
         </header>
-        <Drawer
-          opened={drawerOpened}
-          onClose={closeDrawer}
-          size="100%"
-          padding="md"
-          title="EduCards"
-          hiddenFrom="md"
-          zIndex={100}
-        >
-          <ScrollArea h={`calc(100vh - ${rem(80)})`} mx="-md">
-            <Flex
-              justify="flex-start"
-              align="flex-start"
-              direction="column"
-              wrap="nowrap"
-              h="calc(100dvh - 84px)"
-            >
-              <Divider my="sm" />
-              <Box className={classes.menuLinksBox}>{menuLinks}</Box>
-              <Divider my="sm" />
-              <Group justify="center" pb="xl" px="md">
-                {authLinks}
-              </Group>
-
-              <Divider my="sm" />
-              {currentUser && <UserAccount />}
-            </Flex>
-          </ScrollArea>
-        </Drawer>
       </Flex>
     </Box>
   )

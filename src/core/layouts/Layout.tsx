@@ -1,7 +1,8 @@
 import Head from "next/head"
-import React, { FC, Suspense } from "react"
+import React, { Suspense } from "react"
 import { BlitzLayout } from "@blitzjs/next"
 import { Header } from "src/components/Header"
+import { BottomBar } from "@/components/BottomBar"
 
 const Layout: BlitzLayout<{ title?: string; children?: React.ReactNode }> = ({
   title,
@@ -18,6 +19,10 @@ const Layout: BlitzLayout<{ title?: string; children?: React.ReactNode }> = ({
       </Suspense>
 
       {children}
+
+      <Suspense fallback="Loading...">
+        <BottomBar />
+      </Suspense>
     </>
   )
 }
