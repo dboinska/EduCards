@@ -1,0 +1,48 @@
+.container {
+  background-color: #eeeeee;
+  height: 54px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  font-size: 12px;
+}
+
+.bottomBar {
+  margin: 0 auto;
+  justify-content: space-between;
+
+  & div {
+    border-bottom: 2px solid transparent;
+  }
+}
+
+.link {
+  font-weight: bold;
+  border-bottom: 2px solid transparent;
+  color: #4f4f4f;
+  padding: 4px;
+  gap: 8px;
+  margin: 0 4px;
+
+  & .linkAlias {
+    display: none;
+  }
+
+  svg {
+    margin-right: 4px;
+  }
+
+  &[data-active] {
+    color: var(--main-color);
+    font-weight: bold;
+    border-color: var(--main-color);
+
+    svg {
+      filter: brightness(1);
+    }
+
+    & .linkAlias {
+      display: inline;
+    }
+  }
+}

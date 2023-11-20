@@ -1,9 +1,17 @@
 import type { RouteUrlObject } from "blitz"
 import { Routes } from "@blitzjs/next"
+import {
+  mdiFolderOutline,
+  mdiFolderAccountOutline,
+  mdiHeartOutline,
+  mdiMessageTextOutline,
+  mdiPuzzle,
+} from "@mdi/js"
 
-type Route = {
+export type Route = {
   path: RouteUrlObject
   alias: string
+  icon?: string
   className?: string
   protected?: boolean
 }
@@ -15,16 +23,30 @@ export const authRoutes: Route[] = [
 
 export const routes: Route[] = [
   {
+    path: Routes.PublicCatalouges(),
+    alias: "Public",
+    icon: mdiFolderOutline,
+    className: "linkCatalouges",
+  },
+  {
     path: Routes.Home(),
-    alias: "Private catalogues",
+    alias: "Private ",
+    icon: mdiFolderAccountOutline,
     className: "linkCatalouges",
     protected: true,
   },
   {
-    path: Routes.PublicCatalouges(),
-    alias: "Public catalogues",
-    className: "linkCatalouges",
+    path: Routes.Home(),
+    alias: "Favourite",
+    icon: mdiHeartOutline,
+    className: "link",
+    protected: true,
   },
-  { path: Routes.Home(), alias: "Quiz", className: "link" },
-  { path: Routes.Home(), alias: "Conversation", className: "link" },
+  { path: Routes.Home(), alias: "Quiz", icon: mdiPuzzle, className: "link" },
+  {
+    path: Routes.Home(),
+    alias: "Conversation",
+    icon: mdiMessageTextOutline,
+    className: "link",
+  },
 ]
