@@ -24,18 +24,22 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
   const xInput = [-10, 0, 10]
   const [border, setBorder] = useState("8px solid transparent")
   const [backgroundColor, setBackgroundColor] = useState("transparent")
+  const [iconDisplay, setIconDisplay] = useState("none")
 
   useEffect(() => {
     const unsubscribeX = x.on("change", (latestX) => {
       if (latestX <= -10) {
         setBorder(`3px solid var(--lime-color)`)
         setBackgroundColor("rgba(255,255,255,0.8)")
+        setIconDisplay("flex")
       } else if (latestX >= 10) {
         setBorder(`3px solid var(--mantine-color-red-6) `)
         setBackgroundColor("rgba(255,255,255,0.8)")
+        setIconDisplay("flex")
       } else {
         setBorder(`3px solid transparent`)
         setBackgroundColor("transparent")
+        setIconDisplay("none")
       }
     })
 
@@ -80,7 +84,9 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
                 <MantineCard
                   withBorder
                   className={classes.card}
-                  onClick={() => setReversedCard(true)}
+                  onClick={() => {
+                    setReversedCard(true)
+                  }}
                 >
                   <MantineCard.Section>
                     <Image src={image} alt={header} height={180} />
@@ -98,7 +104,7 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
                   </MantineCard.Section>{" "}
                   <Flex justify="space-between" align="center" mt="sm">
                     <Text fz="sm">1/10</Text>
-                    <Badge size="sm" variant="light">
+                    <Badge size="sm" variant="light" color="var(--main-color)">
                       {catalouge}
                     </Badge>
                     {favCard}
@@ -111,6 +117,7 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
                   x,
                   background: backgroundColor,
                   border: border,
+                  display: iconDisplay,
                 }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
@@ -152,31 +159,33 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
             </motion.div>
           </Flex>
         ) : (
-          <MantineCard
-            withBorder
-            radius="md"
-            className={classes.card}
-            onClick={() => setReversedCard(false)}
-          >
-            <MantineCard.Section className={classes.section} mt="sm">
-              <Group justify="space-between">
-                <Text fz="lg" fw={500}>
-                  {header}
-                </Text>
-              </Group>
+          <Flex justify="center" className={classes.cardContainerReverse}>
+            <MantineCard
+              withBorder
+              radius="md"
+              className={classes.card}
+              onClick={() => setReversedCard(false)}
+            >
+              <MantineCard.Section className={classes.section} mt="sm">
+                <Group justify="space-between">
+                  <Text fz="lg" fw={500}>
+                    {header}
+                  </Text>
+                </Group>
 
-              <Text fz="sm" mt="xs">
-                {desc}
-              </Text>
-            </MantineCard.Section>
-            <Flex justify="space-between" align="center" mt="sm">
-              <Text fz="sm">1/10</Text>
-              <Badge size="sm" variant="dark">
-                {catalouge}
-              </Badge>
-              {favCard}
-            </Flex>
-          </MantineCard>
+                <Text fz="sm" mt="xs">
+                  {desc}
+                </Text>
+              </MantineCard.Section>
+              <Flex justify="space-between" align="center" mt="sm">
+                <Text fz="sm">1/10</Text>
+                <Badge variant="dark" size="sm">
+                  {catalouge}
+                </Badge>
+                {favCard}
+              </Flex>
+            </MantineCard>
+          </Flex>
         )}
       </main>
     </Layout>
