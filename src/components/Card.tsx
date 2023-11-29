@@ -5,17 +5,29 @@ import Layout from "@/core/layouts/Layout"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { useEffect, useState } from "react"
 
-import { motion, useMotionValue, useTransform } from "framer-motion"
+import { type PanInfo, motion, useMotionValue, useTransform } from "framer-motion"
 
 export interface CardProps {
+  id: number
   image?: string
   header: string
   desc?: string
   catalouge?: string
   isFavourite?: boolean
+  onMoveRight?: () => void
+  onMoveLeft?: () => void
 }
 
-const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
+const Card = ({
+  id,
+  image,
+  header,
+  desc,
+  catalouge,
+  isFavourite,
+  onMoveLeft,
+  onMoveRight,
+}: CardProps) => {
   const currentUser = useCurrentUser()
 
   const [reversedCard, setReversedCard] = useState<boolean>(false)
@@ -47,6 +59,20 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
       unsubscribeX()
     }
   }, [x])
+
+  const handlePanEndEvent = (event: PointerEvent, { offset }: PanInfo) => {
+    console.log({ event, offset })
+    if (offset.x > 280) {
+      if (onMoveRight) {
+        onMoveRight()
+      }
+    }
+    if (offset.x < -286) {
+      if (onMoveLeft) {
+        onMoveLeft()
+      }
+    }
+  }
 
   const color = useTransform(x, xInput, [
     "var(--lime-color)",
@@ -80,6 +106,7 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
                 }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
+                onPanEnd={handlePanEndEvent}
               >
                 <MantineCard
                   withBorder
@@ -119,8 +146,6 @@ const Card = ({ image, header, desc, catalouge, isFavourite }: CardProps) => {
                   border: border,
                   display: iconDisplay,
                 }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
               >
                 <svg className={classes.progressIcon} viewBox="0 0 50 50">
                   <motion.path
