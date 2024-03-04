@@ -1,6 +1,7 @@
 import Layout from "src/core/layouts/Layout"
-import { BlitzPage } from "@blitzjs/next"
+import { BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalouges.module.css"
+import Link from "next/link"
 
 const PublicCatalouges: BlitzPage = () => {
   return (
@@ -10,7 +11,7 @@ const PublicCatalouges: BlitzPage = () => {
           <h1>Public catalouges</h1>
         </div>
         <div className={styles.gridCatalouges}>
-          <div className={styles.body}>
+          <Link className={styles.body} href={Routes.Cards()}>
             <div className={styles.headerContainer}>
               <h2>Name</h2>
               <span>10</span>
@@ -20,7 +21,7 @@ const PublicCatalouges: BlitzPage = () => {
               <span className={styles.userImg}></span>
               <span>Author</span>
             </div>
-          </div>
+          </Link>
           <div className={styles.body}>
             <div className={styles.headerContainer}>
               <h2>Name</h2>
