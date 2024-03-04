@@ -74,11 +74,7 @@ const Card = ({
     }
   }
 
-  const color = useTransform(x, xInput, [
-    "var(--lime-color)",
-    "rgba(0,0,0,0)",
-    "var(--mantine-color-red-6)",
-  ])
+  const color = useTransform(x, xInput, ["var(--lime-color)", "rgba(0,0,0,0)", "#fa5252"])
   const tickPath = useTransform(x, [-10, -100], [0, 1])
   const crossPathA = useTransform(x, [10, 55], [0, 1])
   const crossPathB = useTransform(x, [50, 100], [0, 1])
