@@ -1,65 +1,80 @@
+import Layout from "@/core/layouts/Layout"
 import { Routes } from "@blitzjs/next"
 import { RingProgress, Text, Paper, Center, Group, Flex, Button } from "@mantine/core"
 import Link from "next/link"
 
-const data = [
-  {
-    label: "Your score",
-    stats: "78%",
-    progress: 78,
-    color: "var(--main-color)",
-    correct: 7,
-    wrong: 3,
-    all: 10,
-  },
-] as const
+export function Stats({ correct, wrong }) {
+  const all: number = Number(correct + wrong)
+  const percent: number = Number(((correct / all) * 100).toFixed(0))
+  const color = (percent: number): string => {
+    if (percent < 50) {
+      return "var(--mantine-color-red-6)"
+    } else if (percent < 80) {
+      return "var(--mantine-color-orange-6)"
+    } else {
+      return "var(--mantine-color-green-6)"
+    }
+  }
 
-export function Stats() {
-  const stats = data.map((stat) => {
+  const stats = () => {
     return (
-      <Paper withBorder radius="md" p="xs" key={stat.label} w="400px" m="0 auto">
+      <Paper withBorder radius="lg" p="xs" m="0 auto" w="310px">
         <Group pb="16px">
           <Text size="md" tt="uppercase" fw={700} m="0 auto" py="16px">
-            {stat.label}
+            {"Your score"}
           </Text>
         </Group>
         <RingProgress
           size={160}
           roundCaps
           thickness={8}
-          sections={[{ value: stat.progress, color: stat.color }]}
+          sections={[
+            {
+              value: percent,
+              color: color(percent),
+            },
+          ]}
           m="0 auto"
           label={
             <Center>
               <Text fw={700} size="xl">
-                {stat.stats}
+                {`${percent} %`}
               </Text>
             </Center>
           }
         />
         <Flex direction="column" m="16px">
           <Text size="xs" tt="uppercase" fw={700} m="0 auto" py="8px">
-            correct: {stat.correct}
+            correct: {correct}
           </Text>
           <Text size="xs" tt="uppercase" fw={700} m="0 auto" py="8px">
-            wrong: {stat.wrong}
+            wrong: {wrong}
           </Text>
           <Text size="xs" tt="uppercase" fw={700} m="0 auto" py="8px">
-            all rehearseds: {stat.all}
+            all rehearseds: {all}
           </Text>
         </Flex>
-        <Group justify="center">
+        <Group justify="center" py="12px">
           <Link href={Routes.PublicCatalouges()}>
-            <Button color="var(--main-color)">Back to catalogues</Button>
+            <Button color="var(--main-color)" variant="light" radius="md">
+              Back to catalogues
+            </Button>
           </Link>
           <Link href={Routes.Cards()}>
-            <Button color="var(--main-color)" variant="light">
+            <Button color="var(--main-color)" radius="md">
               Try again
             </Button>
           </Link>
         </Group>
       </Paper>
     )
-  })
-  return stats
+  }
+
+  return (
+    <Layout title="Public catalouges">
+      <Flex h="calc(100vh - 220px)" justify="center" align="center" mt="70px">
+        {stats()}
+      </Flex>
+    </Layout>
+  )
 }
