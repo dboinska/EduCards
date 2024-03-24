@@ -1,48 +1,40 @@
-.container {
-  background-color: #eeeeee;
-  height: 54px;
+.root {
+  background: transparent;
+  box-shadow: 0 1px 1px hsl(0deg 0% 0% / 0.075), 0 2px 2px hsl(0deg 0% 0% / 0.075),
+    0 4px 4px hsl(0deg 0% 0% / 0.07), 0 8px 8px hsl(0deg 0% 0% / 0.07),
+    0 16px 16px hsl(0deg 0% 0% / 0.07);
+  border: 1px solid rgba(173, 216, 230, 0.6);
+  width: 90%;
+  display: flex;
   position: fixed;
   bottom: 0;
-  width: 100%;
-  font-size: 12px;
-}
-
-.bottomBar {
-  margin: 0 auto;
+  left: 0;
+  right: 0;
+  margin: 8px auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   justify-content: space-between;
-
-  & div {
-    border-bottom: 2px solid transparent;
-  }
 }
 
-.link {
-  font-weight: bold;
-  border-bottom: 2px solid transparent;
-  color: #4f4f4f;
-  padding: 4px;
-  gap: 8px;
-  margin: 0 4px;
+.indicator {
+  background-image: linear-gradient(
+    to right,
+    var(--mantine-color-lime-filled),
+    var(--mantine-color-blue-filled)
+  );
+}
 
-  & .linkAlias {
+.control {
+  &::before {
     display: none;
   }
+}
 
-  svg {
-    margin-right: 4px;
-  }
-
-  &[data-active] {
-    color: var(--main-color);
-    font-weight: bold;
-    border-color: var(--main-color);
-
-    svg {
-      filter: brightness(1);
-    }
-
-    & .linkAlias {
-      display: inline;
+.label {
+  &,
+  &:hover {
+    &[data-active] {
+      color: var(--mantine-color-white);
     }
   }
 }

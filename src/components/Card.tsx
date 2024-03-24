@@ -5,7 +5,7 @@ import Layout from "@/core/layouts/Layout"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { useEffect, useState } from "react"
 
-import { type PanInfo, motion, useMotionValue, useTransform } from "framer-motion"
+import { motion, useMotionValue, useTransform } from "framer-motion"
 
 export interface CardProps {
   id: number
@@ -13,7 +13,7 @@ export interface CardProps {
   header: string
   desc?: string
   catalouge?: string
-  isFavourite?: boolean
+  isFavorite?: boolean
   onMoveRight?: () => void
   onMoveLeft?: () => void
 }
@@ -24,7 +24,7 @@ const Card = ({
   header,
   desc,
   catalouge,
-  isFavourite,
+  isFavorite,
   onMoveLeft,
   onMoveRight,
 }: CardProps) => {
@@ -38,16 +38,20 @@ const Card = ({
   const [backgroundColor, setBackgroundColor] = useState("transparent")
   const [iconDisplay, setIconDisplay] = useState("none")
 
+  const [isSwiped, setIsSwiped] = useState(false)
+
   useEffect(() => {
     const unsubscribeX = x.on("change", (latestX) => {
       if (latestX <= -10) {
         setBorder(`3px solid var(--lime-color)`)
         setBackgroundColor("rgba(255,255,255,0.8)")
         setIconDisplay("flex")
+        setIsSwiped(true)
       } else if (latestX >= 10) {
         setBorder(`3px solid var(--mantine-color-red-6) `)
         setBackgroundColor("rgba(255,255,255,0.8)")
         setIconDisplay("flex")
+        setIsSwiped(true)
       } else {
         setBorder(`3px solid transparent`)
         setBackgroundColor("transparent")
@@ -60,28 +64,41 @@ const Card = ({
     }
   }, [x])
 
-  const handlePanEndEvent = (event: PointerEvent, { offset }: PanInfo) => {
-    console.log({ event, offset })
-    if (offset.x > 280) {
+  const [exitX, setExitX] = useState(0)
+
+  const handlePanEndEvent = (event: PointerEvent, { offset }) => {
+    if (reversedCard) setExitX(0)
+    if (offset.x >= 25) {
+      setExitX(window.innerWidth)
       if (onMoveRight) {
         onMoveRight()
       }
-    }
-    if (offset.x < -286) {
+    } else if (offset.x <= -20) {
+      setExitX(-window.innerWidth)
       if (onMoveLeft) {
         onMoveLeft()
       }
     }
+
+    setIsSwiped(true)
   }
 
+  useEffect(() => {
+    if (isSwiped) {
+      x.set(0)
+    }
+
+    setExitX(0)
+  }, [isSwiped, reversedCard, x])
+
   const color = useTransform(x, xInput, ["var(--lime-color)", "rgba(0,0,0,0)", "#fa5252"])
-  const tickPath = useTransform(x, [-10, -100], [0, 1])
-  const crossPathA = useTransform(x, [10, 55], [0, 1])
-  const crossPathB = useTransform(x, [50, 100], [0, 1])
+  const tickPath = useTransform(x, [-0, -20], [0, 1])
+  const crossPathA = useTransform(x, [0, 35], [0, 1])
+  const crossPathB = useTransform(x, [25, 35], [0, 1])
 
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={26}>
-      {isFavourite ? (
+      {isFavorite ? (
         <IconHeartFilled className={classes.like} stroke={2} />
       ) : (
         <IconHeart className={classes.like} stroke={2} />
@@ -90,19 +107,25 @@ const Card = ({
   ) : null
 
   return (
-    <Layout title="Public catalouges">
+    <Layout title="Public catalogs">
       <main className={classes.main}>
         {!reversedCard ? (
           <Flex justify="center" className={classes.cardContainer}>
             <motion.div className={classes.cardContainer}>
               <motion.div
+                key={id}
                 className="box"
                 style={{
                   x,
                 }}
+                animate={{ x: exitX }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 onPanEnd={handlePanEndEvent}
+                onAnimationComplete={() => {
+                  x.set(0)
+                  setIsSwiped(false)
+                }}
               >
                 <MantineCard
                   withBorder
@@ -112,9 +135,9 @@ const Card = ({
                   }}
                 >
                   <MantineCard.Section>
-                    <Image src={image} alt={header} height={180} />
+                    {image && <Image src={image} alt={header} height={200} />}
                   </MantineCard.Section>
-                  <MantineCard.Section className={classes.section} mt="sm">
+                  <MantineCard.Section className={classes.section}>
                     <Group justify="space-between">
                       <Text fz="lg" fw={500}>
                         {header}
@@ -141,6 +164,7 @@ const Card = ({
                   background: backgroundColor,
                   border: border,
                   display: iconDisplay,
+                  borderRadius: "var(--mantine-radius-lg)",
                 }}
               >
                 <svg className={classes.progressIcon} viewBox="0 0 50 50">
@@ -181,13 +205,8 @@ const Card = ({
           </Flex>
         ) : (
           <Flex justify="center" className={classes.cardContainerReverse}>
-            <MantineCard
-              withBorder
-              radius="md"
-              className={classes.card}
-              onClick={() => setReversedCard(false)}
-            >
-              <MantineCard.Section className={classes.section} mt="sm">
+            <MantineCard withBorder className={classes.card} onClick={() => setReversedCard(false)}>
+              <MantineCard.Section className={classes.section}>
                 <Group justify="space-between">
                   <Text fz="lg" fw={500}>
                     {header}

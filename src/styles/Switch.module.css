@@ -1,0 +1,31 @@
+.root {
+  background: transparent;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  border: 1px solid #ced4da;
+}
+
+.indicator {
+  background-color: var(--mantine-color-lime-filled);
+}
+
+.control {
+  &::before {
+    display: none;
+  }
+}
+
+.label {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--mantine-font-size-sm);
+  &,
+  &:hover {
+    &[data-active] {
+      color: var(--mantine-color-white);
+    }
+  }
+}

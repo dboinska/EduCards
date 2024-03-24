@@ -7,7 +7,7 @@ const Home: BlitzPage = () => {
   return (
     <Layout title="Home">
       <div className={classes.root}>
-        <Container size="lg" h="calc(100% - 56px)" p="56px">
+        <Container size="lg" h="calc(100% - 56px)">
           <div className={classes.inner}>
             <div className={classes.content}>
               <Title className={classes.title}>
@@ -23,7 +23,7 @@ const Home: BlitzPage = () => {
                 thanks to an innovative application.
               </Title>
 
-              <Text className={classes.description} mt={30}>
+              <Text className={classes.description} mt="30">
                 With EduCards, learning becomes faster, more effective, and more engaging. The app
                 uses intelligent flashcards to help you achieve your learning goals, whether you
                 want to master a new language, prepare for an exam, or expand your knowledge in any
@@ -33,7 +33,8 @@ const Home: BlitzPage = () => {
               <Button
                 variant="gradient"
                 gradient={{ from: "lime", to: "blue" }}
-                size="xl"
+                radius="lg"
+                size="lg"
                 className={classes.control}
                 mt={40}
               >
