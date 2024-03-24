@@ -55,9 +55,9 @@ export function Stats({ correct, wrong }) {
           </Text>
         </Flex>
         <Group justify="center" py="12px">
-          <Link href={Routes.PublicCatalouges()}>
+          <Link href={Routes.Catalogs()}>
             <Button color="var(--main-color)" variant="light" radius="md">
-              Back to catalogues
+              Back to catalogs
             </Button>
           </Link>
           <Link href={Routes.Cards()}>
@@ -71,7 +71,7 @@ export function Stats({ correct, wrong }) {
   }
 
   return (
-    <Layout title="Public catalouges">
+    <Layout title="Public catalogs">
       <Flex h="calc(100vh - 220px)" justify="center" align="center" mt="70px">
         {stats()}
       </Flex>

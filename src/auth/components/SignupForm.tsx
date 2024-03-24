@@ -3,6 +3,7 @@ import { Form, FORM_ERROR } from "src/core/components/Form"
 import signup from "src/auth/mutations/signup"
 import { Signup } from "src/auth/schemas"
 import { useMutation } from "@blitzjs/rpc"
+import { Box } from "@mantine/core"
 
 type SignupFormProps = {
   onSuccess?: () => void
@@ -11,7 +12,7 @@ type SignupFormProps = {
 export const SignupForm = (props: SignupFormProps) => {
   const [signupMutation] = useMutation(signup)
   return (
-    <div>
+    <Box mt="56px">
       <h1>Create an Account</h1>
 
       <Form
@@ -35,7 +36,7 @@ export const SignupForm = (props: SignupFormProps) => {
         <LabeledTextField name="email" label="Email" placeholder="Email" />
         <LabeledTextField name="password" label="Password" placeholder="Password" type="password" />
       </Form>
-    </div>
+    </Box>
   )
 }
 

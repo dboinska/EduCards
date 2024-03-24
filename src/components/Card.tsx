@@ -13,7 +13,7 @@ export interface CardProps {
   header: string
   desc?: string
   catalouge?: string
-  isFavourite?: boolean
+  isFavorite?: boolean
   onMoveRight?: () => void
   onMoveLeft?: () => void
 }
@@ -24,7 +24,7 @@ const Card = ({
   header,
   desc,
   catalouge,
-  isFavourite,
+  isFavorite,
   onMoveLeft,
   onMoveRight,
 }: CardProps) => {
@@ -98,7 +98,7 @@ const Card = ({
 
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={26}>
-      {isFavourite ? (
+      {isFavorite ? (
         <IconHeartFilled className={classes.like} stroke={2} />
       ) : (
         <IconHeart className={classes.like} stroke={2} />
@@ -107,7 +107,7 @@ const Card = ({
   ) : null
 
   return (
-    <Layout title="Public catalouges">
+    <Layout title="Public catalogs">
       <main className={classes.main}>
         {!reversedCard ? (
           <Flex justify="center" className={classes.cardContainer}>

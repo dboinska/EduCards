@@ -36,3 +36,9 @@ i {
 * {
   box-sizing: border-box;
 }
+
+.childrenContainer {
+  overflow: hidden;
+  width: 100%;
+  justify-content: center;
+}
