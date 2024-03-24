@@ -12,7 +12,7 @@ const mockdata: CardProps[] = [
     header: "Verudela Beach",
     catalouge: "Croatiaxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: true,
+    isFavorite: true,
   },
   {
     id: 1,
@@ -21,7 +21,7 @@ const mockdata: CardProps[] = [
     header: "XYZ",
     catalouge: "xxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: false,
+    isFavorite: false,
   },
   {
     id: 2,
@@ -30,7 +30,7 @@ const mockdata: CardProps[] = [
     header: "XYZ",
     catalouge: "xxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: false,
+    isFavorite: false,
   },
   {
     id: 3,
@@ -38,7 +38,7 @@ const mockdata: CardProps[] = [
     header: "Clownfish",
     catalouge: "xxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: false,
+    isFavorite: false,
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const mockdata: CardProps[] = [
     header: "Giraffe",
     catalouge: "xxxxxxxxxxx",
     desc: "Tall and pretty giraffe.",
-    isFavourite: false,
+    isFavorite: false,
   },
   {
     id: 5,
@@ -55,7 +55,7 @@ const mockdata: CardProps[] = [
     header: "XYZ",
     catalouge: "xxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: false,
+    isFavorite: false,
   },
 ]
 

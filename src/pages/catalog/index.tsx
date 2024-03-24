@@ -16,7 +16,7 @@ export interface CatalougeProps {
   image?: string
   header: string
   desc?: string
-  isFavourite?: boolean
+  isFavorite?: boolean
   authorId: number
 }
 
@@ -53,21 +53,14 @@ const sharedWith = [
   },
 ]
 
-const Catalogs: BlitzPage = ({
-  id,
-  image,
-  header,
-  desc,
-  isFavourite,
-  authorId,
-}: CatalougeProps) => {
+const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalougeProps) => {
   const currentUser = useCurrentUser()
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={22}>
-      {isFavourite ? (
-        <IconHeartFilled className={styles.favourite} stroke={2} />
+      {isFavorite ? (
+        <IconHeartFilled className={styles.favorite} stroke={2} />
       ) : (
-        <IconHeart className={styles.favourite} stroke={2} />
+        <IconHeart className={styles.favorite} stroke={2} />
       )}
     </ActionIcon>
   ) : null

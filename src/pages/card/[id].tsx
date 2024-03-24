@@ -10,7 +10,7 @@ const mockdata: CardProps[] = [
     header: "Verudela Beach",
     catalouge: "Croatiaxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: true,
+    isFavorite: true,
   },
   {
     id: 1,
@@ -19,7 +19,7 @@ const mockdata: CardProps[] = [
     header: "XYZ",
     catalouge: "xxxxxxxxxxx",
     desc: "Completely renovated for the season 2020, Arena Verudela Bech Apartments are fully equipped and modernly furnished 4-star self-service apartments located on the Adriatic coastline by one of the most beautiful beaches in Pula.",
-    isFavourite: true,
+    isFavorite: true,
   },
 ]
 

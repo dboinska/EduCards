@@ -3,6 +3,7 @@ import React, { Suspense } from "react"
 import { BlitzLayout } from "@blitzjs/next"
 import { Header } from "src/components/Header"
 import { BottomBar } from "@/components/BottomBar"
+import { Flex } from "@mantine/core"
 
 const Layout: BlitzLayout<{ title?: string; children?: React.ReactNode }> = ({
   title,
@@ -17,8 +18,7 @@ const Layout: BlitzLayout<{ title?: string; children?: React.ReactNode }> = ({
       <Suspense fallback="Loading...">
         <Header />
       </Suspense>
-
-      {children}
+      <Flex className="childrenContainer">{children}</Flex>
 
       <Suspense fallback="Loading...">
         <BottomBar />
