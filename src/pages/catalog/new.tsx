@@ -1,16 +1,16 @@
 import { BlitzPage, Routes } from "@blitzjs/next"
 import { useEffect, useState } from "react"
-import { Stepper, Button, Group, TextInput, Code, Center, Box, Flex, Textarea } from "@mantine/core"
+import { Stepper, Button, Group, TextInput, Box, Flex } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import Layout from "@/core/layouts/Layout"
 import styles from "src/styles/Catalogs.module.css"
-import { IconGripVertical, IconX } from "@tabler/icons-react"
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 
 import DragAndDrop from "@components/DragAndDrop"
 import { CheckboxCard } from "@/components/CheckboxCard"
 import { Picker } from "@/components/Picker"
 import Link from "next/link"
+import { CardCreator } from "@/components/CardCreator"
+import useFormValidity from "@/hooks/useFormValidity"
 
 type Card = {
   term: string
@@ -107,6 +107,8 @@ const NewCatalog: BlitzPage = () => {
     validateInputOnChange: true,
   })
 
+  const isFormValid = useFormValidity(form)
+
   const nextStep = () =>
     setActive((current) => {
       if (form.validate().hasErrors) {
@@ -119,86 +121,12 @@ const NewCatalog: BlitzPage = () => {
 
   const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current))
 
-  const removeCard = ({ index }) => {
-    form.removeListItem("cards", index)
-    console.log({ form })
-  }
-
-  const fields = form.values.cards.map((_, index) => (
-    <Draggable key={index} index={index} draggableId={index.toString()}>
-      {(provided) => (
-        <Group
-          ref={provided.innerRef}
-          mt="xs"
-          {...provided.draggableProps}
-          className={styles.mantineDropzoneInner}
-          component="fieldset"
-        >
-          <Flex justify={"space-between"} className={styles.fullWidth}>
-            <Center {...provided.dragHandleProps}>
-              <IconGripVertical size="1rem" />
-              Move to change order
-            </Center>
-            <IconX onClick={() => removeCard({ index })} />
-          </Flex>
-          <legend>Card #{index + 1} </legend>
-          <Flex direction={"column"} className={styles.fullWidth}>
-            <Flex wrap={"wrap"} gap={"8px"} justify={"space-between"} className={styles.fullWidth}>
-              <Textarea
-                size="sm"
-                radius="md"
-                label="Term"
-                placeholder="Term"
-                withAsterisk
-                {...form.getInputProps(`cards.${index}.term`)}
-                className={styles.textarea}
-                error={form.errors.cards?.[index]?.term}
-                // styles={{min-height:50%}}
-              />
-              <Textarea
-                size="sm"
-                radius="md"
-                label="Description"
-                placeholder="Description text"
-                {...form.getInputProps(`cards.${index}.termDesc`)}
-                className={styles.textarea}
-                error={form.errors.cards?.[index]?.termDesc}
-              />
-            </Flex>
-          </Flex>
-          <DragAndDrop />
-          <Flex wrap={"wrap"} gap={"8px"} className={styles.fullWidth}>
-            <Textarea
-              size="sm"
-              radius="md"
-              label="Definition"
-              withAsterisk
-              placeholder="Definition"
-              {...form.getInputProps(`cards.${index}.definition`)}
-              className={styles.textarea}
-              error={form.errors.cards?.[index]?.definition}
-            />{" "}
-            <Textarea
-              size="sm"
-              radius="md"
-              label="Description"
-              placeholder="Description"
-              {...form.getInputProps(`cards.${index}.defDesc`)}
-              className={styles.textarea}
-              error={form.errors.cards?.[index]?.defDesc}
-            />{" "}
-          </Flex>
-        </Group>
-      )}
-    </Draggable>
-  ))
-
   return (
     <Layout title="Public catalogs">
       <main className={styles.main}>
         <div className={styles.stepperForm}>
           <Stepper active={active} size="md" orientation="horizontal">
-            <Stepper.Step label="First step" description="Catalog name">
+            <Stepper.Step label="First step" description="Main settings">
               <TextInput
                 label="Catalog name"
                 withAsterisk
@@ -215,38 +143,9 @@ const NewCatalog: BlitzPage = () => {
               <DragAndDrop />
             </Stepper.Step>
 
-            <Stepper.Step label="Second step" description="Adding cards">
+            <Stepper.Step label="Second step" description="Adding cards to catalog">
               <Box>
-                <DragDropContext
-                  onDragEnd={({ destination, source }) =>
-                    destination?.index !== undefined &&
-                    form.reorderListItem("cards", { from: source.index, to: destination.index })
-                  }
-                >
-                  <Droppable droppableId="dnd-list" direction="vertical">
-                    {(provided) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef}>
-                        {fields}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-
-                <Group justify="center" mt="md">
-                  <Button
-                    onClick={() =>
-                      form.insertListItem("cards", {
-                        term: "",
-                        termDesc: "",
-                        definition: "",
-                        defDesc: "",
-                      })
-                    }
-                  >
-                    Add card
-                  </Button>
-                </Group>
+                <CardCreator form={form} />
                 {/* <Code block>{JSON.stringify(form.values, null, 2)}</Code> */}
               </Box>
             </Stepper.Step>
@@ -274,7 +173,11 @@ const NewCatalog: BlitzPage = () => {
                 Back
               </Button>
             )}
-            {active !== 3 && <Button onClick={nextStep}>Next step</Button>}
+            {active !== 3 && (
+              <Button disabled={!isFormValid} onClick={nextStep}>
+                Next step
+              </Button>
+            )}
             {active == 3 && (
               <Link href={Routes.Catalogs()}>
                 <Button onClick={prevStep}>Go to catalogs</Button>

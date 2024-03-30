@@ -2,7 +2,7 @@ import Layout from "src/core/layouts/Layout"
 import { BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import Link from "next/link"
-import { ActionIcon, Avatar, Box, Flex } from "@mantine/core"
+import { ActionIcon, Avatar, Box, Flex, Badge } from "@mantine/core"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
 import { AutocompleteLoading } from "src/components/AutocompleteLoading"
@@ -10,6 +10,7 @@ import { useState } from "react"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Switch } from "@/components/Switch"
 import { Picker } from "@/components/Picker"
+import { ToggleMenu } from "@/components/ToggleMenu"
 
 export interface CatalougeProps {
   id: number
@@ -53,6 +54,19 @@ const sharedWith = [
   },
 ]
 
+const catalogSettings = [
+  {
+    label: "Edit",
+    path: Routes.NewCatalog(),
+    id: "edit",
+  },
+  {
+    label: "Delete",
+    path: Routes.Catalogs(),
+    id: "delete",
+  },
+]
+
 const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalougeProps) => {
   const currentUser = useCurrentUser()
   const favCard = currentUser ? (
@@ -74,25 +88,26 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
       case "Public":
         return (
           <>
-            <Link
+            <div
               className={`${styles.withOverlay} ${styles.body}`}
               style={{
                 backgroundImage:
                   "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
               }}
-              href={Routes.Cards()}
             >
               <div className={styles.overlay}></div>
-              <div className={styles.cardContent}>
+              <Link className={styles.cardContent} href={Routes.Catalog()}>
                 <div className={styles.headerContainer}>
                   <h2>NameNameNameNameNameNameNameName</h2>
-                  <span>10</span>
+
+                  <Badge size="sm" variant="outline" color="var(--mantine-color-gray-3)">
+                    10 cards
+                  </Badge>
                 </div>
                 <h3>Description</h3>
-              </div>
+              </Link>
               <div className={styles.inline}>
                 <div className={styles.author}>
-                  {" "}
                   <Avatar
                     src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
                     alt="Jacob Warnhalter"
@@ -101,25 +116,24 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                   />
                   <span>Author</span>
                 </div>
-
-                <div className={styles.controls}>
+                <Flex className={styles.controls}>
                   {currentUser?.id === authorId && (
-                    <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
+                    <ToggleMenu item={"catalog"} settings={catalogSettings} />
                   )}
+
                   {favCard}
-                </div>
+                </Flex>
               </div>
-            </Link>
-            <Link
+            </div>
+            <div
               className={`${styles.withOverlay} ${styles.body}`}
               style={{
                 backgroundImage:
                   "url(https://www.instalki.pl/wp-content/uploads/2021/02/atoms.jpg)",
               }}
-              href={Routes.Cards()}
             >
               <div className={styles.overlay}></div>
-              <div className={styles.cardContent}>
+              <Link className={styles.cardContent} href={Routes.Catalog()}>
                 <div className={styles.headerContainer}>
                   <h2>Lorem ipsum</h2>
                   <span>10</span>
@@ -129,7 +143,7 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                   mauris facilisis, fringilla ligula ac. In eleifend velit eu neque mollis, rutrum
                   malesuada leo luctus. Curabitur non mauris facilisis, fringilla ligula ac.
                 </h3>
-              </div>
+              </Link>
               <div className={styles.inline}>
                 <div className={styles.author}>
                   {" "}
@@ -149,17 +163,17 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                   {favCard}
                 </div>
               </div>
-            </Link>
-            <Link
+            </div>
+            <div
               className={`${styles.withOverlay} ${styles.body}`}
               style={{
                 backgroundImage:
                   "url(https://www.podrb.pl/upload/user_content/warzy/winter-3088042-1920-1.jpg)",
               }}
-              href={Routes.Cards()}
             >
               <div className={styles.overlay}></div>
-              <div className={styles.cardContent}>
+              <Link className={styles.cardContent} href={Routes.Catalog()}>
+                {" "}
                 <div className={styles.headerContainer}>
                   <h2>Lorem ipsum</h2>
                   <span>10</span>
@@ -168,7 +182,7 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                   In eleifend velit eu neque mollis, rutrum malesuada leo luctus. Curabitur non
                   mauris facilisis, fringilla ligula ac.
                 </h3>
-              </div>
+              </Link>
               <div className={styles.inline}>
                 <Avatar
                   src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
@@ -178,23 +192,22 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                 />
                 <span>Author</span>
               </div>
-            </Link>
-            <Link
+            </div>
+            <div
               className={`${styles.withOverlay} ${styles.body}`}
               style={{
                 backgroundImage:
                   "url(https://dc.sklep.pl/wp-content/uploads/2021/07/kropki-25x25cm.jpg)",
               }}
-              href={Routes.Cards()}
             >
               <div className={styles.overlay}></div>
-              <div className={styles.cardContent}>
+              <Link className={styles.cardContent} href={Routes.Catalog()}>
                 <div className={styles.headerContainer}>
                   <h2>Lorem ipsum</h2>
                   <span>10</span>
                 </div>
                 <h3>In eleifend velit eu neque mollis, rutrum malesuada leo luctus.</h3>
-              </div>
+              </Link>
               <div className={styles.inline}>
                 <Avatar
                   src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
@@ -204,22 +217,21 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                 />
                 <span>Author</span>
               </div>
-            </Link>
-            <Link
+            </div>
+            <div
               className={`${styles.withOverlay} ${styles.body}`}
               style={{
                 backgroundImage: "url(https://planetescape.pl//app/uploads/2020/11/Flamingi.jpg)",
               }}
-              href={Routes.Cards()}
             >
               <div className={styles.overlay}></div>
-              <div className={styles.cardContent}>
+              <Link className={styles.cardContent} href={Routes.Catalog()}>
                 <div className={styles.headerContainer}>
                   <h2>Lorem ipsum</h2>
                   <span>10</span>
                 </div>
                 <h3>In eleifend velit eu neque mollis, rutrum malesuada leo luctus.</h3>
-              </div>
+              </Link>
               <div className={styles.inline}>
                 <Avatar
                   src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
@@ -229,15 +241,15 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                 />
                 <span>Author</span>
               </div>
-            </Link>
+            </div>
             <div className={styles.body}>
-              <div className={styles.cardContent}>
+              <Link className={styles.cardContent} href={Routes.Catalog()}>
                 <div className={styles.headerContainer}>
                   <h2>Name</h2>
                   <span>10</span>
                 </div>
                 <h3>Description</h3>
-              </div>
+              </Link>
               <div className={styles.inline}>
                 <span className={styles.userImg}></span>
                 <span>Author</span>
