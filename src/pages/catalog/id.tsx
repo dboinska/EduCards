@@ -8,6 +8,7 @@ import { IconHeart, IconHeartFilled, IconSettings, IconX } from "@tabler/icons-r
 import { AutocompleteLoading } from "src/components/AutocompleteLoading"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Picker } from "@/components/Picker"
+import { ToggleMenu } from "@/components/ToggleMenu"
 
 export interface CatalougeProps {
   id: number
@@ -51,6 +52,19 @@ const sharedWith = [
   },
 ]
 
+const cardSettings = [
+  {
+    label: "Edit",
+    path: Routes.NewCatalog(),
+    id: "edit",
+  },
+  {
+    label: "Delete",
+    path: Routes.Catalogs(),
+    id: "delete",
+  },
+]
+
 const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalougeProps) => {
   const currentUser = useCurrentUser()
   const favCard = currentUser ? (
@@ -66,16 +80,15 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
   const catalogContent = () => {
     return (
       <>
-        <Link
+        <div
           className={`${styles.withOverlay} ${styles.body}`}
           style={{
             backgroundImage:
               "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
           }}
-          href={Routes.Cards()}
         >
           <div className={styles.overlay}></div>
-          <div className={styles.cardContent}>
+          <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
               <span>
@@ -83,10 +96,9 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               </span>
             </div>
             <h3>Description</h3>
-          </div>
+          </Link>
           <div className={styles.inline}>
             <div className={styles.author}>
-              {" "}
               <Avatar
                 src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
                 alt="Jacob Warnhalter"
@@ -95,24 +107,21 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               />
               <span>Author</span>
             </div>
-            <div className={styles.controls}>
-              {currentUser?.id === authorId && (
-                <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
-              )}
-              <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
+            <Flex className={styles.controls}>
+              {currentUser?.id === authorId && <ToggleMenu item={"card"} settings={cardSettings} />}
+
               {favCard}
-            </div>
+            </Flex>
           </div>
-        </Link>
-        <Link
+        </div>
+        <div
           className={`${styles.withOverlay} ${styles.body}`}
           style={{
             backgroundImage: "url(https://www.instalki.pl/wp-content/uploads/2021/02/atoms.jpg)",
           }}
-          href={Routes.Cards()}
         >
           <div className={styles.overlay}></div>
-          <div className={styles.cardContent}>
+          <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>Lorem ipsum</h2>
               <span>
@@ -124,10 +133,9 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               facilisis, fringilla ligula ac. In eleifend velit eu neque mollis, rutrum malesuada
               leo luctus. Curabitur non mauris facilisis, fringilla ligula ac.
             </h3>
-          </div>
+          </Link>
           <div className={styles.inline}>
             <div className={styles.author}>
-              {" "}
               <Avatar
                 src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
                 alt="Jacob Warnhalter"
@@ -143,17 +151,16 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               {favCard}
             </div>
           </div>
-        </Link>
-        <Link
+        </div>
+        <div
           className={`${styles.withOverlay} ${styles.body}`}
           style={{
             backgroundImage:
               "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
           }}
-          href={Routes.Cards()}
         >
           <div className={styles.overlay}></div>
-          <div className={styles.cardContent}>
+          <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
               <span>
@@ -161,7 +168,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               </span>
             </div>
             <h3>Description</h3>
-          </div>
+          </Link>
           <div className={styles.inline}>
             <div className={styles.author}>
               {" "}
@@ -175,17 +182,16 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
             </div>
             <div className={styles.controls}></div>
           </div>
-        </Link>{" "}
-        <Link
+        </div>{" "}
+        <div
           className={`${styles.withOverlay} ${styles.body}`}
           style={{
             backgroundImage:
               "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
           }}
-          href={Routes.Cards()}
         >
           <div className={styles.overlay}></div>
-          <div className={styles.cardContent}>
+          <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
               <span>
@@ -193,7 +199,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               </span>
             </div>
             <h3>Description</h3>
-          </div>
+          </Link>
           <div className={styles.inline}>
             <div className={styles.author}>
               {" "}
@@ -207,17 +213,16 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
             </div>
             <div className={styles.controls}></div>
           </div>
-        </Link>
-        <Link
+        </div>
+        <div
           className={`${styles.withOverlay} ${styles.body}`}
           style={{
             backgroundImage:
               "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
           }}
-          href={Routes.Cards()}
         >
           <div className={styles.overlay}></div>
-          <div className={styles.cardContent}>
+          <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
               <span>
@@ -225,7 +230,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               </span>
             </div>
             <h3>Description</h3>
-          </div>
+          </Link>
           <div className={styles.inline}>
             <div className={styles.author}>
               {" "}
@@ -239,7 +244,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
             </div>
             <div className={styles.controls}></div>
           </div>
-        </Link>
+        </div>
       </>
     )
   }
@@ -250,7 +255,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           header={
             "Catalog xfdgfghfghfgjghdgdgdfgdfgdfgdfgdgfgdfgdfgdfgdfgdfgdfgdfgdgfgdfgdfdfgdfgdfgdfgdfgdgdgxfdgfghfghfgjghdgdgdfgdfgdfgdfgdgfgdfgdfgdfgdfgdfgdfgdfgdgfgdfgdfdfgdfgdfgdfgdfgdgdg"
           }
-          link={Routes.NewCatalog()}
+          link={Routes.NewCard()}
           learningMode={true}
         />
         <div className={styles.filters}>

@@ -12,6 +12,7 @@ const DragAndDrop = () => {
       maxSize={5 * 1024 ** 2}
       accept={IMAGE_MIME_TYPE}
       classNames={{ inner: styles.mantineDropzoneInner }}
+      w="100%"
     >
       <Flex>
         <Group wrap="nowrap" justify="left" gap="sm" style={{ pointerEvents: "none" }}>
