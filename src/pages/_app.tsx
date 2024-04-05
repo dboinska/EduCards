@@ -7,6 +7,7 @@ import "src/styles/globals.css"
 import "@mantine/core/styles.css"
 
 import { MantineProvider, createTheme } from "@mantine/core"
+import { CompartionProvider } from "@/core/providers/compartionProvider"
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -36,7 +37,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   const getLayout = Component.getLayout || ((page) => page)
   return (
     <ErrorBoundary FallbackComponent={RootErrorFallback}>
-      <MantineProvider theme={theme}>{getLayout(<Component {...pageProps} />)}</MantineProvider>
+      <CompartionProvider>
+        <MantineProvider theme={theme}>{getLayout(<Component {...pageProps} />)}</MantineProvider>
+      </CompartionProvider>
     </ErrorBoundary>
   )
 }
