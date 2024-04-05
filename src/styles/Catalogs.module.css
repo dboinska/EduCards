@@ -119,6 +119,11 @@
   }
 }
 
+.compartion {
+  composes: body;
+  padding: 0.6rem;
+}
+
 .withOverlay {
   color: white;
   overflow: hidden;
@@ -134,7 +139,8 @@
   }
 }
 
-.gridCatalogs {
+.gridCatalogs,
+.gridCompartions {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -142,6 +148,11 @@
   max-width: 1000px;
   margin: 0 auto;
   margin-top: var(--mantine-spacing-lg);
+}
+
+.gridCompartions {
+  gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(106px, 1fr));
 }
 
 /* MOBILE */
@@ -165,7 +176,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.6) 90%);
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 31, 63, 0.6) 98%);
   filter: blur(4px);
 }
 

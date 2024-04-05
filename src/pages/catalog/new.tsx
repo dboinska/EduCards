@@ -1,6 +1,6 @@
 import { BlitzPage, Routes } from "@blitzjs/next"
 import { useEffect, useState } from "react"
-import { Stepper, Button, Group, TextInput, Box, Flex } from "@mantine/core"
+import { Stepper, Button, Group, TextInput, Box, Flex, NativeSelect } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import Layout from "@/core/layouts/Layout"
 import styles from "src/styles/Catalogs.module.css"
@@ -141,6 +141,12 @@ const NewCatalog: BlitzPage = () => {
                 {...form.getInputProps("description")}
               />
               <DragAndDrop />
+              <NativeSelect
+                label="Number of compartments"
+                component="select"
+                data={["3", "5", "7"]}
+                mt="md"
+              ></NativeSelect>
             </Stepper.Step>
 
             <Stepper.Step label="Second step" description="Adding cards to catalog">

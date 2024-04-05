@@ -2,22 +2,19 @@ import Layout from "src/core/layouts/Layout"
 import { BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import Link from "next/link"
-import { ActionIcon, Avatar, Box, Flex, Badge } from "@mantine/core"
+import { Avatar, Flex, Box, Badge } from "@mantine/core"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
-import { IconHeart, IconHeartFilled, IconSettings, IconX } from "@tabler/icons-react"
 import { AutocompleteLoading } from "src/components/AutocompleteLoading"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Picker } from "@/components/Picker"
-import { ToggleMenu } from "@/components/ToggleMenu"
 import { UseCompartion } from "@/core/providers/compartionProvider"
 
-export interface CatalougeProps {
+export interface CompartionProps {
   id: number
-  image?: string
   header: string
   desc?: string
-  isFavorite?: boolean
-  authorId: number
+  //   authorId: number
+  cards: number
 }
 
 const sharedWith = [
@@ -53,122 +50,9 @@ const sharedWith = [
   },
 ]
 
-const cardSettings = [
-  {
-    label: "Edit",
-    path: Routes.NewCatalog(),
-    id: "edit",
-  },
-  {
-    label: "Delete",
-    path: Routes.Catalogs(),
-    id: "delete",
-  },
-]
-
-const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalougeProps) => {
+const Compartion: BlitzPage = ({ id, header, desc }: CompartionProps) => {
   const currentUser = useCurrentUser()
-  const favCard = currentUser ? (
-    <ActionIcon variant="subtle" radius="md" size={22}>
-      {isFavorite ? (
-        <IconHeartFilled className={styles.favorite} stroke={2} />
-      ) : (
-        <IconHeart className={styles.favorite} stroke={2} />
-      )}
-    </ActionIcon>
-  ) : null
-
-  const compartionsData = [
-    {
-      color: "var(--mantine-color-yellow-6)",
-      label: "Every day",
-      cards: 3,
-    },
-    {
-      color: "var(--mantine-color-lime-6)",
-      label: "Every 2 days",
-      cards: 23,
-    },
-    {
-      color: "var(--mantine-color-green-6)",
-      label: "Every 4 days",
-      cards: 12,
-    },
-    {
-      color: "var(--mantine-color-teal-6)",
-      label: "Every week",
-      cards: 11,
-    },
-    {
-      color: "var(--mantine-color-blue-6)",
-      label: "Every 2 weeks",
-      cards: 1,
-    },
-    {
-      color: "var(--mantine-color-violet-6)",
-      label: "Every month",
-      cards: 3,
-    },
-    {
-      color: "var(--mantine-color-pink-6)",
-      label: "Every 2 months",
-      cards: 0,
-    },
-  ]
-
-  const compartions = () => {
-    const { compartionProps, setCompartionProps } = UseCompartion()
-    const items = compartionsData.map((data, index) => (
-      <Flex
-        key={index}
-        align="center"
-        h="100%"
-        className={`${styles.compartion}`}
-        style={{
-          border: `2px solid var(--mantine-color-gray-2)`,
-          // color: data.color,
-        }}
-      >
-        <Link
-          href={Routes.Compartion()}
-          style={{ height: "100%" }}
-          onClick={() => {
-            const level = `level ${Number(index + 1)}`
-            setCompartionProps({
-              header: `${level}`,
-              label: data.label,
-              color: data.color,
-            })
-            console.log(compartionProps)
-          }}
-        >
-          <Flex direction="column" justify="space-between" h="100%">
-            <div className={styles.headerContainer}>
-              <h2
-                style={{
-                  color: data.color,
-                }}
-              >
-                {index + 1} level
-              </h2>
-            </div>
-            <h3
-              style={{
-                color: "var(--mantine-color-gray-7)",
-                fontSize: "var(--mantine-font-size-xs)",
-              }}
-            >
-              {data.label}
-            </h3>
-            <Badge variant="outline" color={data.color}>
-              {data.cards} cards
-            </Badge>
-          </Flex>
-        </Link>
-      </Flex>
-    ))
-    return items
-  }
+  const { compartionProps } = UseCompartion()
 
   const catalogContent = () => {
     return (
@@ -184,9 +68,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
             </div>
             <h3>Description</h3>
           </Link>
@@ -200,11 +81,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               />
               <span>Author</span>
             </div>
-            <Flex className={styles.controls}>
-              {currentUser?.id === authorId && <ToggleMenu item={"card"} settings={cardSettings} />}
-
-              {favCard}
-            </Flex>
           </div>
         </div>
         <div
@@ -217,9 +93,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>Lorem ipsum</h2>
-              <span>
-                <IconX />
-              </span>
             </div>
             <h3>
               In eleifend velit eu neque mollis, rutrum malesuada leo luctus. Curabitur non mauris
@@ -237,12 +110,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
               />
               <span>Author</span>
             </div>
-            <div className={styles.controls}>
-              {currentUser?.id === authorId && (
-                <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
-              )}
-              {favCard}
-            </div>
           </div>
         </div>
         <div
@@ -256,9 +123,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
             </div>
             <h3>Description</h3>
           </Link>
@@ -287,9 +151,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
             </div>
             <h3>Description</h3>
           </Link>
@@ -318,9 +179,6 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
             </div>
             <h3>Description</h3>
           </Link>
@@ -344,23 +202,31 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
   return (
     <Layout title="Catalog">
       <main className={styles.main}>
-        <CatalogHeader
-          header={
-            "Catalog xfdgfghfghfgjghdgdgdfgdfgdfgdfgdgfgdfgdfgdfgdfgdfgdfgdfgdgfgdfgdfdfgdfgdfgdfgdfgdgdgxfdgfghfghfgjghdgdgdfgdfgdfgdfgdgfgdfgdfgdfgdfgdfgdfgdfgdgfgdfgdfdfgdfgdfgdfgdfgdgdg"
-          }
-          link={Routes.NewCard()}
-          learningMode={true}
-          authorId={1}
-        />
-        <h2>Compartions:</h2>
-        <div className={styles.gridCompartions}>{compartions()}</div>
-
-        <h2>All cards:</h2>
+        <CatalogHeader header={"Catalog xfdgfg"} link={Routes.NewCard()} authorId={1} />
+        <Box m="var(--mantine-spacing-md) 0">
+          <h2 style={{ color: compartionProps.color, margin: "0" }}>
+            Cards at {compartionProps.header}:
+          </h2>
+          <Flex
+            align="center"
+            justify="space-between"
+            style={{ color: "var(--mantine-color-gray-5)", fontWeight: 500 }}
+          >
+            Learn {compartionProps.label.toLowerCase()}
+            <Flex gap="var(--mantine-spacing-sm)">
+              <Badge color="var(--mantine-color-gray-6)">x learned</Badge>
+              <Badge color="var(--mantine-color-gray-6)" variant="outline">
+                y left
+              </Badge>
+            </Flex>
+          </Flex>
+        </Box>
+        <Flex gap=" var(--mantine-spacing-sm)" mb="var(--mantine-spacing-md)"></Flex>
         <div className={styles.filters}>
           <AutocompleteLoading />
 
           <Flex align={"center"} justify={"space-between"}>
-            <label style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}>
+            <label style={{ fontSize: "var(--mantine-font-size-xs)", fontWeight: 500 }}>
               Sort by:
             </label>
             <Box w="270px">
@@ -374,4 +240,4 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
   )
 }
 
-export default Catalog
+export default Compartion
