@@ -1,9 +1,19 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { UnstyledButton, Checkbox, Text } from "@mantine/core"
 import classes from "src/styles/CheckboxCard.module.css"
 
-export function CheckboxCard({ header, desc }) {
+interface ICheckboxCard {
+  header: string
+  desc?: string
+}
+
+export function CheckboxCard({ header, desc }: ICheckboxCard) {
   const [value, onChange] = useState(true)
+  const [checkboxValue, setCheckboxValue] = useState<boolean>(false)
+
+  useEffect(() => {
+    setCheckboxValue(!value)
+  }, [value])
 
   return (
     <UnstyledButton onClick={() => onChange(!value)} className={classes.button}>
