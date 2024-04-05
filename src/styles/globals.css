@@ -42,3 +42,8 @@ i {
   width: 100%;
   justify-content: center;
 }
+
+.border {
+  border: 2px solid #e8e8e8;
+  border-radius: var(--mantine-spacing-md);
+}
