@@ -1,5 +1,5 @@
 import { Menu, Button, rem } from "@mantine/core"
-import { IconSettings, IconTrash } from "@tabler/icons-react"
+import { IconCirclePlus, IconSettings, IconTrash } from "@tabler/icons-react"
 import Link from "next/link"
 
 export function ToggleMenu({ item, settings }) {
@@ -12,6 +12,11 @@ export function ToggleMenu({ item, settings }) {
       </Menu.Target>
 
       <Menu.Dropdown>
+        <Link href={settings.find((setting) => setting.id === "newStudyPlan")?.path}>
+          <Menu.Item leftSection={<IconCirclePlus style={{ width: rem(14), height: rem(14) }} />}>
+            New study plan
+          </Menu.Item>
+        </Link>
         <Link href={settings.find((setting) => setting.id === "edit")?.path}>
           <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
             Edit {item}
