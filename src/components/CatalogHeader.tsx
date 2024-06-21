@@ -10,8 +10,10 @@ import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 
 interface CatalogHeaderProps {
   header: string
-  link: RouteUrlObject
+  link?: RouteUrlObject
   learningMode?: boolean
+  studyPlanMode?: boolean
+  settings?: boolean
   authorId: number
 }
 
@@ -19,6 +21,11 @@ const gradient =
   "linear-gradient(45deg, var(--mantine-color-blue-filled) 0%, var(--mantine-color-lime-filled) 100%)"
 
 const catalogSettings = [
+  {
+    label: "Add study plan",
+    path: Routes.NewStudyPlan(),
+    id: "newStudyPlan",
+  },
   {
     label: "Edit",
     path: Routes.NewCatalog(),
@@ -31,7 +38,14 @@ const catalogSettings = [
   },
 ]
 
-export function CatalogHeader({ header, link, learningMode, authorId }: CatalogHeaderProps) {
+export function CatalogHeader({
+  header,
+  link,
+  learningMode,
+  studyPlanMode,
+  settings,
+  authorId,
+}: CatalogHeaderProps) {
   const currentUser = useCurrentUser()
   return (
     <div className={styles.header}>
@@ -49,37 +63,54 @@ export function CatalogHeader({ header, link, learningMode, authorId }: CatalogH
             </Button>
           </Link>
         )}
-        <Link href={link} passHref>
-          <Button
-            component="a"
-            radius="md"
-            styles={{
-              root: {
-                padding: rem(2),
-                border: 0,
-                backgroundImage: gradient,
-              },
+        {studyPlanMode && (
+          <Link href={Routes.Catalog()} passHref>
+            <Button
+              variant="gradient"
+              gradient={{ from: "lime", to: "blue" }}
+              radius="md"
+              size="sm"
+            >
+              <IconCards /> Let's learn
+            </Button>
+          </Link>
+        )}
+        {link && (
+          <Link href={link} passHref>
+            <Button
+              component="a"
+              radius="md"
+              styles={{
+                root: {
+                  padding: rem(2),
+                  border: 0,
+                  backgroundImage: gradient,
+                },
 
-              inner: {
-                background: "var(--mantine-color-body)",
-                color: "var(--mantine-color-blue-filled)",
-                borderRadius: "calc(var(--button-radius) - 2px)",
-                paddingLeft: "var(--mantine-spacing-md)",
-                paddingRight: "var(--mantine-spacing-md)",
-              },
+                inner: {
+                  background: "var(--mantine-color-body)",
+                  color: "var(--mantine-color-blue-filled)",
+                  borderRadius: "calc(var(--button-radius) - 2px)",
+                  paddingLeft: "var(--mantine-spacing-md)",
+                  paddingRight: "var(--mantine-spacing-md)",
+                },
 
-              label: {
-                backgroundImage: gradient,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              },
-            }}
-          >
-            <IconCirclePlus /> Add new
-          </Button>
-        </Link>
+                label: {
+                  backgroundImage: gradient,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                },
+              }}
+            >
+              <IconCirclePlus /> Add new
+            </Button>
+          </Link>
+        )}
 
-        {currentUser?.id === authorId && <ToggleMenu item={"catalog"} settings={catalogSettings} />}
+        {settings && currentUser?.id && (
+          //  === authorId
+          <ToggleMenu item={"catalog"} settings={catalogSettings} />
+        )}
       </Flex>
     </div>
   )
