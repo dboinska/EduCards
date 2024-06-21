@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useDisclosure } from "@mantine/hooks"
 import classes from "../styles/Header.module.css"
-import { usePathname } from "next/navigation"
 import logout from "src/auth/mutations/logout"
 import { useMutation } from "@blitzjs/rpc"
 import Link from "next/link"
@@ -24,12 +23,10 @@ import {
   IconStar,
   IconMessage,
   IconSettings,
-  IconPlayerPause,
-  IconTrash,
-  IconSwitchHorizontal,
   IconChevronDown,
 } from "@tabler/icons-react"
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
+import { Routes } from "@blitzjs/next"
 
 export function Header() {
   const [logoutMutation] = useMutation(logout)
@@ -105,56 +102,59 @@ export function Header() {
             </UnstyledButton>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
-              leftSection={
-                <IconHeart
-                  style={{ width: rem(16), height: rem(16) }}
-                  color={theme.colors.red[6]}
-                  stroke={1.5}
-                />
-              }
-            >
-              Statistic
-            </Menu.Item>
-            <Menu.Item
-              leftSection={
-                <IconStar
-                  style={{ width: rem(16), height: rem(16) }}
-                  color={theme.colors.yellow[6]}
-                  stroke={1.5}
-                />
-              }
-            >
-              Study plans
-            </Menu.Item>
-            <Menu.Item
-              leftSection={
-                <IconMessage
-                  style={{ width: rem(16), height: rem(16) }}
-                  color={theme.colors.blue[6]}
-                  stroke={1.5}
-                />
-              }
-            >
-              Your comments
-            </Menu.Item>
+            <Link href={Routes.Statistics()}>
+              <Menu.Item
+                leftSection={
+                  <IconHeart
+                    style={{ width: rem(16), height: rem(16) }}
+                    color={theme.colors.red[6]}
+                    stroke={1.5}
+                  />
+                }
+              >
+                Statistics
+              </Menu.Item>
+            </Link>
+            <Link href={Routes.StudyPlans()}>
+              <Menu.Item
+                leftSection={
+                  <IconStar
+                    style={{ width: rem(16), height: rem(16) }}
+                    color={theme.colors.yellow[6]}
+                    stroke={1.5}
+                  />
+                }
+              >
+                Study plans
+              </Menu.Item>
+            </Link>
+            <Link href={Routes.Suggestions()}>
+              <Menu.Item
+                leftSection={
+                  <IconMessage
+                    style={{ width: rem(16), height: rem(16) }}
+                    color={theme.colors.blue[6]}
+                    stroke={1.5}
+                  />
+                }
+              >
+                Recommended words
+              </Menu.Item>
+            </Link>
 
             <Menu.Label>Settings</Menu.Label>
+            <Link href={Routes.UserPage()}>
+              <Menu.Item
+                leftSection={
+                  <IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+                }
+              >
+                Account settings
+              </Menu.Item>
+            </Link>
+
             <Menu.Item
-              leftSection={
-                <IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
-              }
-            >
-              Account settings
-            </Menu.Item>
-            <Menu.Item
-              leftSection={
-                <IconSwitchHorizontal style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
-              }
-            >
-              Change account
-            </Menu.Item>
-            <Menu.Item
+              color="red"
               onClick={async (event) => {
                 event.preventDefault()
                 await logoutMutation()
@@ -162,23 +162,6 @@ export function Header() {
               leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
             >
               Logout
-            </Menu.Item>
-
-            <Menu.Divider />
-
-            <Menu.Label>Danger zone</Menu.Label>
-            <Menu.Item
-              leftSection={
-                <IconPlayerPause style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
-              }
-            >
-              Pause subscription
-            </Menu.Item>
-            <Menu.Item
-              color="red"
-              leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-            >
-              Delete account
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
