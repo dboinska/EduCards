@@ -2,6 +2,7 @@ import Layout from "@/core/layouts/Layout"
 import { Routes } from "@blitzjs/next"
 import { RingProgress, Text, Paper, Center, Group, Flex, Button } from "@mantine/core"
 import Link from "next/link"
+import { Progress } from "./Progress"
 
 export function Stats({ correct, wrong }) {
   const all: number = Number(correct + wrong)
@@ -24,24 +25,12 @@ export function Stats({ correct, wrong }) {
             {"Your score"}
           </Text>
         </Group>
-        <RingProgress
+        <Progress
+          percent={percent}
+          color={color(percent)}
+          text={`${percent} %`}
           size={160}
-          roundCaps
-          thickness={8}
-          sections={[
-            {
-              value: percent,
-              color: color(percent),
-            },
-          ]}
-          m="0 auto"
-          label={
-            <Center>
-              <Text fw={700} size="xl">
-                {`${percent} %`}
-              </Text>
-            </Center>
-          }
+          textSize="lg"
         />
         <Flex direction="column" m="16px">
           <Text size="xs" tt="uppercase" fw={700} m="0 auto" py="8px">

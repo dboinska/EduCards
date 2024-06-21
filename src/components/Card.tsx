@@ -12,7 +12,7 @@ export interface CardProps {
   image?: string
   header: string
   desc?: string
-  catalouge?: string
+  catalog?: string
   isFavorite?: boolean
   onMoveRight?: () => void
   onMoveLeft?: () => void
@@ -23,7 +23,7 @@ const Card = ({
   image,
   header,
   desc,
-  catalouge,
+  catalog,
   isFavorite,
   onMoveLeft,
   onMoveRight,
@@ -151,7 +151,7 @@ const Card = ({
                   <Flex justify="space-between" align="center" mt="sm">
                     <Text fz="sm">1/10</Text>
                     <Badge size="sm" variant="light" color="var(--main-color)">
-                      {catalouge}
+                      {catalog}
                     </Badge>
                     {favCard}
                   </Flex>
@@ -220,7 +220,7 @@ const Card = ({
               <Flex justify="space-between" align="center" mt="sm">
                 <Text fz="sm">1/10</Text>
                 <Badge variant="dark" size="sm">
-                  {catalouge}
+                  {catalog}
                 </Badge>
                 {favCard}
               </Flex>

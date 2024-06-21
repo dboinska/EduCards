@@ -65,7 +65,7 @@ export const CardCreator = ({ form, oneStep }: Creator) => {
               {...form.getInputProps(`cards.${index}.definition`)}
               className={styles.textarea}
               error={form.errors.cards?.[index]?.definition}
-            />{" "}
+            />
             <Textarea
               size="sm"
               radius="md"

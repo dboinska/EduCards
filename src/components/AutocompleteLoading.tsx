@@ -1,13 +1,16 @@
 import { useState, useRef } from "react"
 import { Autocomplete, Loader } from "@mantine/core"
+import { useRouter } from "next/router"
 
-export function AutocompleteLoading() {
+export function AutocompleteLoading({ pathname }) {
   const timeoutRef = useRef<number>(-1)
   const [value, setValue] = useState("")
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<string[]>([])
 
-  const handleChange = (val: string) => {
+  const router = useRouter()
+
+  const handleChange = async (val: string) => {
     window.clearTimeout(timeoutRef.current)
     setValue(val)
     setData([])
@@ -20,6 +23,14 @@ export function AutocompleteLoading() {
         setLoading(false)
         // setData(["English", "French", "German"].map((provider) => `${val}@${provider}`))
       }, 1000)
+    }
+    try {
+      await router.push({
+        pathname: pathname,
+        query: { ...router.query, search: val },
+      })
+    } catch (error) {
+      console.error("Failed to navigate", error)
     }
   }
   return (
