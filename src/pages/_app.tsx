@@ -8,6 +8,7 @@ import "@mantine/core/styles.css"
 
 import { MantineProvider, createTheme } from "@mantine/core"
 import { CompartionProvider } from "@/core/providers/compartionProvider"
+import Head from "next/head"
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -36,11 +37,19 @@ function RootErrorFallback({ error }: ErrorFallbackProps) {
 function MyApp({ Component, pageProps }: AppProps) {
   const getLayout = Component.getLayout || ((page) => page)
   return (
-    <ErrorBoundary FallbackComponent={RootErrorFallback}>
-      <CompartionProvider>
-        <MantineProvider theme={theme}>{getLayout(<Component {...pageProps} />)}</MantineProvider>
-      </CompartionProvider>
-    </ErrorBoundary>
+    <>
+      <Head>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
+        />
+      </Head>
+      <ErrorBoundary FallbackComponent={RootErrorFallback}>
+        <CompartionProvider>
+          <MantineProvider theme={theme}>{getLayout(<Component {...pageProps} />)}</MantineProvider>
+        </CompartionProvider>
+      </ErrorBoundary>
+    </>
   )
 }
 
