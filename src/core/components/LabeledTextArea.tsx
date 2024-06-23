@@ -1,20 +1,27 @@
 import { forwardRef, PropsWithoutRef, ComponentPropsWithoutRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ErrorMessage } from "@hookform/error-message"
+import TextareaAutosize from "react-textarea-autosize"
 
-export interface LabeledTextFieldProps extends PropsWithoutRef<JSX.IntrinsicElements["input"]> {
+export interface LabeledTextAreaProps extends PropsWithoutRef<JSX.IntrinsicElements["textarea"]> {
   /** Field name. */
   name: string
   /** Field label. */
   label: string
-  /** Field type. Doesn't include radio buttons and checkboxes */
-  type?: "text" | "password" | "email" | "number"
+  /** Field type. */
+  type?: "text"
   outerProps?: PropsWithoutRef<JSX.IntrinsicElements["div"]>
   labelProps?: ComponentPropsWithoutRef<"label">
+  width?: string
+  minRows?: number
+  maxRows?: number
 }
 
-export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldProps>(
-  ({ label, outerProps, labelProps, name, ...props }, ref) => {
+export const LabeledTextArea = forwardRef<HTMLTextAreaElement, LabeledTextAreaProps>(
+  (
+    { label, outerProps, labelProps, name, width = "100%", minRows = 1, maxRows = 5, ...props },
+    ref
+  ) => {
     const {
       register,
       formState: { isSubmitting, errors },
@@ -24,7 +31,15 @@ export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldPro
       <div {...outerProps}>
         <label {...labelProps}>
           {label}
-          <input disabled={isSubmitting} {...register(name)} {...props} />
+          <TextareaAutosize
+            minRows={minRows}
+            maxRows={maxRows}
+            // ref={ref}
+            disabled={isSubmitting}
+            {...register(name)}
+            {...props}
+            style={{ width, border: "none" }}
+          />
         </label>
 
         <ErrorMessage
@@ -38,19 +53,15 @@ export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldPro
         />
 
         <style jsx>{`
+          div {
+            width: 100%;
+          }
           label {
             display: flex;
             flex-direction: column;
             align-items: start;
             font-size: 1rem;
-          }
-          input {
-            font-size: 1rem;
-            padding: 0.25rem 0.5rem;
-            width: 100%;
-            border: 1px solid purple;
-            appearance: none;
-            margin-top: 0.5rem;
+            border: none;
           }
         `}</style>
       </div>
@@ -58,4 +69,4 @@ export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldPro
   }
 )
 
-export default LabeledTextField
+export default LabeledTextArea
