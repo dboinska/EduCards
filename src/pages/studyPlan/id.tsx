@@ -175,7 +175,7 @@ const StudyPlan: BlitzPage = ({ id, authorId }: StatisticsProps) => {
             <Flex direction="column" h="100%" justify="space-between">
               <Flex direction="column" className="border" p="var(--mantine-spacing-md)">
                 <Group>
-                  <h3>Today's learning</h3>
+                  <h3>Today&apos;s learning</h3>
                 </Group>
                 <Progress
                   percent={100}
