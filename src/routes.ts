@@ -23,8 +23,8 @@ export const routes: Route[] = [
     className: "linkCatalogs",
   },
   {
-    path: Routes.FavCatalogs(),
-    alias: "Favorite",
+    path: Routes.Favorites(),
+    alias: "Favorites",
     icon: mdiHeartOutline,
     className: "link",
     protected: true,

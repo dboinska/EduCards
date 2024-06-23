@@ -202,7 +202,7 @@ const Compartion: BlitzPage = ({ id, header, desc }: CompartionProps) => {
   return (
     <Layout title="Catalog">
       <main className={styles.main}>
-        <CatalogHeader header={"Catalog xfdgfg"} link={Routes.NewCard()} authorId={1} />
+        <CatalogHeader header={"Catalog xfdgfg"} link={Routes.NewCard()} authorId={1} settings />
         <Box m="var(--mantine-spacing-md) 0">
           <h2 style={{ color: compartionProps.color, margin: "0" }}>
             Cards at {compartionProps.header}:

@@ -10,8 +10,9 @@ import { CatalogHeader } from "@/components/CatalogHeader"
 import { Picker } from "@/components/Picker"
 import { ToggleMenu } from "@/components/ToggleMenu"
 import { UseCompartion } from "@/core/providers/compartionProvider"
+import { DynamicBadge } from "@/components/DynamicBadge"
 
-export interface CatalougeProps {
+export interface CatalogProps {
   id: number
   image?: string
   header: string
@@ -66,7 +67,7 @@ const cardSettings = [
   },
 ]
 
-const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalougeProps) => {
+const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalogProps) => {
   const currentUser = useCurrentUser()
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={22}>
@@ -81,7 +82,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
   const compartionsData = [
     {
       color: "var(--mantine-color-yellow-6)",
-      label: "Every day",
+      label: "Daily",
       cards: 3,
     },
     {
@@ -96,7 +97,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
     },
     {
       color: "var(--mantine-color-teal-6)",
-      label: "Every week",
+      label: "Weekly",
       cards: 11,
     },
     {
@@ -106,7 +107,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
     },
     {
       color: "var(--mantine-color-violet-6)",
-      label: "Every month",
+      label: "Monthly",
       cards: 3,
     },
     {
@@ -116,59 +117,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
     },
   ]
 
-  const compartions = () => {
-    const { compartionProps, setCompartionProps } = UseCompartion()
-    const items = compartionsData.map((data, index) => (
-      <Flex
-        key={index}
-        align="center"
-        h="100%"
-        className={`${styles.compartion}`}
-        style={{
-          border: `2px solid var(--mantine-color-gray-2)`,
-          // color: data.color,
-        }}
-      >
-        <Link
-          href={Routes.Compartion()}
-          style={{ height: "100%" }}
-          onClick={() => {
-            const level = `level ${Number(index + 1)}`
-            setCompartionProps({
-              header: `${level}`,
-              label: data.label,
-              color: data.color,
-            })
-            console.log(compartionProps)
-          }}
-        >
-          <Flex direction="column" justify="space-between" h="100%">
-            <div className={styles.headerContainer}>
-              <h2
-                style={{
-                  color: data.color,
-                }}
-              >
-                {index + 1} level
-              </h2>
-            </div>
-            <h3
-              style={{
-                color: "var(--mantine-color-gray-7)",
-                fontSize: "var(--mantine-font-size-xs)",
-              }}
-            >
-              {data.label}
-            </h3>
-            <Badge variant="outline" color={data.color}>
-              {data.cards} cards
-            </Badge>
-          </Flex>
-        </Link>
-      </Flex>
-    ))
-    return items
-  }
+  const { compartionProps, setCompartionProps } = UseCompartion()
 
   const catalogContent = () => {
     return (
@@ -184,9 +133,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           <Link href={Routes.Cards()} className={styles.cardContent}>
             <div className={styles.headerContainer}>
               <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
+              <IconX />
             </div>
             <h3>Description</h3>
           </Link>
@@ -349,18 +296,31 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
             "Catalog xfdgfghfghfgjghdgdgdfgdfgdfgdfgdgfgdfgdfgdfgdfgdfgdfgdfgdgfgdfgdfdfgdfgdfgdfgdfgdgdgxfdgfghfghfgjghdgdgdfgdfgdfgdfgdgfgdfgdfgdfgdfgdfgdfgdfgdgfgdfgdfdfgdfgdfgdfgdfgdgdg"
           }
           link={Routes.NewCard()}
-          learningMode={true}
           authorId={1}
+          settings
         />
-        <h2>Compartions:</h2>
-        <div className={styles.gridCompartions}>{compartions()}</div>
+        <Box w="100%">
+          <h2>Compartions:</h2>
+          <div className={styles.justifyLeft}>
+            <DynamicBadge
+              data={compartionsData}
+              compartionProps={compartionProps}
+              setCompartionProps={setCompartionProps}
+            />
+          </div>
+        </Box>
 
         <h2>All cards:</h2>
         <div className={styles.filters}>
           <AutocompleteLoading />
 
           <Flex align={"center"} justify={"space-between"}>
-            <label style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}>
+            <label
+              style={{
+                fontSize: "var(--mantine-font-size-sm)",
+                fontWeight: 500,
+              }}
+            >
               Sort by:
             </label>
             <Box w="270px">
