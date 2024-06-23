@@ -17,6 +17,7 @@
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   border: 2px solid #e8e8e8;
+  min-width: 200px;
 }
 
 .header {
@@ -121,7 +122,8 @@
 
 .compartion {
   composes: body;
-  padding: 0.6rem;
+  padding: var(--mantine-spacing-sm);
+  min-width: auto;
 }
 
 .withOverlay {
@@ -139,8 +141,7 @@
   }
 }
 
-.gridCatalogs,
-.gridCompartions {
+.gridCatalogs {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -150,9 +151,25 @@
   margin-top: var(--mantine-spacing-lg);
 }
 
-.gridCompartions {
+.justifyLeft {
   gap: 4px;
-  grid-template-columns: repeat(auto-fit, minmax(106px, 1fr));
+  width: 100%;
+  justify-content: left;
+  overflow: auto;
+  & {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+}
+
+.catalogMinWidth {
+  min-width: 230px;
+}
+
+@media (min-width: $mantine-breakpoint-md) {
+  .maxWidth600 {
+    max-width: 600px;
+  }
 }
 
 /* MOBILE */

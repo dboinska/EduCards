@@ -6,19 +6,23 @@ import { ActionIcon, Avatar, Box, Flex, Badge } from "@mantine/core"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
 import { AutocompleteLoading } from "src/components/AutocompleteLoading"
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Switch } from "@/components/Switch"
 import { Picker } from "@/components/Picker"
 import { ToggleMenu } from "@/components/ToggleMenu"
 
-export interface CatalougeProps {
+import { useQuery } from "@blitzjs/rpc"
+import getCatalogs from "./queries/getCatalogs"
+
+export interface CatalogProps {
   id: number
   image?: string
   header: string
   desc?: string
   isFavorite?: boolean
   authorId: number
+  numberOfCards?: number
 }
 
 const sharedWith = [
@@ -27,30 +31,35 @@ const sharedWith = [
     name: "Date ascending",
     image:
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
+    value: "dateAsc",
   },
   {
     label: "Date descending",
     name: "Date descending",
     image:
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
+    value: "dateDesc",
   },
   {
     label: "Alphabetically",
     name: "Alphabetically",
     image:
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
+    value: "alph",
   },
   {
     label: "Reverse alphabetically",
     name: "Reverse alphabetically",
     image:
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
+    value: "reverseAlph",
   },
   {
     label: "Randomly",
     name: "Randomly",
     image:
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
+    value: "random",
   },
 ]
 
@@ -67,27 +76,88 @@ const catalogSettings = [
   },
 ]
 
-const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalougeProps) => {
+const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalogProps) => {
+  const [catalog] = useQuery(getCatalogs, {})
+
+  console.log({ catalog })
+
   const currentUser = useCurrentUser()
-  const favCard = currentUser ? (
-    <ActionIcon variant="subtle" radius="md" size={22}>
-      {isFavorite ? (
-        <IconHeartFilled className={styles.favorite} stroke={2} />
-      ) : (
-        <IconHeart className={styles.favorite} stroke={2} />
-      )}
-    </ActionIcon>
-  ) : null
+  function favCard(isFavorite: boolean): ReactNode {
+    return currentUser ? (
+      <ActionIcon variant="subtle" radius="md" size={22}>
+        {isFavorite ? (
+          <IconHeartFilled className={styles.favorite} stroke={2} />
+        ) : (
+          <IconHeart className={styles.favorite} stroke={2} />
+        )}
+      </ActionIcon>
+    ) : null
+  }
 
-  const [catalogueType, setCatalogueType] = useState<string>("All")
+  const [catalogType, setCatalogType] = useState<string>("all")
 
-  const catalogueContent = (catalogueType) => {
-    switch (catalogueType) {
-      case "All":
-        return <div>All</div>
-      case "Public":
+  const itemContent = (catalogItem) => (
+    <div
+      key={catalogItem.id}
+      className={`${styles.withOverlay} ${styles.body}`}
+      style={{
+        backgroundImage: `url(${catalogItem.url})`,
+      }}
+    >
+      <div className={styles.overlay}></div>
+      <Link className={styles.cardContent} href={Routes.Catalog()}>
+        <div className={styles.headerContainer}>
+          <h2>{catalogItem.name}</h2>
+
+          <Badge size="sm" variant="outline" color="var(--mantine-color-gray-3)">
+            {catalogItem.numberOfCards} cards
+          </Badge>
+        </div>
+        <h3>{catalogItem.description}</h3>
+      </Link>
+      <div className={styles.inline}>
+        <div className={styles.author}>
+          <Avatar
+            src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
+            alt="Jacob Warnhalter"
+            radius="xl"
+            size="sm"
+          />
+          <span>Author</span>
+        </div>
+        <Flex className={styles.controls}>
+          {currentUser?.id === authorId && (
+            <ToggleMenu item={"catalog"} settings={catalogSettings} />
+          )}
+
+          {favCard(catalogItem.isFavorite)}
+        </Flex>
+      </div>
+    </div>
+  )
+
+  const publicCatalogs = catalog.map(
+    (catalogItem) => catalogItem.type === "public" && itemContent(catalogItem)
+  )
+
+  const sharedCatalogs = catalog.map(
+    (catalogItem) => catalogItem.type === "shared" && itemContent(catalogItem)
+  )
+
+  const ownCatalogs = catalog.map(
+    (catalogItem) => catalogItem.type === "own" && itemContent(catalogItem)
+  )
+
+  console.log({ catalogType })
+
+  const catalogContent = (catalogType) => {
+    switch (catalogType) {
+      case "all":
         return (
           <>
+            {" "}
+            {publicCatalogs}
+            {sharedCatalogs}
             <div
               className={`${styles.withOverlay} ${styles.body}`}
               style={{
@@ -99,7 +169,6 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
               <Link className={styles.cardContent} href={Routes.Catalog()}>
                 <div className={styles.headerContainer}>
                   <h2>NameNameNameNameNameNameNameName</h2>
-
                   <Badge size="sm" variant="outline" color="var(--mantine-color-gray-3)">
                     10 cards
                   </Badge>
@@ -121,7 +190,7 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                     <ToggleMenu item={"catalog"} settings={catalogSettings} />
                   )}
 
-                  {favCard}
+                  {favCard(true)}
                 </Flex>
               </div>
             </div>
@@ -160,7 +229,7 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
                   <Link href={Routes.NewCatalog()}>
                     <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
                   </Link>
-                  {favCard}
+                  {favCard(false)}
                 </div>
               </div>
             </div>
@@ -322,34 +391,42 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
             </div>
           </>
         )
-      case "Shared":
-        return <div>Shared</div>
-      case "Own":
-        return <div>Own</div>
+      case "public":
+        return <>{publicCatalogs}</>
+      case "shared":
+        return <div>{sharedCatalogs}</div>
+      case "own":
+        return <div>{ownCatalogs}</div>
     }
   }
   return (
     <Layout title="Catalogs">
       <main className={styles.main}>
-        <CatalogHeader header={"Catalogs"} link={Routes.NewCatalog()} />
+        <CatalogHeader authorId={authorId} header={"Catalogs"} link={Routes.NewCatalog()} />
         <div className={styles.filters}>
           <Switch
-            value={catalogueType}
-            setValue={setCatalogueType}
-            data={["All", "Public", "Shared", "Own"]}
+            value={catalogType}
+            setValue={setCatalogType}
+            pathname="/catalogs"
+            data={[
+              { label: "All", value: "all" },
+              { label: "Public", value: "public" },
+              { label: "Shared", value: "shared" },
+              { label: "Own", value: "own" },
+            ]}
           />
-          <AutocompleteLoading />
+          <AutocompleteLoading pathname="/catalog" />
 
           <Flex align={"center"} justify={"space-between"}>
             <label style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}>
               Sort by:{" "}
             </label>
             <Box w="270px">
-              <Picker data={sharedWith} />
+              <Picker data={sharedWith} pathname="/" />
             </Box>
           </Flex>
         </div>
-        <div className={styles.gridCatalogs}>{catalogueContent(catalogueType)}</div>
+        <div className={styles.gridCatalogs}>{catalogContent(catalogType)}</div>
       </main>
     </Layout>
   )
