@@ -17,6 +17,8 @@ import PieChart from "@/components/PieChart"
 import { DynamicBadge } from "@/components/DynamicBadge"
 
 import { useMantineTheme } from "@mantine/core"
+import { useQuery } from "@blitzjs/rpc"
+import getStatistics from "./queries/getStatistics"
 
 export interface StatisticsProps {
   id: number
@@ -61,6 +63,30 @@ const data = [
 ]
 
 const studyPlansData = [
+  {
+    color: "var(--mantine-color-yellow-6)",
+    header: "English",
+    label: "Grammar",
+    percent: 30,
+  },
+  {
+    color: "var(--mantine-color-lime-6)",
+    header: "Polish",
+    label: "Vocabulary",
+    percent: 23,
+  },
+  {
+    color: "var(--mantine-color-green-6)",
+    header: "French",
+    label: "Tenses",
+    percent: 12,
+  },
+  {
+    color: "var(--mantine-color-teal-6)",
+    header: "Deutch",
+    label: "Every week",
+    percent: 11,
+  },
   {
     color: "var(--mantine-color-yellow-6)",
     header: "English",
@@ -169,6 +195,8 @@ const Statistics: BlitzPage = ({
   authorId,
 }: StatisticsProps) => {
   const currentUser = useCurrentUser()
+  const statistics = useQuery(getStatistics, {})
+  console.log({ statistics })
 
   const theme = useMantineTheme()
   const pieChartData = {
