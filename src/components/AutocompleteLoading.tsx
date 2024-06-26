@@ -2,7 +2,11 @@ import { useState, useRef } from "react"
 import { Autocomplete, Loader } from "@mantine/core"
 import { useRouter } from "next/router"
 
-export function AutocompleteLoading({ pathname }) {
+type AutocompleteLoadingProps = {
+  pathname?: string
+}
+
+export function AutocompleteLoading({ pathname }: AutocompleteLoadingProps) {
   const timeoutRef = useRef<number>(-1)
   const [value, setValue] = useState("")
   const [loading, setLoading] = useState(false)
