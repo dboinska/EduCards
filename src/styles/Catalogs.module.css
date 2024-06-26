@@ -120,7 +120,7 @@
   }
 }
 
-.compartion {
+.drawer {
   composes: body;
   padding: var(--mantine-spacing-sm);
   min-width: auto;
