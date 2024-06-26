@@ -9,8 +9,11 @@ import { AutocompleteLoading } from "src/components/AutocompleteLoading"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Picker } from "@/components/Picker"
 import { ToggleMenu } from "@/components/ToggleMenu"
-import { UseCompartion } from "@/core/providers/compartionProvider"
+import { UseDrawer } from "@/core/providers/drawerProvider"
 import { DynamicBadge } from "@/components/DynamicBadge"
+import getDrawer from "./queries/getDrawer"
+import { useQuery } from "@blitzjs/rpc"
+import { CardDTO } from "./queries/getCatalogCards"
 
 export interface CatalogProps {
   id: number
@@ -79,215 +82,54 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
     </ActionIcon>
   ) : null
 
-  const compartionsData = [
-    {
-      color: "var(--mantine-color-yellow-6)",
-      label: "Daily",
-      cards: 3,
-    },
-    {
-      color: "var(--mantine-color-lime-6)",
-      label: "Every 2 days",
-      cards: 23,
-    },
-    {
-      color: "var(--mantine-color-green-6)",
-      label: "Every 4 days",
-      cards: 12,
-    },
-    {
-      color: "var(--mantine-color-teal-6)",
-      label: "Weekly",
-      cards: 11,
-    },
-    {
-      color: "var(--mantine-color-blue-6)",
-      label: "Every 2 weeks",
-      cards: 1,
-    },
-    {
-      color: "var(--mantine-color-violet-6)",
-      label: "Monthly",
-      cards: 3,
-    },
-    {
-      color: "var(--mantine-color-pink-6)",
-      label: "Every 2 months",
-      cards: 0,
-    },
-  ]
+  const [catalogId] = useQuery(getDrawer, {})
+  console.log({ catalogId })
 
-  const { compartionProps, setCompartionProps } = UseCompartion()
+  const { drawerProps, setDrawerProps } = UseDrawer()
 
-  const catalogContent = () => {
-    return (
-      <>
-        <div
-          className={`${styles.withOverlay} ${styles.body}`}
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
-          }}
-        >
-          <div className={styles.overlay}></div>
-          <Link href={Routes.Cards()} className={styles.cardContent}>
-            <div className={styles.headerContainer}>
-              <h2>NameNameNameNameNameNameNameName</h2>
-              <IconX />
-            </div>
-            <h3>Description</h3>
-          </Link>
-          <div className={styles.inline}>
-            <div className={styles.author}>
-              <Avatar
-                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
-                alt="Jacob Warnhalter"
-                radius="xl"
-                size="sm"
-              />
-              <span>Author</span>
-            </div>
-            <Flex className={styles.controls}>
-              {currentUser?.id === authorId && <ToggleMenu item={"card"} settings={cardSettings} />}
+  const drawers = catalogId.drawers
+  const cards = catalogId.cards
 
-              {favCard}
-            </Flex>
+  console.log({ drawers })
+
+  const catalogCards = (cards: CardDTO[]) => {
+    const items = cards.map((card, index) => (
+      <div
+        key={index}
+        className={`${styles.body} ${card.image_url && styles.withOverlay} `}
+        style={{
+          backgroundImage: `url(${card.image_url})`,
+        }}
+      >
+        <div className={card.image_url && styles.overlay}></div>
+        <Link href={Routes.Cards()} className={styles.cardContent}>
+          <div className={styles.headerContainer}>
+            <h2>{card.term}</h2>
+            <IconX />
           </div>
+          <h3>{card.description}</h3>
+        </Link>
+        <div className={styles.inline}>
+          <div className={styles.author}>
+            <Avatar
+              src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
+              alt="Jacob Warnhalter"
+              radius="xl"
+              size="sm"
+            />
+            <span>{card.author_id}</span>
+          </div>
+          <Flex className={styles.controls}>
+            {currentUser?.id === authorId && <ToggleMenu item={"card"} settings={cardSettings} />}
+
+            {favCard}
+          </Flex>
         </div>
-        <div
-          className={`${styles.withOverlay} ${styles.body}`}
-          style={{
-            backgroundImage: "url(https://www.instalki.pl/wp-content/uploads/2021/02/atoms.jpg)",
-          }}
-        >
-          <div className={styles.overlay}></div>
-          <Link href={Routes.Cards()} className={styles.cardContent}>
-            <div className={styles.headerContainer}>
-              <h2>Lorem ipsum</h2>
-              <span>
-                <IconX />
-              </span>
-            </div>
-            <h3>
-              In eleifend velit eu neque mollis, rutrum malesuada leo luctus. Curabitur non mauris
-              facilisis, fringilla ligula ac. In eleifend velit eu neque mollis, rutrum malesuada
-              leo luctus. Curabitur non mauris facilisis, fringilla ligula ac.
-            </h3>
-          </Link>
-          <div className={styles.inline}>
-            <div className={styles.author}>
-              <Avatar
-                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
-                alt="Jacob Warnhalter"
-                radius="xl"
-                size="sm"
-              />
-              <span>Author</span>
-            </div>
-            <div className={styles.controls}>
-              {currentUser?.id === authorId && (
-                <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
-              )}
-              {favCard}
-            </div>
-          </div>
-        </div>
-        <div
-          className={`${styles.withOverlay} ${styles.body}`}
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
-          }}
-        >
-          <div className={styles.overlay}></div>
-          <Link href={Routes.Cards()} className={styles.cardContent}>
-            <div className={styles.headerContainer}>
-              <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
-            </div>
-            <h3>Description</h3>
-          </Link>
-          <div className={styles.inline}>
-            <div className={styles.author}>
-              {" "}
-              <Avatar
-                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
-                alt="Jacob Warnhalter"
-                radius="xl"
-                size="sm"
-              />
-              <span>Author</span>
-            </div>
-            <div className={styles.controls}></div>
-          </div>
-        </div>{" "}
-        <div
-          className={`${styles.withOverlay} ${styles.body}`}
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
-          }}
-        >
-          <div className={styles.overlay}></div>
-          <Link href={Routes.Cards()} className={styles.cardContent}>
-            <div className={styles.headerContainer}>
-              <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
-            </div>
-            <h3>Description</h3>
-          </Link>
-          <div className={styles.inline}>
-            <div className={styles.author}>
-              {" "}
-              <Avatar
-                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
-                alt="Jacob Warnhalter"
-                radius="xl"
-                size="sm"
-              />
-              <span>Author</span>
-            </div>
-            <div className={styles.controls}></div>
-          </div>
-        </div>
-        <div
-          className={`${styles.withOverlay} ${styles.body}`}
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)",
-          }}
-        >
-          <div className={styles.overlay}></div>
-          <Link href={Routes.Cards()} className={styles.cardContent}>
-            <div className={styles.headerContainer}>
-              <h2>NameNameNameNameNameNameNameName</h2>
-              <span>
-                <IconX />
-              </span>
-            </div>
-            <h3>Description</h3>
-          </Link>
-          <div className={styles.inline}>
-            <div className={styles.author}>
-              {" "}
-              <Avatar
-                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
-                alt="Jacob Warnhalter"
-                radius="xl"
-                size="sm"
-              />
-              <span>Author</span>
-            </div>
-            <div className={styles.controls}></div>
-          </div>
-        </div>
-      </>
-    )
+      </div>
+    ))
+    return items
   }
+
   return (
     <Layout title="Catalog">
       <main className={styles.main}>
@@ -300,12 +142,12 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
           settings
         />
         <Box w="100%">
-          <h2>Compartions:</h2>
+          <h2>Drawers:</h2>
           <div className={styles.justifyLeft}>
             <DynamicBadge
-              data={compartionsData}
-              compartionProps={compartionProps}
-              setCompartionProps={setCompartionProps}
+              data={drawers}
+              drawerProps={drawerProps}
+              setDrawerProps={setDrawerProps}
             />
           </div>
         </Box>
@@ -328,7 +170,7 @@ const Catalog: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: C
             </Box>
           </Flex>
         </div>
-        <div className={styles.gridCatalogs}>{catalogContent()}</div>
+        <div className={styles.gridCatalogs}>{catalogCards(cards)}</div>
       </main>
     </Layout>
   )

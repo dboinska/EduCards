@@ -6,34 +6,34 @@ import styles from "src/styles/Catalogs.module.css"
 
 interface DynamicBadgeProps {
   data: any
-  compartionProps?: any
-  setCompartionProps?: any
+  drawerProps?: any
+  setDrawerProps?: any
 }
 
-export const DynamicBadge = ({ data, compartionProps, setCompartionProps }: DynamicBadgeProps) => {
+export const DynamicBadge = ({ data, drawerProps, setDrawerProps }: DynamicBadgeProps) => {
   const items = data.map((data, index) => (
     <Flex
       key={index}
       align="center"
       h="100%"
       p="var(--mantine-spacing-xs)"
-      className={`${styles.compartion}`}
+      className={`${styles.drawer}`}
       style={{
         border: `2px solid var(--mantine-color-gray-2)`,
       }}
     >
       <Link
-        href={Routes.Compartion()}
+        href={Routes.Drawer()}
         style={{ height: "100%", minHeight: "100px" }}
         onClick={() => {
           if (!data.header) {
             const level = `level ${Number(index + 1)}`
-            setCompartionProps({
+            setDrawerProps({
               header: `${level}`,
-              label: data.label,
+              label: data.frequency,
               color: data.color,
             })
-            console.log(compartionProps)
+            console.log(drawerProps)
           }
         }}
       >
@@ -56,11 +56,11 @@ export const DynamicBadge = ({ data, compartionProps, setCompartionProps }: Dyna
               minHeight: "44px",
             }}
           >
-            {data.label}
+            {data.frequency}
           </h3>
-          {data.cards >= 0 && (
+          {data.all_cards >= 0 && (
             <Badge variant="outline" color={data.color} m="0 auto">
-              {data.cards} cards
+              {data.all_cards} cards
             </Badge>
           )}
           {data.percent >= 0 && (

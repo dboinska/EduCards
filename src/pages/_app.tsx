@@ -7,7 +7,7 @@ import "src/styles/globals.css"
 import "@mantine/core/styles.css"
 
 import { MantineProvider, createTheme } from "@mantine/core"
-import { CompartionProvider } from "@/core/providers/compartionProvider"
+import { DrawerProvider } from "@/core/providers/drawerProvider"
 import Head from "next/head"
 
 const theme = createTheme({
@@ -45,9 +45,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
       <ErrorBoundary FallbackComponent={RootErrorFallback}>
-        <CompartionProvider>
+        <DrawerProvider>
           <MantineProvider theme={theme}>{getLayout(<Component {...pageProps} />)}</MantineProvider>
-        </CompartionProvider>
+        </DrawerProvider>
       </ErrorBoundary>
     </>
   )
