@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { ErrorFallbackProps, ErrorComponent, ErrorBoundary, AppProps } from "@blitzjs/next"
 import { AuthenticationError, AuthorizationError } from "blitz"
 import { withBlitz } from "src/blitz-client"
@@ -45,9 +46,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
       <ErrorBoundary FallbackComponent={RootErrorFallback}>
-        <DrawerProvider>
-          <MantineProvider theme={theme}>{getLayout(<Component {...pageProps} />)}</MantineProvider>
-        </DrawerProvider>
+        <Suspense fallback="Loading...">
+          <DrawerProvider>
+            <MantineProvider theme={theme}>
+              {getLayout(<Component {...pageProps} />)}
+            </MantineProvider>
+          </DrawerProvider>
+        </Suspense>
       </ErrorBoundary>
     </>
   )
