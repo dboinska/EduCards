@@ -1,36 +1,41 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { UnstyledButton, Menu, Image, Flex } from "@mantine/core"
 import { IconChevronDown } from "@tabler/icons-react"
 import classes from "src/styles/Picker.module.css"
-import { useRouter } from "next/router"
 
-type PickerProps = {
+export type PickerOption = {
+  label: string
+  name: string
   value: string
-  data: { label: string; image: string; name: string; value: string }[]
-  pathname: string
+  image?: string
 }
 
-export function Picker({ value, data, pathname }: PickerProps) {
-  const [opened, setOpened] = useState(false)
-  const [selected, setSelected] = useState(data[0])
-  const router = useRouter()
+type PickerProps = {
+  options: PickerOption[]
+  onChange?: (value: PickerOption) => void
+  defaultValue?: string
+}
 
-  const handlePick = (item: { label: string; image: string; name: string; value: string }) => {
-    setSelected(item)
-    void router
-      .push({
-        pathname: pathname,
-        query: { ...router.query, type: item.value },
-      })
-      .catch((error) => {
-        console.error("Failed to navigate", error)
-      })
+export function Picker({ defaultValue, options, onChange }: PickerProps) {
+  const [opened, setOpened] = useState(false)
+  const [selected, setSelected] = useState<PickerOption | undefined>(options[0])
+
+  useEffect(() => {
+    if (defaultValue && options.length) {
+      const option = options.find((opt) => opt.value === defaultValue)
+      setSelected(option)
+    }
+  }, [defaultValue, options])
+
+  const handleSelectionChange = (option: PickerOption) => {
+    setSelected(option)
+    onChange?.(option)
   }
 
-  const items = data.map((item) => (
+  const items = options.map((item) => (
     <Menu.Item
       leftSection={<Image src={item.image} maw={18} width={18} height={18} alt={item.name} />}
-      onClick={() => handlePick(item)}
+      onClick={() => handleSelectionChange(item)}
       key={item.label}
     >
       {item.label}
