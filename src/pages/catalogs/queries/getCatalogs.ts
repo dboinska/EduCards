@@ -3,19 +3,23 @@ import { Ctx } from "blitz"
 import * as z from "zod"
 import db from "db"
 
-const GetCatalogs = z
-  .object({
-    catalog_catalog_id: z.string().optional(),
-    author_catalog_id: z.string().optional(),
-  })
-  .merge(CommonInput)
-
-export default async function getCatalogs(input: z.infer<typeof GetCatalogs>, ctx: Ctx) {
+export default async function getCatalogs(input: z.infer<typeof CommonInput>, ctx: Ctx) {
   // Valcatalog_idate the input
-  //const data = GetCatalogs.parse(input)
+  //const data = CommonInput.parse(input)
 
   // Require user to be logged in
   ctx.session.$authorize()
+
+  const mapSortToField = {
+    asc: "createdAt",
+    desc: "createdAt",
+    alfa_asc: "name",
+    alfa_desc: "name",
+  } as const
+
+  const { sort } = input
+  const orderField = sort ? mapSortToField[sort] : mapSortToField.asc
+  const order = sort?.startsWith("alfa") ? sort.split("_")[1] : sort
 
   const catalogType = {
     own: { ownerId: ctx.session.userId },
@@ -31,6 +35,7 @@ export default async function getCatalogs(input: z.infer<typeof GetCatalogs>, ct
       ...(input.filter && input.filter in catalogType && catalogType[input.filter]),
       ...(input.query && { name: { contains: input.query } }),
     },
+    ...(sort && { orderBy: { [orderField]: order } }),
   })
 
   const results = catalogs.map((catalog) => {
