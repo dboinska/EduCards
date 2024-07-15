@@ -14,7 +14,7 @@ interface CatalogHeaderProps {
   learningMode?: boolean
   studyPlanMode?: boolean
   settings?: boolean
-  authorId: number
+  authorId: string
 }
 
 const gradient =
