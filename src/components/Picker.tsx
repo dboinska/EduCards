@@ -3,9 +3,9 @@ import { UnstyledButton, Menu, Image, Flex } from "@mantine/core"
 import { IconChevronDown } from "@tabler/icons-react"
 import classes from "src/styles/Picker.module.css"
 
-export type PickerOption = {
+export interface PickerOption {
   label: string
-  name: string
+  imageAlt?: string
   value: string
   image?: string
 }
@@ -14,9 +14,10 @@ type PickerProps = {
   options: PickerOption[]
   onChange?: (value: PickerOption) => void
   defaultValue?: string
+  id: string
 }
 
-export function Picker({ defaultValue, options, onChange }: PickerProps) {
+export function Picker({ defaultValue, options, onChange, id }: PickerProps) {
   const [opened, setOpened] = useState(false)
   const [selected, setSelected] = useState<PickerOption | undefined>(options[0])
 
@@ -32,16 +33,6 @@ export function Picker({ defaultValue, options, onChange }: PickerProps) {
     onChange?.(option)
   }
 
-  const items = options.map((item) => (
-    <Menu.Item
-      leftSection={<Image src={item.image} maw={18} width={18} height={18} alt={item.name} />}
-      onClick={() => handleSelectionChange(item)}
-      key={item.label}
-    >
-      {item.label}
-    </Menu.Item>
-  ))
-
   return (
     <Menu
       onOpen={() => setOpened(true)}
@@ -49,6 +40,7 @@ export function Picker({ defaultValue, options, onChange }: PickerProps) {
       radius="md"
       width="target"
       withinPortal
+      id={id}
     >
       <Menu.Target>
         <UnstyledButton
@@ -58,13 +50,25 @@ export function Picker({ defaultValue, options, onChange }: PickerProps) {
           aria-label={selected?.label}
         >
           <Flex gap="xs">
-            <Image src={selected?.image} width={22} height={22} alt={selected?.name} />
+            <Image src={selected?.image} width={22} height={22} alt={selected?.imageAlt} />
             <label className={classes.label}>{selected?.label}</label>
           </Flex>
           <IconChevronDown size="1rem" className={classes.icon} />
         </UnstyledButton>
       </Menu.Target>
-      <Menu.Dropdown>{items}</Menu.Dropdown>
+      <Menu.Dropdown>
+        {options.map((item) => (
+          <Menu.Item
+            leftSection={
+              <Image src={item.image} maw={18} width={18} height={18} alt={item.imageAlt} />
+            }
+            onClick={() => handleSelectionChange(item)}
+            key={item.label}
+          >
+            {item.label}
+          </Menu.Item>
+        ))}
+      </Menu.Dropdown>
     </Menu>
   )
 }
