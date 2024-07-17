@@ -1,11 +1,11 @@
 import { CommonInput } from "@/schemas/CommonInput"
-import { Ctx } from "blitz"
+import type { Ctx } from "blitz"
 import * as z from "zod"
 import db from "db"
 
 export default async function getCatalogs(input: z.infer<typeof CommonInput>, ctx: Ctx) {
-  // Valcatalog_idate the input
-  //const data = CommonInput.parse(input)
+  // Valiate catalog input params
+  const data = CommonInput.parse(input)
 
   // Require user to be logged in
   ctx.session.$authorize()
@@ -17,7 +17,7 @@ export default async function getCatalogs(input: z.infer<typeof CommonInput>, ct
     alfa_desc: "name",
   } as const
 
-  const { sort } = input
+  const { sort } = data
   const orderField = sort ? mapSortToField[sort] : mapSortToField.asc
   const order = sort?.startsWith("alfa") ? sort.split("_")[1] : sort
 
@@ -32,8 +32,8 @@ export default async function getCatalogs(input: z.infer<typeof CommonInput>, ct
       owner: true,
     },
     where: {
-      ...(input.filter && input.filter in catalogType && catalogType[input.filter]),
-      ...(input.query && { name: { contains: input.query } }),
+      ...(data.filter && data.filter in catalogType && catalogType[data.filter]),
+      ...(data.query && { name: { contains: data.query } }),
     },
     ...(sort && { orderBy: { [orderField]: order } }),
   })
@@ -42,12 +42,6 @@ export default async function getCatalogs(input: z.infer<typeof CommonInput>, ct
     const { id, email, imageUrl, name } = catalog.owner
     return { ...catalog, owner: { id, email, imageUrl, name } }
   })
-
-  // Can do any processing, fetching from other APIs, etc
-
-  console.log("==========================================================")
-  console.log({ input })
-  console.log("==========================================================")
 
   return results
 }

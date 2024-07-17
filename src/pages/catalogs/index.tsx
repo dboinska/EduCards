@@ -1,5 +1,5 @@
 import Layout from "src/core/layouts/Layout"
-import { BlitzPage, Routes } from "@blitzjs/next"
+import { type BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import { Box, Flex } from "@mantine/core"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
@@ -9,13 +9,17 @@ import { Switch } from "@/components/Switch"
 import { Picker } from "@/components/Picker"
 import { TextInput } from "@mantine/core"
 import { useDebouncedCallback } from "@mantine/hooks"
+import { useRouter } from "next/router"
 
-import type { PayloadMap } from "@/types/PayloadMap"
 import type { PickerOption } from "@/components/Picker"
 
 import { useQuery } from "@blitzjs/rpc"
 import getCatalogs from "./queries/getCatalogs"
 import Catalog from "@/components/Catalog"
+import { type SortType } from "@/types/SortType"
+import { actionTypes, dataReducer, initialState } from "@/reducers/dataReducer"
+import type { FilterType } from "@/types/FilterType"
+import { sortBy } from "@/utils/sortBy"
 
 export interface CatalogProps {
   id: number
@@ -38,112 +42,22 @@ const catalogSettings = [
     path: Routes.Catalogs(),
     id: "delete",
   },
-]
-
-const sortTypes = {
-  ASC: "asc",
-  DESC: "desc",
-  ALFA_ASC: "alfa_asc",
-  ALFA_DESC: "alfa_desc",
-} as const
-
-type SortType = (typeof sortTypes)[keyof typeof sortTypes]
-
-type FilterType = "all" | "public" | "own" | "shared"
-
-const actionTypes = {
-  search: "SEARCH",
-  sort: "SORT",
-  filter: "FILTER",
-} as const
-
-type DataPayload = {
-  [actionTypes.search]: {
-    query: string | undefined
-  }
-  [actionTypes.filter]: {
-    filter: FilterType
-  }
-  [actionTypes.sort]: {
-    sort: SortType | undefined
-  }
-}
-
-type DataReducerAction = PayloadMap<DataPayload>[keyof PayloadMap<DataPayload>]
-
-export function dataReducer(state: any, action: DataReducerAction) {
-  const { type, payload } = action
-
-  switch (type) {
-    case actionTypes.search: {
-      return {
-        ...state,
-        filter: "all",
-        query: payload.query,
-      }
-    }
-    case actionTypes.filter: {
-      return {
-        ...state,
-        filter: payload.filter,
-      }
-    }
-    case actionTypes.sort: {
-      return {
-        ...state,
-        sort: payload.sort,
-      }
-    }
-
-    default: {
-      throw new Error(`Unhandled type: ${type}`)
-    }
-  }
-}
-
-const initialState = {
-  filter: "all",
-}
-
-interface SortOrder extends Omit<PickerOption, "value"> {
-  value: SortType
-}
-
-const sortOrder: SortOrder[] = [
-  {
-    label: "Date ascending",
-    imageAlt: "Date ascending",
-    image:
-      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
-    value: sortTypes.ASC,
-  },
-  {
-    label: "Date descending",
-    imageAlt: "Date descending",
-    image:
-      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
-    value: sortTypes.DESC,
-  },
-  {
-    label: "Alphabetically",
-    imageAlt: "Alphabetically",
-    image:
-      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
-    value: sortTypes.ALFA_ASC,
-  },
-  {
-    label: "Reverse alphabetically",
-    imageAlt: "Reverse alphabetically",
-    image:
-      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
-    value: sortTypes.ALFA_DESC,
-  },
 ] as const
 
-const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: CatalogProps) => {
+const visibilityFilter = [
+  { label: "All", value: "all" },
+  { label: "Public", value: "public" },
+  { label: "Shared", value: "shared" },
+  { label: "Own", value: "own" },
+]
+
+const Catalogs: BlitzPage = () => {
   const [catalogState, dispatch] = useReducer(dataReducer, { ...initialState })
   const [searchValue, setSearchValue] = useState("")
   const [catalog] = useQuery(getCatalogs, catalogState)
+  const router = useRouter()
+
+  // ?type=public&query=dddd&sort=alphabeticaly
 
   const currentUser = useCurrentUser()
 
@@ -182,18 +96,13 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
   return (
     <Layout title="Catalogs">
       <main className={styles.main}>
-        <CatalogHeader authorId={authorId} header={"Catalogs"} link={Routes.NewCatalog()} />
+        <CatalogHeader authorId="" header="Catalogs" link={Routes.NewCatalog()} />
         <div className={styles.filters}>
           <Switch
             value={catalogState.filter}
             setValue={handleFilter}
             pathname="/catalogs"
-            data={[
-              { label: "All", value: "all" },
-              { label: "Public", value: "public" },
-              { label: "Shared", value: "shared" },
-              { label: "Own", value: "own" },
-            ]}
+            data={visibilityFilter}
           />
           <Flex align="center" justify="space-between">
             <label
@@ -215,7 +124,7 @@ const Catalogs: BlitzPage = ({ id, image, header, desc, isFavorite, authorId }: 
               Sort by:
             </label>
             <Box w="240px">
-              <Picker options={sortOrder} onChange={handleSortChange} id="sort" />
+              <Picker options={sortBy} onChange={handleSortChange} id="sort" />
             </Box>
           </Flex>
         </div>
