@@ -10,8 +10,11 @@ import { Picker } from "@/components/Picker"
 import { TextInput } from "@mantine/core"
 import { useDebouncedCallback } from "@mantine/hooks"
 import { useRouter } from "next/router"
+import { CommonInput } from "@/schemas/CommonInput"
+import * as z from "zod"
 
 import type { PickerOption } from "@/components/Picker"
+import type { InferGetServerSidePropsType, GetServerSideProps } from "next"
 
 import { useQuery } from "@blitzjs/rpc"
 import getCatalogs from "./queries/getCatalogs"
@@ -20,16 +23,6 @@ import { type SortType } from "@/types/SortType"
 import { actionTypes, dataReducer, initialState } from "@/reducers/dataReducer"
 import type { FilterType } from "@/types/FilterType"
 import { sortBy } from "@/utils/sortBy"
-
-export interface CatalogProps {
-  id: number
-  image?: string
-  header: string
-  desc?: string
-  isFavorite?: boolean
-  authorId: string
-  numberOfCards?: number
-}
 
 const catalogSettings = [
   {
@@ -54,9 +47,12 @@ const visibilityFilter = (currentUser: any) =>
       ]
     : [{ label: "Public", value: "public" }]
 
-const Catalogs: BlitzPage = () => {
-  const [catalogState, dispatch] = useReducer(dataReducer, { ...initialState })
-  const [searchValue, setSearchValue] = useState("")
+const Catalogs: BlitzPage = ({ query }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [catalogState, dispatch] = useReducer(dataReducer, {
+    ...initialState,
+    ...query,
+  })
+  const [searchValue, setSearchValue] = useState(() => query.query || "")
   const [catalog] = useQuery(getCatalogs, catalogState)
   const router = useRouter()
   const currentUser = useCurrentUser()
@@ -91,7 +87,7 @@ const Catalogs: BlitzPage = () => {
       },
     })
 
-    await router.push({ query: { ...router.query, type } })
+    await router.push({ query: { ...router.query, filter: type } })
   }
 
   const handleSortChange = async ({ value }: PickerOption) => {
@@ -160,5 +156,11 @@ const Catalogs: BlitzPage = () => {
     </Layout>
   )
 }
+
+export const getServerSideProps = (async ({ query }) => {
+  return {
+    props: { query },
+  }
+}) satisfies GetServerSideProps<{ query: z.infer<typeof CommonInput> }>
 
 export default Catalogs
