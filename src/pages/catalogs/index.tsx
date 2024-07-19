@@ -44,21 +44,21 @@ const catalogSettings = [
   },
 ] as const
 
-const visibilityFilter = [
-  { label: "All", value: "all" },
-  { label: "Public", value: "public" },
-  { label: "Shared", value: "shared" },
-  { label: "Own", value: "own" },
-]
+const visibilityFilter = (currentUser: any) =>
+  currentUser
+    ? [
+        { label: "All", value: "all" },
+        { label: "Public", value: "public" },
+        { label: "Shared", value: "shared" },
+        { label: "Own", value: "own" },
+      ]
+    : [{ label: "Public", value: "public" }]
 
 const Catalogs: BlitzPage = () => {
   const [catalogState, dispatch] = useReducer(dataReducer, { ...initialState })
   const [searchValue, setSearchValue] = useState("")
   const [catalog] = useQuery(getCatalogs, catalogState)
   const router = useRouter()
-
-  // ?type=public&query=dddd&sort=alphabeticaly
-
   const currentUser = useCurrentUser()
 
   const handleSearch = useDebouncedCallback(async (query: string) => {
@@ -68,6 +68,14 @@ const Catalogs: BlitzPage = () => {
         query,
       },
     })
+
+    const routerQuery = {
+      ...(query.length > 0 && {
+        query: { query },
+      }),
+    }
+
+    await router.push(routerQuery)
   }, 500)
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,22 +83,26 @@ const Catalogs: BlitzPage = () => {
     handleSearch(event.currentTarget.value)
   }
 
-  const handleFilter = (type: FilterType) => {
+  const handleFilter = async (type: FilterType) => {
     dispatch({
       type: actionTypes.filter,
       payload: {
         filter: type,
       },
     })
+
+    await router.push({ query: { ...router.query, type } })
   }
 
-  const handleSortChange = ({ value }: PickerOption) => {
+  const handleSortChange = async ({ value }: PickerOption) => {
     dispatch({
       type: actionTypes.sort,
       payload: {
         sort: value as SortType,
       },
     })
+
+    await router.push({ query: { ...router.query, sort: value } })
   }
 
   return (
@@ -100,9 +112,9 @@ const Catalogs: BlitzPage = () => {
         <div className={styles.filters}>
           <Switch
             value={catalogState.filter}
-            setValue={handleFilter}
-            pathname="/catalogs"
-            data={visibilityFilter}
+            onChange={handleFilter}
+            data={visibilityFilter(currentUser)}
+            containerClass={styles.filter}
           />
           <Flex align="center" justify="space-between">
             <label
