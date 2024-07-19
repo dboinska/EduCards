@@ -7,9 +7,6 @@ export default async function getCatalogs(input: z.infer<typeof CommonInput>, ct
   // Valiate catalog input params
   const data = CommonInput.parse(input)
 
-  // Require user to be logged in
-  ctx.session.$authorize()
-
   const mapSortToField = {
     asc: "createdAt",
     desc: "createdAt",
@@ -32,7 +29,7 @@ export default async function getCatalogs(input: z.infer<typeof CommonInput>, ct
       owner: true,
     },
     where: {
-      ...(data.filter && data.filter in catalogType && catalogType[data.filter]),
+      ...(ctx.session.userId ? data.filter && catalogType[data.filter] : catalogType.public),
       ...(data.query && { name: { contains: data.query } }),
     },
     ...(sort && { orderBy: { [orderField]: order } }),
