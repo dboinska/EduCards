@@ -14,7 +14,6 @@ interface CatalogHeaderProps {
   learningMode?: boolean
   studyPlanMode?: boolean
   settings?: boolean
-  authorId: string
 }
 
 const gradient =
@@ -44,7 +43,6 @@ export function CatalogHeader({
   learningMode,
   studyPlanMode,
   settings,
-  authorId,
 }: CatalogHeaderProps) {
   const currentUser = useCurrentUser()
   return (
@@ -59,7 +57,7 @@ export function CatalogHeader({
               radius="md"
               size="sm"
             >
-              <IconCards /> Let's learn
+              <IconCards /> Let&apos;s learn
             </Button>
           </Link>
         )}
@@ -71,7 +69,7 @@ export function CatalogHeader({
               radius="md"
               size="sm"
             >
-              <IconCards /> Let's learn
+              <IconCards /> Let&apos;s learn
             </Button>
           </Link>
         )}
@@ -107,10 +105,7 @@ export function CatalogHeader({
           </Link>
         )}
 
-        {settings && currentUser?.id && (
-          //  === authorId
-          <ToggleMenu item={"catalog"} settings={catalogSettings} />
-        )}
+        {settings && currentUser?.id && <ToggleMenu item={"catalog"} settings={catalogSettings} />}
       </Flex>
     </div>
   )
