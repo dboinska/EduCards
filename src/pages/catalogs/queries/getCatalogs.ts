@@ -1,26 +1,44 @@
 import { CommonInput } from "@/schemas/CommonInput"
-import { Ctx } from "blitz"
+import type { Ctx } from "blitz"
 import * as z from "zod"
 import db from "db"
 
-const GetCatalog = z
-  .object({
-    catalog_catalog_id: z.string().optional(),
-    author_catalog_id: z.string().optional(),
+export default async function getCatalogs(input: z.infer<typeof CommonInput>, ctx: Ctx) {
+  // Valiate catalog input params
+  const data = CommonInput.parse(input)
+
+  const mapSortToField = {
+    asc: "createdAt",
+    desc: "createdAt",
+    alfa_asc: "name",
+    alfa_desc: "name",
+  } as const
+
+  const { sort } = data
+  const orderField = sort ? mapSortToField[sort] : mapSortToField.asc
+  const order = sort?.startsWith("alfa") ? sort.split("_")[1] : sort
+
+  const catalogType = {
+    own: { ownerId: ctx.session.userId },
+    public: { type: "public" },
+    shared: { isShared: true },
+  }
+
+  const catalogs = await db.catalog.findMany({
+    include: {
+      owner: true,
+    },
+    where: {
+      ...(ctx.session.userId ? data.filter && catalogType[data.filter] : catalogType.public),
+      ...(data.query && { name: { contains: data.query } }),
+    },
+    ...(sort && { orderBy: { [orderField]: order } }),
   })
-  .merge(CommonInput)
 
-export default async function getCatalogs(input: z.infer<typeof GetCatalog>, ctx: Ctx) {
-  // Valcatalog_idate the input
-  //const data = GetCatalog.parse(input)
+  const results = catalogs.map((catalog) => {
+    const { id, email, imageUrl, name } = catalog.owner
+    return { ...catalog, owner: { id, email, imageUrl, name } }
+  })
 
-  // Require user to be logged in
-  ctx.session.$authorize()
-
-  const catalog = await db.catalog.findMany()
-  // console.log({ catalog })
-
-  // Can do any processing, fetching from other APIs, etc
-
-  return catalog
+  return results
 }

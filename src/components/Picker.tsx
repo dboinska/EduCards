@@ -1,41 +1,37 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { UnstyledButton, Menu, Image, Flex } from "@mantine/core"
 import { IconChevronDown } from "@tabler/icons-react"
 import classes from "src/styles/Picker.module.css"
-import { useRouter } from "next/router"
 
-type PickerProps = {
+export interface PickerOption {
+  label: string
+  imageAlt?: string
   value: string
-  data: { label: string; image: string; name: string; value: string }[]
-  pathname: string
+  image?: string
 }
 
-export function Picker({ value, data, pathname }: PickerProps) {
+type PickerProps = {
+  options: PickerOption[]
+  onChange?: (value: PickerOption) => void
+  defaultValue?: string
+  id: string
+}
+
+export function Picker({ defaultValue, options, onChange, id }: PickerProps) {
   const [opened, setOpened] = useState(false)
-  const [selected, setSelected] = useState(data[0])
-  const router = useRouter()
+  const [selected, setSelected] = useState<PickerOption | undefined>(options[0])
 
-  const handlePick = (item: { label: string; image: string; name: string; value: string }) => {
-    setSelected(item)
-    void router
-      .push({
-        pathname: pathname,
-        query: { ...router.query, type: item.value },
-      })
-      .catch((error) => {
-        console.error("Failed to navigate", error)
-      })
+  useEffect(() => {
+    if (defaultValue && options.length) {
+      const option = options.find((opt) => opt.value === defaultValue)
+      setSelected(option)
+    }
+  }, [defaultValue, options])
+
+  const handleSelectionChange = (option: PickerOption) => {
+    setSelected(option)
+    onChange?.(option)
   }
-
-  const items = data.map((item) => (
-    <Menu.Item
-      leftSection={<Image src={item.image} maw={18} width={18} height={18} alt={item.name} />}
-      onClick={() => handlePick(item)}
-      key={item.label}
-    >
-      {item.label}
-    </Menu.Item>
-  ))
 
   return (
     <Menu
@@ -44,6 +40,7 @@ export function Picker({ value, data, pathname }: PickerProps) {
       radius="md"
       width="target"
       withinPortal
+      id={id}
     >
       <Menu.Target>
         <UnstyledButton
@@ -53,13 +50,25 @@ export function Picker({ value, data, pathname }: PickerProps) {
           aria-label={selected?.label}
         >
           <Flex gap="xs">
-            <Image src={selected?.image} width={22} height={22} alt={selected?.name} />
+            <Image src={selected?.image} width={22} height={22} alt={selected?.imageAlt} />
             <label className={classes.label}>{selected?.label}</label>
           </Flex>
           <IconChevronDown size="1rem" className={classes.icon} />
         </UnstyledButton>
       </Menu.Target>
-      <Menu.Dropdown>{items}</Menu.Dropdown>
+      <Menu.Dropdown>
+        {options.map((item) => (
+          <Menu.Item
+            leftSection={
+              <Image src={item.image} maw={18} width={18} height={18} alt={item.imageAlt} />
+            }
+            onClick={() => handleSelectionChange(item)}
+            key={item.label}
+          >
+            {item.label}
+          </Menu.Item>
+        ))}
+      </Menu.Dropdown>
     </Menu>
   )
 }

@@ -18,6 +18,7 @@
     "jsx": "preserve",
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
+    "verbatimModuleSyntax": true,
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"]
