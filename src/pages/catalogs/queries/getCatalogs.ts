@@ -1,6 +1,6 @@
 import { CommonInput } from "@/schemas/CommonInput"
 import type { Ctx } from "blitz"
-import * as z from "zod"
+import { z } from "zod"
 import db from "db"
 
 export default async function getCatalogs(input: z.infer<typeof CommonInput>, ctx: Ctx) {

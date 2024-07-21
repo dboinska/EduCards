@@ -1,6 +1,6 @@
 import { CommonInput } from "@/schemas/CommonInput"
 import { Ctx } from "blitz"
-import * as z from "zod"
+import { z } from "zod"
 
 const GetCatalog = z
   .object({

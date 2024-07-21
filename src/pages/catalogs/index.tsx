@@ -10,7 +10,7 @@ import { TextInput } from "@mantine/core"
 import { useDebouncedCallback } from "@mantine/hooks"
 import { useRouter } from "next/router"
 import { CommonInput } from "@/schemas/CommonInput"
-import * as z from "zod"
+import { z } from "zod"
 
 import type { PickerOption } from "@/components/Picker"
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next"

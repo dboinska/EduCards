@@ -1,5 +1,5 @@
 import { Ctx } from "blitz"
-import * as z from "zod"
+import { z } from "zod"
 
 const CardSchema = z.object({
   cardId: z.string().optional(),
