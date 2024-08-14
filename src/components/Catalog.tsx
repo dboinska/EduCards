@@ -3,6 +3,30 @@ import { Avatar, Badge, Flex } from "@mantine/core"
 import Link from "next/link"
 import { ToggleMenu } from "./ToggleMenu"
 import { Routes } from "@blitzjs/next"
+import { RouteUrlObject } from "blitz"
+
+interface Owner {
+  id: string
+  email: string
+  imageUrl: string | null
+  name: string | null
+}
+
+interface CatalogSetting {
+  label: string
+  path: RouteUrlObject
+  id: string
+}
+
+interface CatalogProps {
+  imageURL?: string | null
+  numberOfCards: number
+  description?: string | null
+  owner: Owner
+  isOwn: boolean
+  catalogSettings: CatalogSetting[]
+  catalogId: string
+}
 
 const Catalog = ({
   children,
@@ -12,7 +36,8 @@ const Catalog = ({
   owner,
   isOwn,
   catalogSettings,
-}) => {
+  catalogId,
+}: React.PropsWithChildren<CatalogProps>) => {
   return (
     <div
       className={`${imageURL && styles.withOverlay} ${styles.body}`}
@@ -20,8 +45,8 @@ const Catalog = ({
         backgroundImage: `url(${imageURL})`,
       }}
     >
-      <div className={imageURL && styles.overlay}></div>
-      <Link className={styles.cardContent} href={Routes.Catalog()}>
+      <div className={imageURL ? styles.overlay : ""}></div>
+      <Link className={styles.cardContent} href={Routes.CatalogId({ id: catalogId })}>
         <div className={styles.headerContainer}>
           <h2>{children}</h2>
           <Badge size="sm" variant="outline" color="var(--mantine-color-gray-3)">
@@ -32,7 +57,7 @@ const Catalog = ({
       </Link>
       <div className={styles.inline}>
         <div className={styles.author}>
-          <Avatar src={owner.imageUrl} alt={owner.name} radius="xl" size="sm" />
+          <Avatar src={owner.imageUrl} alt={owner?.name || "Persona image"} radius="xl" size="sm" />
           <span>{owner.name}</span>
         </div>
         <Flex className={styles.controls}>
