@@ -35,7 +35,7 @@ const catalogSettings = [
     path: Routes.Catalogs(),
     id: "delete",
   },
-] as const
+]
 
 const visibilityFilter = (isUser: boolean) =>
   isUser
@@ -149,6 +149,7 @@ const Catalogs: BlitzPage = ({
               owner={c.owner}
               isOwn={userId === c.ownerId}
               catalogSettings={catalogSettings}
+              catalogId={c.catalogId}
             >
               {c.name}
             </Catalog>
