@@ -1,6 +1,16 @@
 import { Routes, type BlitzPage } from "@blitzjs/next"
 import { useRouter } from "next/router"
-import { Box, Button, Center, Flex, Group, Stepper, Textarea, TextInput } from "@mantine/core"
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Group,
+  Input,
+  Stepper,
+  Textarea,
+  TextInput,
+} from "@mantine/core"
 import { randomId } from "@mantine/hooks"
 
 import Layout from "@/core/layouts/Layout"
@@ -19,12 +29,23 @@ import { IconCirclePlus, IconGripVertical, IconX } from "@tabler/icons-react"
 import { ImageUpload } from "@/components/ImageUpload"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCatalogCardsDefaults } from "@/schemas/CreateCatalog.defaults"
+import { useEffect } from "react"
 
 const { catalogId: _, ...cardInitial } = cardDefaults
 
 const NewCatalogAddCards: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push } = useRouter()
+
+  useEffect(() => {
+    if (!formState) {
+      const pushBack = async () => {
+        await push(Routes.NewCatalog())
+      }
+
+      pushBack().catch(console.error)
+    }
+  }, [formState, push])
 
   console.log("renderer")
 
@@ -45,7 +66,7 @@ const NewCatalogAddCards: BlitzPage = () => {
   }
 
   const handleBack = async () => {
-    await push(Routes.NewCatalogPage())
+    await push(Routes.NewCatalog())
   }
 
   const handleOnDrop = async (files: any, index: number) => {
@@ -112,10 +133,8 @@ const NewCatalogAddCards: BlitzPage = () => {
               />
             </Flex>
           </Flex>
-          <ImageUpload
-            onDrop={(files) => handleOnDrop(files, index)}
-            onReject={(file) => console.log({ file })}
-          />
+          <ImageUpload onDrop={(files) => handleOnDrop(files, index)} />
+          {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <Flex wrap={"wrap"} gap={"8px"} className={styles.fullWidth}>
             <Textarea
               size="sm"

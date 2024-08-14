@@ -12,7 +12,7 @@ import { CreateCatalogContextProps, useCatalogContext } from "@/contexts/CreateC
 import { CreateCatalogLayout } from "@/layouts/CreateCatalogLayout"
 import { zodResolver } from "mantine-form-zod-resolver"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createCatalogSharingDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import { useMutation } from "@blitzjs/rpc"
@@ -47,7 +47,15 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push } = useRouter()
 
-  console.log({ formState })
+  useEffect(() => {
+    if (!formState) {
+      const pushBack = async () => {
+        await push(Routes.NewCatalog())
+      }
+
+      pushBack().catch(console.error)
+    }
+  }, [formState, push])
 
   const handleSuccess = async () => {
     await push(Routes.Catalogs())

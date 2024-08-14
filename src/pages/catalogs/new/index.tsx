@@ -1,6 +1,6 @@
 import { Routes, type BlitzPage } from "@blitzjs/next"
 import { useRouter } from "next/router"
-import { Box, Button, NativeSelect, Stepper, TextInput } from "@mantine/core"
+import { Box, Button, Input, NativeSelect, Stepper, TextInput } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { zodResolver } from "mantine-form-zod-resolver"
 
@@ -61,6 +61,11 @@ const NewCatalog: BlitzPage = () => {
     }
   }
 
+  const handleOnReject = (files) => {
+    console.log(files[0].errors[0].message)
+    form.setFieldError("imageUrl", files[0].errors[0].message)
+  }
+
   return (
     <Layout title="Create new catalog">
       <main className={styles.main}>
@@ -86,7 +91,8 @@ const NewCatalog: BlitzPage = () => {
             placeholder="Description"
             {...form.getInputProps("description")}
           />
-          <ImageUpload onDrop={handleOnDrop} onReject={(file) => console.log({ file })} />
+          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} />
+          {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <NativeSelect
             label="Number of drawers"
             component="select"
