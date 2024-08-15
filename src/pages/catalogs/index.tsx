@@ -10,7 +10,7 @@ import { TextInput } from "@mantine/core"
 import { useDebouncedCallback } from "@mantine/hooks"
 import { useRouter } from "next/router"
 import { CommonInput } from "@/schemas/CommonInput"
-import * as z from "zod"
+import { z } from "zod"
 
 import type { PickerOption } from "@/components/Picker"
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next"
@@ -35,7 +35,7 @@ const catalogSettings = [
     path: Routes.Catalogs(),
     id: "delete",
   },
-] as const
+]
 
 const visibilityFilter = (isUser: boolean) =>
   isUser
@@ -149,6 +149,7 @@ const Catalogs: BlitzPage = ({
               owner={c.owner}
               isOwn={userId === c.ownerId}
               catalogSettings={catalogSettings}
+              catalogId={c.catalogId}
             >
               {c.name}
             </Catalog>

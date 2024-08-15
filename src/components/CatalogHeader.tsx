@@ -1,7 +1,7 @@
 import { Routes } from "@blitzjs/next"
 import { Button, Flex, rem } from "@mantine/core"
 import { IconCirclePlus, IconCards } from "@tabler/icons-react"
-import { RouteUrlObject } from "blitz"
+import type { RouteUrlObject } from "blitz"
 import Link from "next/link"
 
 import styles from "src/styles/CatalogHeader.module.css"
@@ -14,6 +14,7 @@ interface CatalogHeaderProps {
   learningMode?: boolean
   studyPlanMode?: boolean
   settings?: boolean
+  ownerId?: string
 }
 
 const gradient =
@@ -43,66 +44,67 @@ export function CatalogHeader({
   learningMode,
   studyPlanMode,
   settings,
+  ownerId,
 }: CatalogHeaderProps) {
   const currentUser = useCurrentUser()
+
   return (
     <div className={styles.header}>
       <h1>{header}</h1>
       <Flex gap="8px" className={styles.links}>
         {learningMode && (
-          <Link href={Routes.Cards()} passHref>
-            <Button
-              variant="gradient"
-              gradient={{ from: "lime", to: "blue" }}
-              radius="md"
-              size="sm"
-            >
-              <IconCards /> Let&apos;s learn
-            </Button>
-          </Link>
+          <Button
+            variant="gradient"
+            gradient={{ from: "lime", to: "blue" }}
+            radius="md"
+            size="sm"
+            component={Link}
+            href={Routes.Cards()}
+          >
+            <IconCards /> Let&apos;s learn
+          </Button>
         )}
         {studyPlanMode && (
-          <Link href={Routes.Catalog()} passHref>
-            <Button
-              variant="gradient"
-              gradient={{ from: "lime", to: "blue" }}
-              radius="md"
-              size="sm"
-            >
-              <IconCards /> Let&apos;s learn
-            </Button>
-          </Link>
+          <Button
+            variant="gradient"
+            gradient={{ from: "lime", to: "blue" }}
+            radius="md"
+            size="sm"
+            component={Link}
+            href={Routes.Catalog()}
+          >
+            <IconCards /> Let&apos;s learn
+          </Button>
         )}
-        {link && (
-          <Link href={link} passHref>
-            <Button
-              component="a"
-              radius="md"
-              styles={{
-                root: {
-                  padding: rem(2),
-                  border: 0,
-                  backgroundImage: gradient,
-                },
+        {link && ((!ownerId && currentUser?.id) || ownerId === currentUser?.id) && (
+          <Button
+            component={Link}
+            href={link}
+            radius="md"
+            styles={{
+              root: {
+                padding: rem(2),
+                border: 0,
+                backgroundImage: gradient,
+              },
 
-                inner: {
-                  background: "var(--mantine-color-body)",
-                  color: "var(--mantine-color-blue-filled)",
-                  borderRadius: "calc(var(--button-radius) - 2px)",
-                  paddingLeft: "var(--mantine-spacing-md)",
-                  paddingRight: "var(--mantine-spacing-md)",
-                },
+              inner: {
+                background: "var(--mantine-color-body)",
+                color: "var(--mantine-color-blue-filled)",
+                borderRadius: "calc(var(--button-radius) - 2px)",
+                paddingLeft: "var(--mantine-spacing-md)",
+                paddingRight: "var(--mantine-spacing-md)",
+              },
 
-                label: {
-                  backgroundImage: gradient,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                },
-              }}
-            >
-              <IconCirclePlus /> Add new
-            </Button>
-          </Link>
+              label: {
+                backgroundImage: gradient,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              },
+            }}
+          >
+            <IconCirclePlus /> Add new
+          </Button>
         )}
 
         {settings && currentUser?.id && <ToggleMenu item={"catalog"} settings={catalogSettings} />}

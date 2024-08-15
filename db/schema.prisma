@@ -67,16 +67,30 @@ model Token {
 // }
 
 model Catalog {
-  catalogId     String   @id @default(uuid())
-  name          String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  isShared      Boolean  @default(false)
-  numberOfCards Int
-  description   String?
-  imageUrl      String?
-  type          String
+  catalogId       String   @id @default(uuid())
+  name            String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isShared        Boolean  @default(false)
+  numberOfCards   Int
+  amountOfDrawers String   @default("3")
+  description     String?
+  imageUrl        String?
+  type            String
 
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
+
+  // cards Card[]
 }
+
+// model Card {
+//   id                    Int     @id @default(autoincrement())
+//   term                  String
+//   description           String?
+//   termTranslated        String?
+//   descriptionTranslated String?
+//   imageURL              String?
+//   catalogId             String
+//   catalog               Catalog @relation(fields: [catalogId], references: [catalogId])
+// }
