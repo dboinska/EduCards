@@ -15,6 +15,7 @@ const seed = async () => {
       numberOfCards: 10,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: true,
+      amountOfDrawers: 3,
     },
     {
       name: "Spanish lessons",
@@ -22,6 +23,7 @@ const seed = async () => {
       numberOfCards: 15,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: true,
+      amountOfDrawers: 3,
     },
     {
       name: "French lessons",
@@ -29,6 +31,7 @@ const seed = async () => {
       numberOfCards: 20,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: true,
+      amountOfDrawers: 3,
     },
     {
       name: "German lessons",
@@ -36,6 +39,7 @@ const seed = async () => {
       numberOfCards: 25,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: false,
+      amountOfDrawers: 3,
     },
     {
       name: "Chinese lessons",
@@ -43,6 +47,7 @@ const seed = async () => {
       numberOfCards: 30,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: false,
+      amountOfDrawers: 3,
     },
     {
       name: "Japanese lessons",
@@ -50,6 +55,7 @@ const seed = async () => {
       numberOfCards: 35,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: true,
+      amountOfDrawers: 3,
     },
     {
       name: "Italian lessons",
@@ -57,6 +63,7 @@ const seed = async () => {
       numberOfCards: 40,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: false,
+      amountOfDrawers: 3,
     },
     {
       name: "Russian lessons",
@@ -64,6 +71,7 @@ const seed = async () => {
       numberOfCards: 45,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: true,
+      amountOfDrawers: 3,
     },
     {
       name: "Portuguese lessons",
@@ -71,6 +79,7 @@ const seed = async () => {
       numberOfCards: 50,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: false,
+      amountOfDrawers: 3,
     },
     {
       name: "Arabic lessons",
@@ -78,6 +87,7 @@ const seed = async () => {
       numberOfCards: 55,
       ownerId: "44703caa-4b68-4c41-a1d8-bc0fb5c8b5ca",
       isShared: true,
+      amountOfDrawers: 3,
     },
   ]
 
@@ -87,6 +97,7 @@ const seed = async () => {
         name: catalog.name,
         type: catalog.type,
         numberOfCards: catalog.numberOfCards,
+        amountOfDrawers: catalog.amountOfDrawers.toString(),
         ownerId: catalog.ownerId,
         isShared: catalog.isShared,
         description: null,
