@@ -15,6 +15,10 @@ export const newCatalogCardsSchema = z.object({
   cards: z.array(cardSchema.omit({ catalogId: true }).merge(z.object({ key: z.string() }))),
 })
 
+export const editCatalogCardsSchema = z.object({
+  cards: z.array(cardSchema.omit({ catalogId: true }).merge(z.object({ key: z.string() }))),
+})
+
 export type NewCatalogCardsSchema = z.infer<typeof newCatalogCardsSchema>
 
 export const newCatalogShareSettingsSchema = z.object({
