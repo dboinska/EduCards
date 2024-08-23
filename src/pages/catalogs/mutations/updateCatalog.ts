@@ -1,11 +1,15 @@
-import type { Ctx } from "blitz"
-import { CreateCatalogSchema, createCatalogSchema } from "@/schemas/CreateCatalog.schema"
-
+import { createCatalogSchema, CreateCatalogSchema } from "@/schemas/CreateCatalog.schema"
+import { Ctx } from "blitz"
 import db from "db"
+import { z } from "zod"
 
-export default async function createCatalog(input: CreateCatalogSchema, ctx: Ctx) {
+const updateCatalogSchema = createCatalogSchema.merge(z.object({ catalogId: z.string().uuid() }))
+
+type UpdateCatalogSchema = z.infer<typeof updateCatalogSchema>
+
+export default async function updateCatalog(input: UpdateCatalogSchema, ctx: Ctx) {
   ctx.session.$authorize()
-  const data = createCatalogSchema.parse(input)
+  const data = updateCatalogSchema.parse(input)
   const { cards, amountOfDrawers, sharedWith, ...catalog } = data
 
   const catalogData = {
@@ -16,7 +20,8 @@ export default async function createCatalog(input: CreateCatalogSchema, ctx: Ctx
   }
 
   try {
-    const result = await db.catalog.create({
+    const result = await db.catalog.update({
+      where: { catalogId: catalog.catalogId },
       data: catalogData,
     })
 

@@ -23,19 +23,26 @@ import { useEffect } from "react"
 
 const { catalogId: _, ...cardInitial } = cardDefaults
 
-const NewCatalogAddCards: BlitzPage = () => {
+const CatalogEditCards: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
-  const { push } = useRouter()
+  const { push, query } = useRouter()
+  console.log({ formState, query })
 
   useEffect(() => {
+    if (!query.id) {
+      const redirectHome = async () => {
+        await push(Routes.Home())
+      }
+      redirectHome().catch(console.error)
+    }
+
     if (!formState) {
       const pushBack = async () => {
-        await push(Routes.NewCatalog())
+        await push(Routes.EditCatalog({ id: query.id as string }))
       }
-
       pushBack().catch(console.error)
     }
-  }, [formState, push])
+  }, [formState, push, query])
 
   console.log("renderer")
 
@@ -52,11 +59,11 @@ const NewCatalogAddCards: BlitzPage = () => {
     console.log({ values })
 
     setFormState((state) => ({ ...state, ...values }))
-    await push(Routes.NewCatalogShareSettingsPage())
+    await push(Routes.CatalogEditShareSettingsPage({ id: query.id as string }))
   }
 
   const handleBack = async () => {
-    await push(Routes.NewCatalog())
+    await push(Routes.EditCatalog({ id: query.id as string }))
   }
 
   const handleOnDrop = async (files: any, index: number) => {
@@ -207,8 +214,8 @@ const NewCatalogAddCards: BlitzPage = () => {
   )
 }
 
-NewCatalogAddCards.getLayout = function getLayout(page) {
+CatalogEditCards.getLayout = function getLayout(page) {
   return <CreateCatalogLayout>{page}</CreateCatalogLayout>
 }
 
-export default NewCatalogAddCards
+export default CatalogEditCards
