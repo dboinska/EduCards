@@ -1,12 +1,14 @@
 import { Routes } from "@blitzjs/next"
 import { Button, Flex, rem } from "@mantine/core"
 import { IconCirclePlus, IconCards } from "@tabler/icons-react"
-import type { RouteUrlObject } from "blitz"
+import type { Ctx, RouteUrlObject } from "blitz"
 import Link from "next/link"
 
 import styles from "src/styles/CatalogHeader.module.css"
 import { ToggleMenu } from "./ToggleMenu"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import { useMutation } from "@blitzjs/rpc"
+import deleteCatalog from "@/pages/catalogs/mutations/deleteCatalog"
 
 interface CatalogHeaderProps {
   header: string
@@ -15,28 +17,11 @@ interface CatalogHeaderProps {
   studyPlanMode?: boolean
   settings?: boolean
   ownerId?: string
+  catalogId?: string
 }
 
 const gradient =
   "linear-gradient(45deg, var(--mantine-color-blue-filled) 0%, var(--mantine-color-lime-filled) 100%)"
-
-const catalogSettings = [
-  {
-    label: "Add study plan",
-    path: Routes.NewStudyPlan(),
-    id: "newStudyPlan",
-  },
-  {
-    label: "Edit",
-    path: Routes.NewCatalog(),
-    id: "edit",
-  },
-  {
-    label: "Delete",
-    path: Routes.Catalogs(),
-    id: "delete",
-  },
-]
 
 export function CatalogHeader({
   header,
@@ -45,8 +30,45 @@ export function CatalogHeader({
   studyPlanMode,
   settings,
   ownerId,
+  catalogId,
 }: CatalogHeaderProps) {
   const currentUser = useCurrentUser()
+
+  const [deleteCatalogMutation] = useMutation(deleteCatalog)
+
+  const handleSuccess = () => {
+    console.log("xxx")
+  }
+
+  async function handleDeleteCatalog(catalogId: string) {
+    try {
+      console.log("Attempting to delete catalog with ID:", catalogId)
+
+      await deleteCatalogMutation(catalogId, { onSuccess: handleSuccess })
+    } catch (error) {
+      console.error("Failed to delete catalog:", error)
+    }
+  }
+  const catalogSettings = catalogId
+    ? [
+        {
+          label: "Add study plan",
+          path: Routes.NewStudyPlan(),
+          id: "newStudyPlan",
+        },
+        {
+          label: "Edit",
+          path: Routes.EditCatalog({ id: catalogId }),
+          id: "edit",
+        },
+        {
+          label: "Delete",
+          path: Routes.Catalogs(),
+          id: "delete",
+          action: () => handleDeleteCatalog(catalogId),
+        },
+      ]
+    : []
 
   return (
     <div className={styles.header}>
@@ -71,7 +93,7 @@ export function CatalogHeader({
             radius="md"
             size="sm"
             component={Link}
-            href={Routes.Catalog()}
+            href={Routes.Catalogs()}
           >
             <IconCards /> Let&apos;s learn
           </Button>
@@ -107,7 +129,9 @@ export function CatalogHeader({
           </Button>
         )}
 
-        {settings && currentUser?.id && <ToggleMenu item={"catalog"} settings={catalogSettings} />}
+        {settings && currentUser?.id && catalogId && (
+          <ToggleMenu item={"catalog"} settings={catalogSettings} />
+        )}
       </Flex>
     </div>
   )

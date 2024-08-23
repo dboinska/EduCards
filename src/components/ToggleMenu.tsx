@@ -3,6 +3,7 @@ import { IconCirclePlus, IconSettings, IconTrash } from "@tabler/icons-react"
 import Link from "next/link"
 
 export function ToggleMenu({ item, settings }) {
+  const deleteSetting = settings.find((setting) => setting.id === "delete")
   return (
     <Menu>
       <Menu.Target>
@@ -27,6 +28,7 @@ export function ToggleMenu({ item, settings }) {
           <Menu.Item
             color="red"
             leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+            onClick={() => deleteSetting?.action && deleteSetting.action()}
           >
             Delete {item}
           </Menu.Item>
