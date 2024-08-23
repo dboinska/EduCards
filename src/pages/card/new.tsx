@@ -1,80 +1,179 @@
-import { BlitzPage } from "@blitzjs/next"
-import { useForm } from "@mantine/form"
+import { Routes, type BlitzPage } from "@blitzjs/next"
+import { useRouter } from "next/router"
+import { Button, Center, Flex, Group, Input, Textarea } from "@mantine/core"
+import { randomId } from "@mantine/hooks"
+
 import Layout from "@/core/layouts/Layout"
 import styles from "src/styles/Catalogs.module.css"
 
-import { CardCreator } from "@/components/CardCreator"
+import { useForm } from "@mantine/form"
+import { zodResolver } from "mantine-form-zod-resolver"
 
-interface FormValues {
-  catalogueName: string
-  description: string
-  imageUrl: string
-  cards: Card[]
-}
+import { IconCirclePlus, IconGripVertical, IconX } from "@tabler/icons-react"
+import { ImageUpload } from "@/components/ImageUpload"
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
+import { createCardSchema, CreateCardSchema } from "@/schemas/CreateCard.schema"
+import { createCardDefaults } from "@/schemas/CreateCard.defaults"
+import { cardDefaults } from "@/schemas/Card.defaults"
 
-type Card = {
-  term: string
-  termDesc: string
-  definition: string
-  defDesc: string
-}
+const { catalogId: _, ...cardInitial } = cardDefaults
 
 const NewCard: BlitzPage = () => {
-  const form = useForm<FormValues>({
-    initialValues: {
-      catalogueName: "",
-      description: "",
-      imageUrl: "",
-      cards: [
-        {
-          term: "Giraffe",
-          termDesc: "giraffe",
-          definition: "Żyrafa",
-          defDesc: "żyrafa",
-        },
-      ],
-    },
+  console.log("renderer")
 
-    validate: (values) => {
-      const errors: { [key: string]: any } = {}
-
-      const cardsErrors = values.cards.reduce((acc, card, index) => {
-        const cardErrors: Partial<Card> = {}
-
-        if (!card.term || card.term.trim().length < 2) {
-          cardErrors.term = "Term must include at least 2 characters"
-        }
-        if (!card.definition || card.definition.trim().length < 2) {
-          cardErrors.definition = "Definition must include at least 2 characters"
-        }
-
-        if (Object.keys(cardErrors).length) {
-          acc[index] = cardErrors
-        }
-
-        return acc
-      }, {})
-
-      if (Object.keys(cardsErrors).length) {
-        errors.cards = cardsErrors
-      }
-
-      return errors
-    },
-
+  const form = useForm<CreateCardSchema>({
+    validate: zodResolver(createCardSchema),
+    initialValues: createCardDefaults("227e505a-8e0a-4ae3-8e19-ea1e82f1a212"),
     validateInputOnChange: true,
+    validateInputOnBlur: true,
   })
 
+  const { push } = useRouter()
+
+  console.log({ error: form.errors, values: form.values })
+
+  const handleSubmit = async (values: CreateCardSchema) => {
+    console.log({ values })
+    await push(Routes.Catalog())
+  }
+
+  const handleOnDrop = async (files: any, index: number) => {
+    const formData = new FormData()
+    formData.append("file", files[0])
+
+    try {
+      const response = await fetch("/api/catalog/upload-cover", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload cover")
+      }
+
+      const result = await response.json()
+
+      form.setFieldValue(`cards.${index}.imageURL`, result.fileURL)
+      console.log("File uploaded successfully", result)
+    } catch (error) {
+      console.error("Error uploading cover", error)
+    }
+  }
+
+  const cards = form.getValues().cards.map((item, index) => (
+    <Draggable key={item.key} index={index} draggableId={index.toString()}>
+      {(provided) => (
+        <Group
+          ref={provided.innerRef}
+          mt="xs"
+          {...provided.draggableProps}
+          className={styles.mantineDropzoneInner}
+          component="fieldset"
+          key={item.key}
+        >
+          <Flex justify={"space-between"} className={styles.fullWidth}>
+            <Center {...provided.dragHandleProps}>
+              <IconGripVertical size="1rem" />
+              Press and slide to change the order
+            </Center>
+            {cards.length > 1 && <IconX onClick={() => removeCard({ index })} />}
+          </Flex>
+          <legend>Card #{index + 1} </legend>
+          <Flex direction="column" className={styles.fullWidth}>
+            <Flex wrap="wrap" gap="8px" justify="space-between" className={styles.fullWidth}>
+              <Textarea
+                size="sm"
+                radius="md"
+                label="Term"
+                placeholder="Term"
+                withAsterisk
+                {...form.getInputProps(`cards.${index}.term`)}
+                className={styles.textarea}
+                error={form.errors?.[`cards.${index}.term`]}
+              />
+              <Textarea
+                size="sm"
+                radius="md"
+                label="Description"
+                placeholder="Description text"
+                {...form.getInputProps(`cards.${index}.description`)}
+                className={styles.textarea}
+              />
+            </Flex>
+          </Flex>
+          <ImageUpload onDrop={(files) => handleOnDrop(files, index)} />
+          {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
+          <Flex wrap={"wrap"} gap={"8px"} className={styles.fullWidth}>
+            <Textarea
+              size="sm"
+              radius="md"
+              label="Definition"
+              withAsterisk
+              placeholder="Definition"
+              {...form.getInputProps(`cards.${index}.termTranslated`)}
+              className={styles.textarea}
+              error={form.errors?.[`cards.${index}.termTranslated`]}
+            />
+            <Textarea
+              size="sm"
+              radius="md"
+              label="Description"
+              placeholder="Description"
+              {...form.getInputProps(`cards.${index}.descriptionTranslated`)}
+              className={styles.textarea}
+            />
+          </Flex>
+        </Group>
+      )}
+    </Draggable>
+  ))
+
+  const removeCard = (index) => {
+    console.log({ index })
+    form.removeListItem("cards", index.index)
+  }
+
   return (
-    <>
-      <Layout title="Create Card">
-        <main className={styles.main}>
-          <div className={styles.stepperForm}>
-            <CardCreator form={form} oneStep />
-          </div>
-        </main>
-      </Layout>
-    </>
+    <Layout title="Add cards to catalog">
+      <main className={styles.main}>
+        <form name="addCards" onSubmit={form.onSubmit(handleSubmit)} className={styles.container}>
+          <DragDropContext
+            onDragEnd={({ destination, source }) =>
+              destination?.index !== undefined &&
+              form.reorderListItem("cards", { from: source.index, to: destination.index })
+            }
+          >
+            <Droppable droppableId="dnd-list" direction="vertical">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {cards}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+          <Group justify="center" mt="xl">
+            <Button
+              variant="filled"
+              color="var(--mantine-color-blue-6)"
+              radius="md"
+              disabled={!form.isValid()}
+              onClick={() => form.insertListItem("cards", { ...cardInitial, key: randomId() })}
+            >
+              <IconCirclePlus /> Add card
+            </Button>
+            <Button
+              type="submit"
+              variant="filled"
+              color="var(--mantine-color-lime-6)"
+              disabled={!form.isValid()}
+            >
+              Next step
+            </Button>
+          </Group>
+        </form>
+      </main>
+    </Layout>
   )
 }
 
