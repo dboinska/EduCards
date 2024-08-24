@@ -90,7 +90,7 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
       <main className={styles.main}>
         <CatalogHeader
           header={`Catalog ${catalog?.name}`}
-          link={Routes.NewCard()}
+          link={Routes.AddCard({ id: catalog?.catalogId as string })}
           ownerId={catalog?.ownerId}
           settings
           catalogId={catalog?.catalogId}

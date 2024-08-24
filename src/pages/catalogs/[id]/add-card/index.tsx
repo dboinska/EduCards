@@ -15,15 +15,25 @@ import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCardSchema, CreateCardSchema } from "@/schemas/CreateCard.schema"
 import { createCardDefaults } from "@/schemas/CreateCard.defaults"
 import { cardDefaults } from "@/schemas/Card.defaults"
+import { gSSP } from "@/blitz-server"
+import { CatalogSchema } from "@/schemas/Catalog.schema"
+import { InferGetServerSidePropsType } from "next"
+import getCatalog from "../../queries/getCatalog"
+import { useMutation } from "@blitzjs/rpc"
+import createCard from "../../mutations/createCard"
 
 const { catalogId: _, ...cardInitial } = cardDefaults
 
-const NewCard: BlitzPage = () => {
+const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
+  catalog,
+}) => {
   console.log("renderer")
+
+  const [cardMutation] = useMutation(createCard)
 
   const form = useForm<CreateCardSchema>({
     validate: zodResolver(createCardSchema),
-    initialValues: createCardDefaults("227e505a-8e0a-4ae3-8e19-ea1e82f1a212"),
+    initialValues: createCardDefaults(catalog?.catalogId as string),
     validateInputOnChange: true,
     validateInputOnBlur: true,
   })
@@ -34,7 +44,21 @@ const NewCard: BlitzPage = () => {
 
   const handleSubmit = async (values: CreateCardSchema) => {
     console.log({ values })
-    await push(Routes.Catalog())
+
+    if (!catalog?.catalogId) {
+      console.error("Catalog ID is missing")
+      return
+    }
+
+    try {
+      await cardMutation(values, {
+        onSuccess: async () => {
+          await push(Routes.CatalogId({ id: catalog?.catalogId as string }))
+        },
+      })
+    } catch (error: any) {
+      console.error("Error creating card:", error)
+    }
   }
 
   const handleOnDrop = async (files: any, index: number) => {
@@ -158,7 +182,13 @@ const NewCard: BlitzPage = () => {
               color="var(--mantine-color-blue-6)"
               radius="md"
               disabled={!form.isValid()}
-              onClick={() => form.insertListItem("cards", { ...cardInitial, key: randomId() })}
+              onClick={() =>
+                form.insertListItem("cards", {
+                  ...cardInitial,
+                  catalogId: catalog?.catalogId,
+                  key: randomId(),
+                })
+              }
             >
               <IconCirclePlus /> Add card
             </Button>
@@ -177,4 +207,10 @@ const NewCard: BlitzPage = () => {
   )
 }
 
-export default NewCard
+export const getServerSideProps = gSSP(async ({ params, ctx }) => {
+  const id = (params as CatalogSchema).id
+  const catalog = await getCatalog({ id }, ctx)
+  return { props: { catalog } }
+})
+
+export default AddCard
