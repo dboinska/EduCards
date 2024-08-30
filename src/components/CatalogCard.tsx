@@ -1,48 +1,52 @@
-import { Avatar, Flex } from "@mantine/core"
+import { Avatar, Flex, ActionIcon, Button, rem } from "@mantine/core"
 import styles from "src/styles/Catalogs.module.css"
-import { ToggleMenu } from "./ToggleMenu"
-import Link from "next/link"
-import { IconX } from "@tabler/icons-react"
-import { Routes } from "@blitzjs/next"
-import { RouteUrlObject } from "blitz"
+import classes from "src/styles/Notifications.module.css"
+import { IconX, IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
 import { clsx } from "clsx"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
-import { ActionIcon } from "@mantine/core"
-import { IconHeart, IconHeartFilled } from "@tabler/icons-react"
+import { useMutation } from "@blitzjs/rpc"
+import deleteCard from "@/pages/catalogs/mutations/deleteCard"
+import { RouteUrlObject } from "blitz"
+import { notifications } from "@mantine/notifications"
+import { Routes } from "@blitzjs/next"
+import { useRouter } from "next/router"
 
 type Setting = {
   label: string
   path: RouteUrlObject
   id: string
 }
-
 interface CatalogCardProps {
   imageUrl?: string | null
   term: string
   description?: string | null
-  ownerId: string
-  isOwner?: boolean
-  settings?: Setting[]
   owner: {
     id: string
     email: string
     imageUrl: string | null
     name: string | null
   }
+  cardId: string
+  catalogId: string
+  onDelete: (cardId: string) => void
 }
 
 export const CatalogCard = ({
   imageUrl,
   term,
   description,
-  ownerId,
-  isOwner,
-  settings,
   owner,
+  cardId,
+  catalogId,
+  onDelete,
 }: CatalogCardProps) => {
   const currentUser = useCurrentUser()
 
+  const { push } = useRouter()
+
   const isFavorite = false
+
+  const [deleteCardMutation] = useMutation(deleteCard)
 
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={22}>
@@ -54,29 +58,77 @@ export const CatalogCard = ({
     </ActionIcon>
   ) : null
 
+  const removeCard = async (event: React.MouseEvent) => {
+    event.stopPropagation()
+
+    try {
+      await deleteCardMutation(cardId)
+
+      notifications.show({
+        title: "Card Deleted",
+        message: `The card "${term}" has been successfully deleted.`,
+        position: "top-right",
+        color: "green",
+        classNames: classes,
+        autoClose: 5000,
+      })
+      onDelete(cardId)
+    } catch (error: any) {
+      console.error("Error deleting card:", error)
+      notifications.show({
+        title: "Error",
+        message: `Failed to delete card "${term}". Please try again.`,
+        color: "red",
+        position: "top-right",
+        classNames: classes,
+        autoclose: 5000,
+      })
+    }
+  }
+
+  async function handleEdit(cardId: string) {
+    await push(Routes.EditCard({ id: cardId, catalogId: catalogId }))
+  }
+
   return (
     <div
-      className={`${styles.body} ${imageUrl && styles.withOverlay} `}
+      className={clsx(styles.body, imageUrl && styles.withOverlay)}
       style={{
         backgroundImage: `url(${imageUrl})`,
       }}
     >
       <div className={clsx(imageUrl && styles.overlay)}></div>
-      <Link href={Routes.Cards()} className={styles.cardContent}>
+      <div className={styles.cardContent}>
         <div className={styles.headerContainer}>
           <h2>{term}</h2>
-          <IconX />
+          <Button
+            variant="outline"
+            color="red"
+            className={styles.deleteButton}
+            onClick={removeCard}
+            p=" var(--mantine-spacing-md) auto"
+          >
+            <IconX />
+          </Button>
         </div>
         <h3>{description}</h3>
-      </Link>
+      </div>
       <div className={styles.inline}>
         <div className={styles.author}>
           <Avatar src={owner.imageUrl} alt={owner.name || "Owner"} radius="xl" size="sm" />
           <span>{owner.name || "Owner"}</span>
         </div>
         <Flex className={styles.controls}>
-          {isOwner && settings && <ToggleMenu item={"card"} settings={settings} />}
-
+          <Button
+            p="0 var(--mantine-spacing-sm)"
+            radius="sm"
+            onClick={() => handleEdit(cardId)}
+            className={styles.iconSettings}
+            variant="transparent"
+            color="black"
+          >
+            <IconSettings />
+          </Button>
           {favCard}
         </Flex>
       </div>
