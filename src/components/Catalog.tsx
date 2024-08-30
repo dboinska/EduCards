@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ToggleMenu } from "./ToggleMenu"
 import { Routes } from "@blitzjs/next"
 import { RouteUrlObject } from "blitz"
+import { useEffect, useState } from "react"
 
 interface Owner {
   id: string
@@ -14,8 +15,9 @@ interface Owner {
 
 interface CatalogSetting {
   label: string
-  path: RouteUrlObject
+  path?: RouteUrlObject
   id: string
+  action?: (catalogId: string) => void
 }
 
 interface CatalogProps {
@@ -38,6 +40,59 @@ const Catalog = ({
   catalogSettings,
   catalogId,
 }: React.PropsWithChildren<CatalogProps>) => {
+  const [settings, setSettings] = useState(catalogSettings || [])
+  const handleDelete = () => {
+    console.log("handle delete")
+    const deleteItem = catalogSettings.find((item) => item.id === "delete")
+
+    if (!deleteItem) {
+      return
+    }
+
+    deleteItem?.action?.(catalogId)
+  }
+
+  useEffect(() => {
+    if (catalogSettings) {
+      const overridenSettings = catalogSettings.map((setting) => {
+        if (setting.id !== "delete") {
+          return setting
+        }
+        return {
+          ...setting,
+          action: handleDelete,
+        }
+      })
+      setSettings(overridenSettings)
+    }
+  }, [])
+
+  const handleEdit = () => {
+    console.log("handle edit")
+    const deleteItem = catalogSettings.find((item) => item.id === "edit")
+
+    if (!deleteItem) {
+      return
+    }
+
+    deleteItem?.action?.(catalogId)
+  }
+
+  useEffect(() => {
+    if (catalogSettings) {
+      const overridenSettings = catalogSettings.map((setting) => {
+        if (setting.id !== "edit") {
+          return setting
+        }
+        return {
+          ...setting,
+          action: handleEdit,
+        }
+      })
+      setSettings(overridenSettings)
+    }
+  }, [])
+
   return (
     <div
       className={`${imageURL && styles.withOverlay} ${styles.body}`}
@@ -61,7 +116,7 @@ const Catalog = ({
           <span>{owner.name}</span>
         </div>
         <Flex className={styles.controls}>
-          {isOwn && <ToggleMenu item={"catalog"} settings={catalogSettings} />}
+          {isOwn && <ToggleMenu item={"catalog"} settings={settings} />}
 
           {/* {favCard(true)} */}
         </Flex>
