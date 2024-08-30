@@ -16,12 +16,10 @@ import { useEffect, useState } from "react"
 import { createCatalogSharingDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import { useMutation } from "@blitzjs/rpc"
-import createCatalog from "../../mutations/createCatalog"
-import { gSSP } from "@/blitz-server"
-import { CatalogSchema } from "@/schemas/Catalog.schema"
-import getCatalog from "../../queries/getCatalog"
-import { InferGetServerSidePropsType } from "next"
 import updateCatalog from "../../mutations/updateCatalog"
+import { notifications } from "@mantine/notifications"
+
+import classes from "src/styles/Notifications.module.css"
 
 const sharedWith = [
   {
@@ -86,8 +84,24 @@ const CatalogEditShareSettingsPage: BlitzPage = () => {
           onSuccess: handleSuccess,
         }
       )
+      notifications.show({
+        title: "Catalog Edited",
+        message: `Catalog has been successfully edited.`,
+        position: "top-right",
+        color: "green",
+        classNames: classes,
+        autoClose: 5000,
+      })
     } catch (error: any) {
       console.error({ error })
+      notifications.show({
+        title: "Failed to Edit Catalog",
+        message: `Catalog hasn't been successfully edited.`,
+        position: "top-right",
+        color: "red",
+        classNames: classes,
+        autoClose: 5000,
+      })
     } finally {
       setFormState(currentFormState)
     }

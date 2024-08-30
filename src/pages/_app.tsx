@@ -4,16 +4,17 @@ import { AuthenticationError, AuthorizationError } from "blitz"
 import { withBlitz } from "src/blitz-client"
 import "src/styles/globals.css"
 
-// core styles are required for all packages
 import "@mantine/core/styles.css"
+import "@mantine/notifications/styles.css"
 
 import { MantineProvider, createTheme } from "@mantine/core"
+import { Notifications } from "@mantine/notifications"
+
 import { DrawerProvider } from "@/core/providers/drawerProvider"
+
 import Head from "next/head"
 
-const theme = createTheme({
-  /** Put your mantine theme override here */
-})
+const theme = createTheme({})
 
 function RootErrorFallback({ error }: ErrorFallbackProps) {
   if (error instanceof AuthenticationError) {
@@ -49,6 +50,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <Suspense fallback="Loading...">
           <DrawerProvider>
             <MantineProvider theme={theme}>
+              <Notifications zIndex={9999} />
               {getLayout(<Component {...pageProps} />)}
             </MantineProvider>
           </DrawerProvider>

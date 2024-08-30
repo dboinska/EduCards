@@ -17,6 +17,8 @@ import { createCatalogSharingDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import { useMutation } from "@blitzjs/rpc"
 import createCatalog from "../mutations/createCatalog"
+import { notifications } from "@mantine/notifications"
+import classes from "src/styles/Notifications.module.css"
 
 const sharedWith = [
   {
@@ -70,8 +72,24 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
 
     try {
       await catalogMutation(currentFormState, { onSuccess: handleSuccess })
+      notifications.show({
+        title: "Catalog Added",
+        message: `Catalog has been successfully added.`,
+        position: "top-right",
+        color: "green",
+        classNames: classes,
+        autoClose: 5000,
+      })
     } catch (error: any) {
       console.error({ error })
+      notifications.show({
+        title: "Catalog Added",
+        message: `Catalog hasn't been successfully added.`,
+        position: "top-right",
+        color: "red",
+        classNames: classes,
+        autoClose: 5000,
+      })
     } finally {
       setFormState(currentFormState)
     }

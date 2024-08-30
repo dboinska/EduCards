@@ -14,22 +14,21 @@ import { ImageUpload } from "@/components/ImageUpload"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCardSchema, CreateCardSchema } from "@/schemas/CreateCard.schema"
 import { createCardDefaults } from "@/schemas/CreateCard.defaults"
-import { cardDefaults } from "@/schemas/Card.defaults"
+import { storedCardDefaults } from "@/schemas/Card.defaults"
 import { gSSP } from "@/blitz-server"
 import { CatalogSchema } from "@/schemas/Catalog.schema"
 import { InferGetServerSidePropsType } from "next"
 import getCatalog from "../../queries/getCatalog"
 import { useMutation } from "@blitzjs/rpc"
-import createCard from "../../mutations/createCard"
+import createCards from "../../mutations/createCards"
+import { notifications } from "@mantine/notifications"
 
-const { catalogId: _, ...cardInitial } = cardDefaults
+import classes from "src/styles/Notifications.module.css"
 
 const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   catalog,
 }) => {
-  console.log("renderer")
-
-  const [cardMutation] = useMutation(createCard)
+  const [cardMutation] = useMutation(createCards)
 
   const form = useForm<CreateCardSchema>({
     validate: zodResolver(createCardSchema),
@@ -40,11 +39,7 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
 
   const { push } = useRouter()
 
-  console.log({ error: form.errors, values: form.values })
-
   const handleSubmit = async (values: CreateCardSchema) => {
-    console.log({ values })
-
     if (!catalog?.catalogId) {
       console.error("Catalog ID is missing")
       return
@@ -56,8 +51,24 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
           await push(Routes.CatalogId({ id: catalog?.catalogId as string }))
         },
       })
+      notifications.show({
+        title: "Cards Added",
+        message: `Cards have been successfully added.`,
+        position: "top-right",
+        color: "green",
+        classNames: classes,
+        autoClose: 5000,
+      })
     } catch (error: any) {
       console.error("Error creating card:", error)
+      notifications.show({
+        title: "Failed to Add Cards",
+        message: `Cards haven't been successfully added.`,
+        position: "top-right",
+        color: "red",
+        classNames: classes,
+        autoClose: 5000,
+      })
     }
   }
 
@@ -184,7 +195,7 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
               disabled={!form.isValid()}
               onClick={() =>
                 form.insertListItem("cards", {
-                  ...cardInitial,
+                  ...storedCardDefaults,
                   catalogId: catalog?.catalogId,
                   key: randomId(),
                 })

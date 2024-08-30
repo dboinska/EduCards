@@ -22,7 +22,6 @@ import { InferGetServerSidePropsType } from "next"
 import { gSSP } from "@/blitz-server"
 import { CatalogSchema } from "@/schemas/Catalog.schema"
 import getCatalog from "../../queries/getCatalog"
-import { useEffect } from "react"
 import { randomId } from "@mantine/hooks"
 
 const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({

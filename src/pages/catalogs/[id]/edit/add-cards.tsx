@@ -14,19 +14,16 @@ import { useForm } from "@mantine/form"
 import { zodResolver } from "mantine-form-zod-resolver"
 import { NewCatalogCardsSchema, newCatalogCardsSchema } from "@/schemas/CreateCatalog.schema"
 
-import { cardDefaults } from "@/schemas/Card.defaults"
+import { storedCardDefaults } from "@/schemas/Card.defaults"
 import { IconCirclePlus, IconGripVertical, IconX } from "@tabler/icons-react"
 import { ImageUpload } from "@/components/ImageUpload"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCatalogCardsDefaults } from "@/schemas/CreateCatalog.defaults"
 import { useEffect } from "react"
 
-const { catalogId: _, ...cardInitial } = cardDefaults
-
 const CatalogEditCards: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push, query } = useRouter()
-  console.log({ formState, query })
 
   useEffect(() => {
     if (!query.id) {
@@ -44,8 +41,6 @@ const CatalogEditCards: BlitzPage = () => {
     }
   }, [formState, push, query])
 
-  console.log("renderer")
-
   const form = useForm<NewCatalogCardsSchema>({
     validate: zodResolver(newCatalogCardsSchema),
     initialValues: { ...createCatalogCardsDefaults, ...formState },
@@ -53,11 +48,7 @@ const CatalogEditCards: BlitzPage = () => {
     validateInputOnBlur: true,
   })
 
-  console.log({ error: form.errors, values: form.values })
-
   const handleSubmit = async (values: NewCatalogCardsSchema) => {
-    console.log({ values })
-
     setFormState((state) => ({ ...state, ...values }))
     await push(Routes.CatalogEditShareSettingsPage({ id: query.id as string }))
   }
@@ -83,7 +74,6 @@ const CatalogEditCards: BlitzPage = () => {
       const result = await response.json()
 
       form.setFieldValue(`cards.${index}.imageURL`, result.fileURL)
-      console.log("File uploaded successfully", result)
     } catch (error) {
       console.error("Error uploading cover", error)
     }
@@ -158,7 +148,6 @@ const CatalogEditCards: BlitzPage = () => {
   ))
 
   const removeCard = (index) => {
-    console.log({ index })
     form.removeListItem("cards", index.index)
   }
 
@@ -195,7 +184,9 @@ const CatalogEditCards: BlitzPage = () => {
               color="var(--mantine-color-blue-6)"
               radius="md"
               disabled={!form.isValid()}
-              onClick={() => form.insertListItem("cards", { ...cardInitial, key: randomId() })}
+              onClick={() =>
+                form.insertListItem("cards", { ...storedCardDefaults, key: randomId() })
+              }
             >
               <IconCirclePlus /> Add card
             </Button>
