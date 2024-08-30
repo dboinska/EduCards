@@ -1,16 +1,22 @@
 import type { Ctx } from "blitz"
 import db from "db"
-import { cardSchema, type CardSchema } from "@/schemas/Card.schema"
+import { z } from "zod"
 
-export default async function getCard(input: CardSchema, ctx: Ctx) {
-  const data = cardSchema.parse(input)
+const getCardInput = z.object({
+  cardId: z.string().uuid(),
+})
+
+type GetCardInput = z.infer<typeof getCardInput>
+
+export default async function getCard(input: GetCardInput, ctx: Ctx) {
+  const data = getCardInput.parse(input)
 
   const card = await db.card.findUnique({
     include: {
       owner: true,
     },
     where: {
-      cardId: data.catalogId,
+      cardId: data.cardId,
     },
   })
 
