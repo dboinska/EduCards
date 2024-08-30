@@ -12,11 +12,15 @@ export const createCatalogBaseSchema = z.object({
 export type CreateCatalogBaseSchema = z.infer<typeof createCatalogBaseSchema>
 
 export const newCatalogCardsSchema = z.object({
-  cards: z.array(cardSchema.omit({ catalogId: true }).merge(z.object({ key: z.string() }))),
+  cards: z.array(
+    cardSchema.omit({ catalogId: true, cardId: true }).merge(z.object({ key: z.string() }))
+  ),
 })
 
 export const editCatalogCardsSchema = z.object({
-  cards: z.array(cardSchema.omit({ catalogId: true }).merge(z.object({ key: z.string() }))),
+  cards: z.array(
+    cardSchema.omit({ catalogId: true, cardId: true }).merge(z.object({ key: z.string() }))
+  ),
 })
 
 export type NewCatalogCardsSchema = z.infer<typeof newCatalogCardsSchema>
