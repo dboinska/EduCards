@@ -285,3 +285,18 @@
   color: var(--mantine-color-dimmed);
   font-size: var(--mantine-font-size-xs);
 }
+
+.deleteButton {
+  background: transparent;
+  color: var(--mantine-color-black);
+  border: none;
+}
+.iconSettings {
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-black);
+    color: white;
+  }
+}
