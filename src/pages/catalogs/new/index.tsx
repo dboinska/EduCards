@@ -66,6 +66,10 @@ const NewCatalog: BlitzPage = () => {
     form.setFieldError("imageUrl", files[0].errors[0].message)
   }
 
+  const handleOnRemove = async () => {
+    form.setFieldValue("imageUrl", "")
+  }
+
   return (
     <Layout title="Create new catalog">
       <main className={styles.main}>
@@ -91,7 +95,7 @@ const NewCatalog: BlitzPage = () => {
             placeholder="Description"
             {...form.getInputProps("description")}
           />
-          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} />
+          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} onRemove={handleOnRemove} />
           {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <NativeSelect
             label="Number of drawers"
@@ -116,12 +120,3 @@ NewCatalog.getLayout = function getLayout(page) {
 }
 
 export default NewCatalog
-
-/*
-  @TODO: Ograniczenia uploadu tylko do plików max 5 MB i plików graicznych
-  @TODO: Dostęp do widoku tylko dla zalogowanych userów
-  @TODO: Upload covera bezpośrednio do katalogu usera
-
-  ## Szufladki
-  Number of drawers - podczas zapisu do bazy danych pole będzie wskazywać ile rekordów w tabeli drawers powinno zostać utworzonych dla poszczególnego katalogu. Pole wirtualne, obowiązkowe, default 3.
- */

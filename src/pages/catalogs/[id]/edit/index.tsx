@@ -68,7 +68,7 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
 
       const result = await response.json()
 
-      form.setFieldValue("imageUrl", result.fileURL)
+      form.setFieldValue("imageURL", result.fileURL)
       console.log("File uploaded successfully", result)
     } catch (error) {
       console.error("Error uploading cover", error)
@@ -77,7 +77,11 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
 
   const handleOnReject = (files) => {
     console.log(files[0].errors[0].message)
-    form.setFieldError("imageUrl", files[0].errors[0].message)
+    form.setFieldError("imageURL", files[0].errors[0].message)
+  }
+
+  const handleOnRemove = async () => {
+    form.setFieldValue("imageURL", "")
   }
 
   return (
@@ -105,8 +109,8 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
             placeholder="Description"
             {...form.getInputProps("description")}
           />
-          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} />
-          {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
+          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} onRemove={handleOnRemove} />
+          {form?.errors?.imageURL && <Input.Error>{form.errors.imageURL}</Input.Error>}
           <NativeSelect
             label="Number of drawers"
             component="select"

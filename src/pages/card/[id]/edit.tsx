@@ -18,7 +18,7 @@ import { notifications } from "@mantine/notifications"
 import classes from "src/styles/Notifications.module.css"
 import { cardSchema, CardSchema } from "@/schemas/Card.schema"
 import updateCard from "@/pages/catalogs/mutations/updateCard"
-import getCard from "@/pages/catalogs/queries/getCard"
+import getCard from "@/pages/card/queries/getCard"
 
 const EditCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   query,
@@ -113,6 +113,10 @@ const EditCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
     }
   }
 
+  const handleOnRemove = async () => {
+    form.setFieldValue("imageURL", "")
+  }
+
   return (
     <Layout title="Edit card">
       <main className={styles.main}>
@@ -142,7 +146,7 @@ const EditCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
                 />
               </Flex>
             </Flex>
-            <ImageUpload onDrop={handleOnDrop} />
+            <ImageUpload onDrop={handleOnDrop} onRemove={handleOnRemove} />
             <Flex wrap={"wrap"} gap={"8px"} className={styles.fullWidth}>
               <Textarea
                 size="sm"

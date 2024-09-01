@@ -95,6 +95,10 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
     }
   }
 
+  const handleOnRemove = async (index: number) => {
+    form.setFieldValue(`cards.${index}.imageURL`, "")
+  }
+
   const cards = form.getValues().cards.map((item, index) => (
     <Draggable key={item.key} index={index} draggableId={index.toString()}>
       {(provided) => (
@@ -136,7 +140,10 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
               />
             </Flex>
           </Flex>
-          <ImageUpload onDrop={(files) => handleOnDrop(files, index)} />
+          <ImageUpload
+            onDrop={(files) => handleOnDrop(files, index)}
+            onRemove={() => handleOnRemove(index)}
+          />
           {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <Flex wrap={"wrap"} gap={"8px"} className={styles.fullWidth}>
             <Textarea
