@@ -14,6 +14,7 @@ export default async function getCard(input: GetCardInput, ctx: Ctx) {
   const card = await db.card.findUnique({
     include: {
       owner: true,
+      catalog: true,
     },
     where: {
       cardId: data.cardId,
