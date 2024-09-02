@@ -8,26 +8,32 @@ import { useEffect, useState } from "react"
 import { motion, useMotionValue, useTransform } from "framer-motion"
 
 export interface CardProps {
-  id: number
-  image?: string
-  header: string
-  desc?: string
-  catalog?: string
-  isFavorite?: boolean
+  id: string
+  imageURL?: string
+  term: string
+  termTranslated: string
+  description?: string
+  descriptionTranslated?: string
+  catalogName?: string
+  // isFavorite?: boolean
   onMoveRight?: () => void
   onMoveLeft?: () => void
+  sliding: boolean
 }
 
 const Card = ({
   id,
-  image,
-  header,
-  desc,
-  catalog,
-  isFavorite,
+  imageURL,
+  term,
+  termTranslated,
+  description,
+  descriptionTranslated,
+  catalogName,
+  sliding,
   onMoveLeft,
   onMoveRight,
-}: CardProps) => {
+}: // isFavorite,
+CardProps) => {
   const currentUser = useCurrentUser()
 
   const [reversedCard, setReversedCard] = useState<boolean>(false)
@@ -39,48 +45,55 @@ const Card = ({
   const [iconDisplay, setIconDisplay] = useState("none")
 
   const [isSwiped, setIsSwiped] = useState(false)
+  const isFavorite = false
+
+  console.log({ sliding })
 
   useEffect(() => {
-    const unsubscribeX = x.on("change", (latestX) => {
-      if (latestX <= -10) {
-        setBorder(`3px solid var(--lime-color)`)
-        setBackgroundColor("rgba(255,255,255,0.8)")
-        setIconDisplay("flex")
-        setIsSwiped(true)
-      } else if (latestX >= 10) {
-        setBorder(`3px solid var(--mantine-color-red-6) `)
-        setBackgroundColor("rgba(255,255,255,0.8)")
-        setIconDisplay("flex")
-        setIsSwiped(true)
-      } else {
-        setBorder(`3px solid transparent`)
-        setBackgroundColor("transparent")
-        setIconDisplay("none")
-      }
-    })
+    if (sliding) {
+      const unsubscribeX = x.on("change", (latestX) => {
+        if (latestX <= -10) {
+          setBorder(`3px solid var(--lime-color)`)
+          setBackgroundColor("rgba(255,255,255,0.8)")
+          setIconDisplay("flex")
+          setIsSwiped(true)
+        } else if (latestX >= 10) {
+          setBorder(`3px solid var(--mantine-color-red-6) `)
+          setBackgroundColor("rgba(255,255,255,0.8)")
+          setIconDisplay("flex")
+          setIsSwiped(true)
+        } else {
+          setBorder(`3px solid transparent`)
+          setBackgroundColor("transparent")
+          setIconDisplay("none")
+        }
+      })
 
-    return () => {
-      unsubscribeX()
+      return () => {
+        unsubscribeX()
+      }
     }
   }, [x])
 
   const [exitX, setExitX] = useState(0)
 
   const handlePanEndEvent = (event: PointerEvent, { offset }) => {
-    if (reversedCard) setExitX(0)
-    if (offset.x >= 25) {
-      setExitX(window.innerWidth)
-      if (onMoveRight) {
-        onMoveRight()
+    if (sliding) {
+      if (reversedCard) setExitX(0)
+      if (offset.x >= 25) {
+        setExitX(window.innerWidth)
+        if (onMoveRight) {
+          onMoveRight()
+        }
+      } else if (offset.x <= -20) {
+        setExitX(-window.innerWidth)
+        if (onMoveLeft) {
+          onMoveLeft()
+        }
       }
-    } else if (offset.x <= -20) {
-      setExitX(-window.innerWidth)
-      if (onMoveLeft) {
-        onMoveLeft()
-      }
-    }
 
-    setIsSwiped(true)
+      setIsSwiped(true)
+    }
   }
 
   useEffect(() => {
@@ -118,10 +131,9 @@ const Card = ({
                 style={{
                   x,
                 }}
-                animate={{ x: exitX }}
-                drag="x"
+                drag={sliding ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
-                onPanEnd={handlePanEndEvent}
+                onPanEnd={sliding ? handlePanEndEvent : undefined}
                 onAnimationComplete={() => {
                   x.set(0)
                   setIsSwiped(false)
@@ -135,23 +147,23 @@ const Card = ({
                   }}
                 >
                   <MantineCard.Section>
-                    {image && <Image src={image} alt={header} height={200} />}
+                    {imageURL && <Image src={imageURL} alt={term} height={200} />}
                   </MantineCard.Section>
                   <MantineCard.Section className={classes.section}>
                     <Group justify="space-between">
                       <Text fz="lg" fw={500}>
-                        {header}
+                        {term}
                       </Text>
                     </Group>
 
                     <Text fz="sm" mt="xs">
-                      {desc}
+                      {description}
                     </Text>
                   </MantineCard.Section>{" "}
                   <Flex justify="space-between" align="center" mt="sm">
                     <Text fz="sm">1/10</Text>
                     <Badge size="sm" variant="light" color="var(--main-color)">
-                      {catalog}
+                      {catalogName}
                     </Badge>
                     {favCard}
                   </Flex>
@@ -167,39 +179,41 @@ const Card = ({
                   borderRadius: "var(--mantine-radius-lg)",
                 }}
               >
-                <svg className={classes.progressIcon} viewBox="0 0 50 50">
-                  <motion.path
-                    fill="none"
-                    strokeWidth="1"
-                    stroke={color}
-                    d="M 0, 20 a 20, 20 0 1,0 40,0 a 20, 20 0 1,0 -40,0"
-                    style={{ translateX: 5, translateY: 5 }}
-                  />
-                  <motion.path
-                    fill="none"
-                    strokeWidth="1"
-                    stroke={color}
-                    d="M14,26 L 22,33 L 35,16"
-                    strokeDasharray="0 1"
-                    style={{ pathLength: tickPath }}
-                  />
-                  <motion.path
-                    fill="none"
-                    strokeWidth="1"
-                    stroke={color}
-                    d="M17,17 L33,33"
-                    strokeDasharray="0 1"
-                    style={{ pathLength: crossPathA }}
-                  />
-                  <motion.path
-                    fill="none"
-                    strokeWidth="1"
-                    stroke={color}
-                    d="M33,17 L17,33"
-                    strokeDasharray="0 1"
-                    style={{ pathLength: crossPathB }}
-                  />
-                </svg>
+                {sliding && (
+                  <svg className={classes.progressIcon} viewBox="0 0 50 50">
+                    <motion.path
+                      fill="none"
+                      strokeWidth="1"
+                      stroke={color}
+                      d="M 0, 20 a 20, 20 0 1,0 40,0 a 20, 20 0 1,0 -40,0"
+                      style={{ translateX: 5, translateY: 5 }}
+                    />
+                    <motion.path
+                      fill="none"
+                      strokeWidth="1"
+                      stroke={color}
+                      d="M14,26 L 22,33 L 35,16"
+                      strokeDasharray="0 1"
+                      style={{ pathLength: tickPath }}
+                    />
+                    <motion.path
+                      fill="none"
+                      strokeWidth="1"
+                      stroke={color}
+                      d="M17,17 L33,33"
+                      strokeDasharray="0 1"
+                      style={{ pathLength: crossPathA }}
+                    />
+                    <motion.path
+                      fill="none"
+                      strokeWidth="1"
+                      stroke={color}
+                      d="M33,17 L17,33"
+                      strokeDasharray="0 1"
+                      style={{ pathLength: crossPathB }}
+                    />
+                  </svg>
+                )}
               </motion.div>
             </motion.div>
           </Flex>
@@ -209,18 +223,18 @@ const Card = ({
               <MantineCard.Section className={classes.section}>
                 <Group justify="space-between">
                   <Text fz="lg" fw={500}>
-                    {header}
+                    {termTranslated}
                   </Text>
                 </Group>
 
                 <Text fz="sm" mt="xs">
-                  {desc}
+                  {descriptionTranslated}
                 </Text>
               </MantineCard.Section>
               <Flex justify="space-between" align="center" mt="sm">
                 <Text fz="sm">1/10</Text>
                 <Badge variant="dark" size="sm">
-                  {catalog}
+                  {catalogName}
                 </Badge>
                 {favCard}
               </Flex>
