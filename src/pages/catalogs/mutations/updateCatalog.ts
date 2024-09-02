@@ -35,9 +35,17 @@ export default async function updateCatalog(input: UpdateCatalogSchema, ctx: Ctx
       ownerId: ctx.session.userId as string,
     }))
 
-    const savedCards = await db.card.createMany({
-      data: cardList,
-    })
+    const existingCards = cardList.filter((card) => card.cardId)
+    const newCards = cardList.filter((card) => !card.cardId)
+
+    const [updatedCards, savedCards] = await db.$transaction([
+      db.card.updateMany({
+        data: existingCards,
+      }),
+      db.card.createMany({
+        data: existingCards,
+      }),
+    ])
 
     console.log({ savedCards })
 
