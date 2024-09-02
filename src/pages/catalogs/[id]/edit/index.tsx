@@ -68,7 +68,7 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
 
       const result = await response.json()
 
-      form.setFieldValue("imageURL", result.fileURL)
+      form.setFieldValue("imageUrl", result.fileURL)
       console.log("File uploaded successfully", result)
     } catch (error) {
       console.error("Error uploading cover", error)
@@ -144,6 +144,8 @@ export const getServerSideProps = gSSP(async ({ params, ctx }) => {
       term: card.term || "",
       termTranslated: card.termTranslated || "",
       key: randomId(),
+
+      ...(card.cardId && { cardId: card.cardId }),
     }
 
     return definedCard
