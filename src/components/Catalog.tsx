@@ -1,10 +1,11 @@
 import styles from "src/styles/Catalogs.module.css"
-import { Avatar, Badge, Flex } from "@mantine/core"
+import { Avatar, Badge, Button, Flex, Image } from "@mantine/core"
 import Link from "next/link"
-import { ToggleMenu } from "./ToggleMenu"
 import { Routes } from "@blitzjs/next"
 import { RouteUrlObject } from "blitz"
 import { useEffect, useState } from "react"
+import { IconSettings } from "@tabler/icons-react"
+import { useRouter } from "next/router"
 
 interface Owner {
   id: string
@@ -52,6 +53,8 @@ const Catalog = ({
     deleteItem?.action?.(catalogId)
   }
 
+  const { push } = useRouter()
+
   useEffect(() => {
     if (catalogSettings) {
       const overridenSettings = catalogSettings.map((setting) => {
@@ -67,15 +70,8 @@ const Catalog = ({
     }
   }, [])
 
-  const handleEdit = () => {
-    console.log("handle edit")
-    const deleteItem = catalogSettings.find((item) => item.id === "edit")
-
-    if (!deleteItem) {
-      return
-    }
-
-    deleteItem?.action?.(catalogId)
+  async function handleEdit(catalogId: string) {
+    await push(Routes.EditCatalog({ id: catalogId }))
   }
 
   useEffect(() => {
@@ -97,26 +93,61 @@ const Catalog = ({
     <div
       className={`${imageURL && styles.withOverlay} ${styles.body}`}
       style={{
-        backgroundImage: `url(${imageURL})`,
+        position: "relative",
       }}
     >
+      {imageURL && (
+        <Image
+          src={imageURL}
+          alt="background image"
+          w="100%"
+          h="100%"
+          style={{ position: "absolute", top: 0, left: 0 }}
+        />
+      )}
+
       <div className={imageURL ? styles.overlay : ""}></div>
       <Link className={styles.cardContent} href={Routes.CatalogId({ id: catalogId })}>
         <div className={styles.headerContainer}>
           <h2>{children}</h2>
-          <Badge size="sm" variant="outline" color="var(--mantine-color-gray-3)">
+          <Badge size="sm" variant="filled" color="var(--mantine-color-lime-5)">
             {numberOfCards} cards
           </Badge>
         </div>
         <h3>{description}</h3>
       </Link>
       <div className={styles.inline}>
-        <div className={styles.author}>
-          <Avatar src={owner.imageUrl} alt={owner?.name || "Persona image"} radius="xl" size="sm" />
-          <span>{owner.name}</span>
-        </div>
+        <Flex align="center" gap="var(--mantine-spacing-sm)">
+          <Avatar
+            src={owner.imageUrl}
+            color={imageURL ? "white" : "blue"}
+            alt={owner?.name || "Persona image"}
+            radius="xl"
+            size="sm"
+          />
+          <Badge
+            size="sm"
+            variant={imageURL ? "white" : "light"}
+            color="var(--mantine-color-blue-5)"
+          >
+            {owner.name || "Owner"}
+          </Badge>
+        </Flex>
         <Flex className={styles.controls}>
-          {isOwn && <ToggleMenu item={"catalog"} settings={settings} />}
+          {isOwn && (
+            <Button
+              p="0 2px"
+              w="24"
+              h="24"
+              radius="xl"
+              onClick={() => handleEdit(catalogId)}
+              className={styles.iconSettings}
+              variant="transparent"
+              color="var(--mantine-color-gray-8)"
+            >
+              <IconSettings />
+            </Button>
+          )}
 
           {/* {favCard(true)} */}
         </Flex>

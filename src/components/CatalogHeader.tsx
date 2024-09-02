@@ -81,7 +81,8 @@ export function CatalogHeader({
             radius="md"
             size="sm"
             component={Link}
-            href={Routes.Cards()}
+            //
+            href={Routes.AddCard({ id: catalogId as string })}
           >
             <IconCards /> Let&apos;s learn
           </Button>
@@ -129,7 +130,7 @@ export function CatalogHeader({
           </Button>
         )}
 
-        {settings && currentUser?.id && catalogId && (
+        {settings && ownerId === currentUser?.id && (
           <ToggleMenu item={"catalog"} settings={catalogSettings} />
         )}
       </Flex>
