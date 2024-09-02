@@ -2,7 +2,7 @@ import Layout from "src/core/layouts/Layout"
 import { type BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import { Box, Flex } from "@mantine/core"
-import { useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Switch } from "@/components/Switch"
 import { Picker } from "@/components/Picker"
@@ -78,7 +78,6 @@ const Catalogs: BlitzPage = ({
         },
         {
           label: "Edit",
-          // path: Routes.EditCatalog({ id: "sdd" }),
           id: "edit",
           action: (id) => handleEditCatalog(id),
         },
@@ -134,6 +133,16 @@ const Catalogs: BlitzPage = ({
 
     await router.push({ query: { ...router.query, sort: value } })
   }
+
+  useEffect(() => {
+    if (query.revalidatePath) {
+      const replaceRoute = async () => {
+        const { revalidatePath, ...updatedQuery } = router.query
+        await router.push({ query: { ...updatedQuery } })
+      }
+      replaceRoute().catch(console.error)
+    }
+  }, [])
 
   return (
     <Layout title="Catalogs">

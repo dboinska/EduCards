@@ -1,16 +1,29 @@
-import { Menu, Button, rem } from "@mantine/core"
+import { Routes } from "@blitzjs/next"
+import { Menu, Button, rem, Dialog, Group, Text } from "@mantine/core"
+import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import { IconCirclePlus, IconSettings, IconTrash } from "@tabler/icons-react"
 import Link from "next/link"
+import { useRouter } from "next/router"
+import { useState } from "react"
 
 import classes from "src/styles/Notifications.module.css"
 
 export function ToggleMenu({ item, settings }) {
   const deleteSetting = settings.find((setting) => setting.id === "delete")
   const editSetting = settings.find((setting) => setting.id === "edit")
+  const [opened, { open, close }] = useDisclosure(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleDelete = () => {
+  const { push } = useRouter()
+
+  async function redirectToCatalogs() {
+    await push(Routes.Catalogs({ revalidatePath: true }))
+  }
+
+  const handleDelete = async () => {
     try {
+      setLoading(true)
       if (deleteSetting?.action) {
         deleteSetting.action()
 
@@ -22,6 +35,9 @@ export function ToggleMenu({ item, settings }) {
           classNames: classes,
           autoClose: 5000,
         })
+
+        close()
+        await redirectToCatalogs()
       }
     } catch (e) {
       console.error(e)
@@ -33,6 +49,8 @@ export function ToggleMenu({ item, settings }) {
         classNames: classes,
         autoClose: 5000,
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -59,7 +77,7 @@ export function ToggleMenu({ item, settings }) {
     <Menu>
       <Menu.Target>
         <Button color="transparent" p="0 var(--mantine-spacing-xs)">
-          <IconSettings size="22" style={{ color: "var(--mantine-color-gray-3)" }} />
+          <IconSettings size="22" style={{ color: "var(--mantine-color-black)" }} />
         </Button>
       </Menu.Target>
 
@@ -88,11 +106,39 @@ export function ToggleMenu({ item, settings }) {
         <Menu.Item
           color="red"
           leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-          onClick={handleDelete}
+          onClick={() => open()}
         >
           Delete {item}
         </Menu.Item>
       </Menu.Dropdown>
+      <Dialog
+        opened={opened}
+        onClose={close}
+        size="md"
+        radius="md"
+        zIndex="9999"
+        styles={{
+          root: {
+            position: "fixed",
+            top: "50%",
+            left: "40%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1000,
+          },
+        }}
+      >
+        <Text size="sm" mb="xs" fw={500}>
+          Do you want to remove card: {item}?
+        </Text>
+        <Group justify="right">
+          <Button variant="outline" color="black" onClick={close} disabled={loading}>
+            Dismiss
+          </Button>
+          <Button color="red" onClick={handleDelete} disabled={loading}>
+            Delete
+          </Button>
+        </Group>
+      </Dialog>
     </Menu>
   )
 }

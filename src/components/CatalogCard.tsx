@@ -1,4 +1,4 @@
-import { Avatar, Flex, ActionIcon, Button, rem } from "@mantine/core"
+import { Avatar, Flex, ActionIcon, Button, Image, Badge, Group, Dialog, Text } from "@mantine/core"
 import styles from "src/styles/Catalogs.module.css"
 import classes from "src/styles/Notifications.module.css"
 import { IconX, IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
@@ -6,16 +6,12 @@ import { clsx } from "clsx"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { useMutation } from "@blitzjs/rpc"
 import deleteCard from "@/pages/catalogs/mutations/deleteCard"
-import { RouteUrlObject } from "blitz"
 import { notifications } from "@mantine/notifications"
 import { Routes } from "@blitzjs/next"
 import { useRouter } from "next/router"
+import { useDisclosure } from "@mantine/hooks"
+import { useState } from "react"
 
-type Setting = {
-  label: string
-  path: RouteUrlObject
-  id: string
-}
 interface CatalogCardProps {
   imageUrl?: string | null
   term: string
@@ -47,6 +43,8 @@ export const CatalogCard = ({
   const isFavorite = false
 
   const [deleteCardMutation] = useMutation(deleteCard)
+  const [opened, { open, close }] = useDisclosure(false)
+  const [loading, setLoading] = useState(false)
 
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={22}>
@@ -62,6 +60,7 @@ export const CatalogCard = ({
     event.stopPropagation()
 
     try {
+      setLoading(true)
       await deleteCardMutation(cardId)
 
       notifications.show({
@@ -73,6 +72,7 @@ export const CatalogCard = ({
         autoClose: 5000,
       })
       onDelete(cardId)
+      close()
     } catch (error: any) {
       console.error("Error deleting card:", error)
       notifications.show({
@@ -83,6 +83,8 @@ export const CatalogCard = ({
         classNames: classes,
         autoclose: 5000,
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -90,23 +92,33 @@ export const CatalogCard = ({
     await push(Routes.EditCard({ id: cardId, catalogId: catalogId }))
   }
 
+  async function handleClick() {
+    await push(Routes.CardPage({ id: cardId }))
+  }
+
   return (
-    <div
-      className={clsx(styles.body, imageUrl && styles.withOverlay)}
-      style={{
-        backgroundImage: `url(${imageUrl})`,
-      }}
-    >
+    <div className={clsx(styles.body, imageUrl && styles.withOverlay)}>
+      {imageUrl && (
+        <Image
+          src={imageUrl}
+          alt="background image"
+          w="100%"
+          h="100%"
+          style={{ position: "absolute", top: 0, left: 0 }}
+        />
+      )}
       <div className={clsx(imageUrl && styles.overlay)}></div>
       <div className={styles.cardContent}>
         <div className={styles.headerContainer}>
-          <h2>{term}</h2>
+          <h2 onClick={handleClick}>{term}</h2>
           <Button
             variant="outline"
             color="red"
             className={styles.deleteButton}
-            onClick={removeCard}
-            p=" var(--mantine-spacing-md) auto"
+            onClick={() => {
+              open()
+            }}
+            p="var(--mantine-spacing-md) auto"
           >
             <IconX />
           </Button>
@@ -114,24 +126,66 @@ export const CatalogCard = ({
         <h3>{description}</h3>
       </div>
       <div className={styles.inline}>
-        <div className={styles.author}>
-          <Avatar src={owner.imageUrl} alt={owner.name || "Owner"} radius="xl" size="sm" />
-          <span>{owner.name || "Owner"}</span>
-        </div>
+        <Flex align="center" gap="var(--mantine-spacing-sm)">
+          <Avatar
+            src={owner.imageUrl}
+            color={imageUrl ? "white" : "blue"}
+            alt={owner.name || "Owner"}
+            radius="xl"
+            size="sm"
+          />
+          <Badge
+            size="sm"
+            variant={imageUrl ? "white" : "light"}
+            color="var(--mantine-color-blue-5)"
+          >
+            {owner.name || "Owner"}
+          </Badge>
+        </Flex>
         <Flex className={styles.controls}>
           <Button
-            p="0 var(--mantine-spacing-sm)"
-            radius="sm"
+            p="0 2px"
+            w="24"
+            h="24"
+            radius="xl"
             onClick={() => handleEdit(cardId)}
             className={styles.iconSettings}
             variant="transparent"
-            color="black"
+            color="var(--mantine-color-gray-8)"
           >
             <IconSettings />
           </Button>
           {favCard}
         </Flex>
       </div>
+      <Dialog
+        opened={opened}
+        onClose={close}
+        size="md"
+        radius="md"
+        zIndex="9999"
+        styles={{
+          root: {
+            position: "fixed",
+            top: "50%",
+            left: "40%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1000,
+          },
+        }}
+      >
+        <Text size="sm" mb="xs" fw={500}>
+          Do you want to remove card: {term}?
+        </Text>
+        <Group justify="right">
+          <Button variant="outline" color="black" onClick={close} disabled={loading}>
+            Dismiss
+          </Button>
+          <Button color="red" onClick={removeCard} disabled={loading}>
+            Delete
+          </Button>
+        </Group>
+      </Dialog>
     </div>
   )
 }
