@@ -289,12 +289,14 @@
   color: var(--mantine-color-black);
   border: none;
 }
+
 .iconSettings {
   cursor: pointer;
   transition: color 0.2s ease, transform 0.2s ease;
   background-color: rgba(255, 255, 255, 0.2);
+  color: black;
 
-  @mixin hover {
+  &:hover {
     background-color: var(--mantine-color-black);
     color: white;
   }

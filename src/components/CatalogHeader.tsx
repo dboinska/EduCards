@@ -73,7 +73,7 @@ export function CatalogHeader({
   return (
     <div className={styles.header}>
       <h1>{header}</h1>
-      <Flex gap="8px" className={styles.links}>
+      <Flex gap="16px" className={styles.links} align="center">
         {learningMode && (
           <Button
             variant="gradient"
