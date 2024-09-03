@@ -1,4 +1,4 @@
-import { Avatar, Flex, ActionIcon, Button, Image, Badge, Group, Dialog, Text } from "@mantine/core"
+import { Avatar, Flex, ActionIcon, Button, Image, Badge } from "@mantine/core"
 import styles from "src/styles/Catalogs.module.css"
 import classes from "src/styles/Notifications.module.css"
 import { IconX, IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
@@ -11,6 +11,7 @@ import { Routes } from "@blitzjs/next"
 import { useRouter } from "next/router"
 import { useDisclosure } from "@mantine/hooks"
 import { useState } from "react"
+import { ConfirmationDialog } from "./ConfirmationDialog"
 
 interface CatalogCardProps {
   imageUrl?: string | null
@@ -53,9 +54,7 @@ export const CatalogCard = ({
     </ActionIcon>
   ) : null
 
-  const removeCard = async (event: React.MouseEvent) => {
-    event.stopPropagation()
-
+  const removeCard = async () => {
     try {
       setLoading(true)
       await deleteCardMutation(cardId)
@@ -111,9 +110,7 @@ export const CatalogCard = ({
             variant="outline"
             color="red"
             className={styles.deleteButton}
-            onClick={() => {
-              open()
-            }}
+            onClick={open}
             p="var(--mantine-spacing-md) auto"
           >
             <IconX />
@@ -154,34 +151,15 @@ export const CatalogCard = ({
           {favCard}
         </Flex>
       </div>
-      <Dialog
+
+      <ConfirmationDialog
         opened={opened}
-        onClose={close}
-        size="md"
-        radius="md"
-        zIndex="9999"
-        styles={{
-          root: {
-            position: "fixed",
-            top: "50%",
-            left: "40%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1000,
-          },
-        }}
-      >
-        <Text size="sm" mb="xs" fw={500}>
-          Do you want to remove card: {term}?
-        </Text>
-        <Group justify="right">
-          <Button variant="outline" color="black" onClick={close} disabled={loading}>
-            Dismiss
-          </Button>
-          <Button color="red" onClick={removeCard} disabled={loading}>
-            Delete
-          </Button>
-        </Group>
-      </Dialog>
+        close={close}
+        item={term}
+        onDelete={removeCard}
+        confirmationMessage={`Do you want to remove card "${term}"?`}
+        confirmButtonText="Delete"
+      />
     </div>
   )
 }

@@ -1,19 +1,19 @@
 import { Routes } from "@blitzjs/next"
-import { Menu, Button, rem, Dialog, Group, Text } from "@mantine/core"
+import { Menu, Button, rem } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import { IconCirclePlus, IconSettings, IconTrash } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import styles from "src/styles/Catalogs.module.css"
 
 import classes from "src/styles/Notifications.module.css"
+import { ConfirmationDialog } from "./ConfirmationDialog"
 
 export function ToggleMenu({ item, settings }) {
   const deleteSetting = settings.find((setting) => setting.id === "delete")
   const editSetting = settings.find((setting) => setting.id === "edit")
   const [opened, { open, close }] = useDisclosure(false)
-  const [loading, setLoading] = useState(false)
 
   const { push } = useRouter()
 
@@ -23,7 +23,6 @@ export function ToggleMenu({ item, settings }) {
 
   const handleDelete = async () => {
     try {
-      setLoading(true)
       if (deleteSetting?.action) {
         deleteSetting.action()
 
@@ -36,7 +35,6 @@ export function ToggleMenu({ item, settings }) {
           autoClose: 5000,
         })
 
-        close()
         await redirectToCatalogs()
       }
     } catch (e) {
@@ -49,13 +47,10 @@ export function ToggleMenu({ item, settings }) {
         classNames: classes,
         autoClose: 5000,
       })
-    } finally {
-      setLoading(false)
     }
   }
 
   const handleEdit = () => {
-    console.log({})
     try {
       if (editSetting?.action) {
         editSetting.action()
@@ -76,8 +71,16 @@ export function ToggleMenu({ item, settings }) {
   return (
     <Menu>
       <Menu.Target>
-        <Button color="transparent" p="0 var(--mantine-spacing-xs)">
-          <IconSettings size="22" style={{ color: "var(--mantine-color-black)" }} />
+        <Button
+          p="0 2px"
+          w="36"
+          h="36"
+          radius="xl"
+          className={styles.iconSettings}
+          variant="transparent"
+          color="var(--mantine-color-gray-8)"
+        >
+          <IconSettings />
         </Button>
       </Menu.Target>
 
@@ -111,34 +114,14 @@ export function ToggleMenu({ item, settings }) {
           Delete {item}
         </Menu.Item>
       </Menu.Dropdown>
-      <Dialog
+      <ConfirmationDialog
         opened={opened}
-        onClose={close}
-        size="md"
-        radius="md"
-        zIndex="9999"
-        styles={{
-          root: {
-            position: "fixed",
-            top: "50%",
-            left: "40%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1000,
-          },
-        }}
-      >
-        <Text size="sm" mb="xs" fw={500}>
-          Do you want to remove card: {item}?
-        </Text>
-        <Group justify="right">
-          <Button variant="outline" color="black" onClick={close} disabled={loading}>
-            Dismiss
-          </Button>
-          <Button color="red" onClick={handleDelete} disabled={loading}>
-            Delete
-          </Button>
-        </Group>
-      </Dialog>
+        close={close}
+        item={item}
+        onDelete={handleDelete}
+        confirmationMessage={`Do you want to remove catalog: ${item}?`}
+        confirmButtonText={"Delete"}
+      />
     </Menu>
   )
 }
