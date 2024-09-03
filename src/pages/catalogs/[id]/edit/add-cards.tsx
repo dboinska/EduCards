@@ -21,19 +21,25 @@ import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCatalogCardsDefaults } from "@/schemas/CreateCatalog.defaults"
 import { useEffect } from "react"
 
-const NewCatalogAddCards: BlitzPage = () => {
+const CatalogEditCards: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
-  const { push } = useRouter()
+  const { push, query } = useRouter()
 
   useEffect(() => {
+    if (!query.id) {
+      const redirectHome = async () => {
+        await push(Routes.Home())
+      }
+      redirectHome().catch(console.error)
+    }
+
     if (!formState) {
       const pushBack = async () => {
-        await push(Routes.NewCatalog())
+        await push(Routes.EditCatalog({ id: query.id as string }))
       }
-
       pushBack().catch(console.error)
     }
-  }, [formState, push])
+  }, [formState, push, query])
 
   const form = useForm<NewCatalogCardsSchema>({
     validate: zodResolver(newCatalogCardsSchema),
@@ -43,14 +49,12 @@ const NewCatalogAddCards: BlitzPage = () => {
   })
 
   const handleSubmit = async (values: NewCatalogCardsSchema) => {
-    console.log({ values })
-
     setFormState((state) => ({ ...state, ...values }))
-    await push(Routes.NewCatalogShareSettingsPage())
+    await push(Routes.CatalogEditShareSettingsPage({ id: query.id as string }))
   }
 
   const handleBack = async () => {
-    await push(Routes.NewCatalog())
+    await push(Routes.EditCatalog({ id: query.id as string }))
   }
 
   const handleOnDrop = async (files: any, index: number) => {
@@ -208,8 +212,8 @@ const NewCatalogAddCards: BlitzPage = () => {
   )
 }
 
-NewCatalogAddCards.getLayout = function getLayout(page) {
+CatalogEditCards.getLayout = function getLayout(page) {
   return <CreateCatalogLayout>{page}</CreateCatalogLayout>
 }
 
-export default NewCatalogAddCards
+export default CatalogEditCards

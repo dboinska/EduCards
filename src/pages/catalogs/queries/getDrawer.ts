@@ -41,12 +41,14 @@ export interface CardDTO {
 interface CatalogDTO {
   cards: CardDTO[]
   drawers: DrawerDTO[]
+  id: string
 }
 
 function fakeEndpoint(): Promise<CatalogDTO> {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
+        id: "80604ed0-d9cf-463b-95ed-6a2bffa83ad2",
         cards: [
           {
             card_id: "1",

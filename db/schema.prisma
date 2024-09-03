@@ -25,6 +25,7 @@ model User {
   tokens   Token[]
   sessions Session[]
   Catalog  Catalog[]
+  Card     Card[]
 }
 
 model Session {
@@ -80,17 +81,25 @@ model Catalog {
 
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
-
-  // cards Card[]
+  cards   Card[]
 }
 
-// model Card {
-//   id                    Int     @id @default(autoincrement())
-//   term                  String
-//   description           String?
-//   termTranslated        String?
-//   descriptionTranslated String?
-//   imageURL              String?
-//   catalogId             String
-//   catalog               Catalog @relation(fields: [catalogId], references: [catalogId])
-// }
+model Card {
+  cardId                String   @id @default(uuid())
+  term                  String
+  description           String?
+  termTranslated        String
+  descriptionTranslated String?
+  imageURL              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  catalogId String
+  catalog   Catalog @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade, onUpdate: Cascade)
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+}
+
+// Next iteration
+// planCard PlanCard[]

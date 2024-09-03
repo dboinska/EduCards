@@ -67,6 +67,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 200px;
+      cursor: pointer;
     }
   }
   h3 {
@@ -92,21 +93,17 @@
   .inline {
     display: flex;
     gap: 0.5rem;
-    margin-top: 8px;
-    padding-top: 8px;
+    padding: 2px 8px;
     align-items: center;
     font-size: 12px;
     z-index: 999;
     width: 100%;
     font-weight: 600;
     justify-content: space-between;
-
-    .author {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      color: var(--mantine-color-blue-3);
-    }
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(2px);
+    border-radius: var(--mantine-spacing-md);
+    height: 36px;
 
     .controls {
       align-items: center;
@@ -193,8 +190,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 31, 63, 0.6) 98%);
-  filter: blur(4px);
+  /* background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 31, 63, 0.6) 98%);
+  filter: blur(4px); */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
 }
 
 .cardContent {
@@ -284,4 +282,22 @@
   margin-top: 8px;
   color: var(--mantine-color-dimmed);
   font-size: var(--mantine-font-size-xs);
+}
+
+.deleteButton {
+  background: transparent;
+  color: var(--mantine-color-black);
+  border: none;
+}
+
+.iconSettings {
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: black;
+
+  &:hover {
+    background-color: var(--mantine-color-black);
+    color: white;
+  }
 }

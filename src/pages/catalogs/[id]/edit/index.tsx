@@ -18,24 +18,38 @@ import {
 import { createCatalogBaseDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import type { CreateCatalogContextProps } from "@/contexts/CreateCatalog.context"
+import { InferGetServerSidePropsType } from "next"
+import { gSSP } from "@/blitz-server"
+import { CatalogSchema } from "@/schemas/Catalog.schema"
+import getCatalog from "../../queries/getCatalog"
+import { randomId } from "@mantine/hooks"
 
-const NewCatalog: BlitzPage = () => {
+const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
+  catalog,
+}) => {
+  console.log({ catalog })
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push } = useRouter()
 
   const form = useForm({
     mode: "uncontrolled",
     validate: zodResolver(createCatalogBaseSchema),
-    initialValues: { createCatalogBaseDefaults, ...formState },
+    initialValues: { createCatalogBaseDefaults, ...catalog, ...formState },
     validateInputOnChange: true,
     validateInputOnBlur: true,
   })
 
   const handleSubmit = async (values: CreateCatalogBaseSchema) => {
     console.log({ values })
+    if (!catalog.catalogId) {
+      const redirectHome = async () => {
+        await push(Routes.Home())
+      }
+      redirectHome().catch(console.error)
+    }
 
     setFormState((state) => ({ ...state, ...values }))
-    await push(Routes.NewCatalogAddCards())
+    await push(Routes.CatalogEditCards({ id: catalog?.catalogId as string }))
   }
 
   const handleOnDrop = async (files) => {
@@ -63,11 +77,11 @@ const NewCatalog: BlitzPage = () => {
 
   const handleOnReject = (files) => {
     console.log(files[0].errors[0].message)
-    form.setFieldError("imageUrl", files[0].errors[0].message)
+    form.setFieldError("imageURL", files[0].errors[0].message)
   }
 
   const handleOnRemove = async () => {
-    form.setFieldValue("imageUrl", "")
+    form.setFieldValue("imageURL", "")
   }
 
   return (
@@ -96,7 +110,7 @@ const NewCatalog: BlitzPage = () => {
             {...form.getInputProps("description")}
           />
           <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} onRemove={handleOnRemove} />
-          {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
+          {form?.errors?.imageURL && <Input.Error>{form.errors.imageURL}</Input.Error>}
           <NativeSelect
             label="Number of drawers"
             component="select"
@@ -115,8 +129,38 @@ const NewCatalog: BlitzPage = () => {
   )
 }
 
-NewCatalog.getLayout = function getLayout(page) {
+EditCatalog.getLayout = function getLayout(page) {
   return <CreateCatalogLayout>{page}</CreateCatalogLayout>
 }
 
-export default NewCatalog
+export const getServerSideProps = gSSP(async ({ params, ctx }) => {
+  const id = (params as CatalogSchema).id
+  const catalog = await getCatalog({ id }, ctx)
+  const cards = catalog?.cards.map((card) => {
+    const definedCard = {
+      description: card.description || "",
+      descriptionTranslated: card.descriptionTranslated || "",
+      imageURL: card.imageURL || "",
+      term: card.term || "",
+      termTranslated: card.termTranslated || "",
+      key: randomId(),
+
+      ...(card.cardId && { cardId: card.cardId }),
+    }
+
+    return definedCard
+  })
+
+  return { props: { catalog: { ...catalog, cards: cards || [] } } }
+})
+
+export default EditCatalog
+
+/*
+  @TODO: Ograniczenia uploadu tylko do plików max 5 MB i plików graicznych
+  @TODO: Dostęp do widoku tylko dla zalogowanych userów
+  @TODO: Upload covera bezpośrednio do katalogu usera
+
+  ## Szufladki
+  Number of drawers - podczas zapisu do bazy danych pole będzie wskazywać ile rekordów w tabeli drawers powinno zostać utworzonych dla poszczególnego katalogu. Pole wirtualne, obowiązkowe, default 3.
+ */

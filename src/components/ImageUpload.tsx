@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Box, Flex, Group, Text, rem, Image, SimpleGrid } from "@mantine/core"
 import { IconUpload, IconPhoto, IconX } from "@tabler/icons-react"
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone"
@@ -7,7 +7,18 @@ import styles from "src/styles/Catalogs.module.css"
 
 import type { FileWithPath, DropzoneProps } from "@mantine/dropzone"
 
-export const ImageUpload = ({ onDrop, onReject, maxSize, accept, ...props }: DropzoneProps) => {
+interface ImageUploadProps extends DropzoneProps {
+  onRemove: () => void
+}
+
+export const ImageUpload = ({
+  onDrop,
+  onReject,
+  onRemove,
+  maxSize,
+  accept,
+  ...props
+}: ImageUploadProps) => {
   const [files, setFiles] = useState<FileWithPath[]>([])
 
   const maxFileSize = maxSize ?? 5 * 1024 ** 2
@@ -15,18 +26,38 @@ export const ImageUpload = ({ onDrop, onReject, maxSize, accept, ...props }: Dro
 
   const fileHeight = "200px"
 
+  const removeCard = (index, event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index))
+    onRemove?.()
+  }
+
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file)
     return (
-      <Image
-        mah={fileHeight}
-        w="100%"
-        style={{ objectFit: "cover", objectPosition: "center" }}
-        key={index}
-        src={imageUrl}
-        onLoad={() => URL.revokeObjectURL(imageUrl)}
-        alt=""
-      />
+      <div key={index} style={{ position: "relative" }}>
+        <Image
+          mah={fileHeight}
+          w="100%"
+          style={{ objectFit: "cover", objectPosition: "center" }}
+          key={index}
+          src={imageUrl}
+          onLoad={() => URL.revokeObjectURL(imageUrl)}
+          alt=""
+        />
+        <IconX
+          style={{
+            position: "absolute",
+            right: 10,
+            top: 10,
+            zIndex: 99999,
+            cursor: "pointer",
+            pointerEvents: "auto",
+          }}
+          onClick={(event) => removeCard(index, event)}
+        />
+      </div>
     )
   })
 

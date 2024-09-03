@@ -15,13 +15,29 @@ export default async function createCatalog(input: CreateCatalogSchema, ctx: Ctx
     ownerId: ctx.session.userId,
   }
 
-  const result = await db.catalog.create({
-    data: catalogData,
-  })
+  try {
+    const result = await db.catalog.create({
+      data: catalogData,
+    })
 
-  if (!result.catalogId) {
-    throw new Error("Failed to create catalog.")
+    if (!result.catalogId) {
+      throw new Error("Failed to create catalog.")
+    }
+
+    const cardList = cards.map(({ key, ...card }) => ({
+      ...card,
+      catalogId: result.catalogId,
+      ownerId: ctx.session.userId as string,
+    }))
+
+    const savedCards = await db.card.createMany({
+      data: cardList,
+    })
+
+    console.log({ savedCards })
+
+    return result
+  } catch (error) {
+    console.error(error)
   }
-
-  return result
 }

@@ -1,56 +1,75 @@
 import { Routes, type BlitzPage } from "@blitzjs/next"
 import { useRouter } from "next/router"
-import { Box, Button, Center, Flex, Group, Input, Stepper, Textarea } from "@mantine/core"
+import { Button, Center, Flex, Group, Input, Textarea } from "@mantine/core"
 import { randomId } from "@mantine/hooks"
 
 import Layout from "@/core/layouts/Layout"
 import styles from "src/styles/Catalogs.module.css"
 
-import { CreateCatalogLayout } from "@/layouts/CreateCatalogLayout"
-import { useCatalogContext } from "@/contexts/CreateCatalog.context"
-
-import type { CreateCatalogContextProps } from "@/contexts/CreateCatalog.context"
 import { useForm } from "@mantine/form"
 import { zodResolver } from "mantine-form-zod-resolver"
-import { NewCatalogCardsSchema, newCatalogCardsSchema } from "@/schemas/CreateCatalog.schema"
 
-import { storedCardDefaults } from "@/schemas/Card.defaults"
 import { IconCirclePlus, IconGripVertical, IconX } from "@tabler/icons-react"
 import { ImageUpload } from "@/components/ImageUpload"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
-import { createCatalogCardsDefaults } from "@/schemas/CreateCatalog.defaults"
-import { useEffect } from "react"
+import { createCardSchema, CreateCardSchema } from "@/schemas/CreateCard.schema"
+import { createCardDefaults } from "@/schemas/CreateCard.defaults"
+import { storedCardDefaults } from "@/schemas/Card.defaults"
+import { gSSP } from "@/blitz-server"
+import { CatalogSchema } from "@/schemas/Catalog.schema"
+import { InferGetServerSidePropsType } from "next"
+import getCatalog from "../../queries/getCatalog"
+import { useMutation } from "@blitzjs/rpc"
+import { notifications } from "@mantine/notifications"
 
-const NewCatalogAddCards: BlitzPage = () => {
-  const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
-  const { push } = useRouter()
+import classes from "src/styles/Notifications.module.css"
+import createCards from "@/pages/card/mutations/createCards"
 
-  useEffect(() => {
-    if (!formState) {
-      const pushBack = async () => {
-        await push(Routes.NewCatalog())
-      }
+const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
+  catalog,
+}) => {
+  const [cardMutation] = useMutation(createCards)
 
-      pushBack().catch(console.error)
-    }
-  }, [formState, push])
-
-  const form = useForm<NewCatalogCardsSchema>({
-    validate: zodResolver(newCatalogCardsSchema),
-    initialValues: { ...createCatalogCardsDefaults, ...formState },
+  const form = useForm<CreateCardSchema>({
+    validate: zodResolver(createCardSchema),
+    initialValues: createCardDefaults(catalog?.catalogId as string),
     validateInputOnChange: true,
     validateInputOnBlur: true,
   })
 
-  const handleSubmit = async (values: NewCatalogCardsSchema) => {
-    console.log({ values })
+  const { push } = useRouter()
 
-    setFormState((state) => ({ ...state, ...values }))
-    await push(Routes.NewCatalogShareSettingsPage())
-  }
+  const handleSubmit = async (values: CreateCardSchema) => {
+    if (!catalog?.catalogId) {
+      console.error("Catalog ID is missing")
+      return
+    }
 
-  const handleBack = async () => {
-    await push(Routes.NewCatalog())
+    try {
+      await cardMutation(values, {
+        onSuccess: async () => {
+          await push(Routes.CatalogId({ id: catalog?.catalogId as string }))
+        },
+      })
+      notifications.show({
+        title: "Cards Added",
+        message: `Cards have been successfully added.`,
+        position: "top-right",
+        color: "green",
+        classNames: classes,
+        autoClose: 5000,
+      })
+    } catch (error: any) {
+      console.error("Error creating card:", error)
+      notifications.show({
+        title: "Failed to Add Cards",
+        message: `Cards haven't been successfully added.`,
+        position: "top-right",
+        color: "red",
+        classNames: classes,
+        autoClose: 5000,
+      })
+    }
   }
 
   const handleOnDrop = async (files: any, index: number) => {
@@ -70,6 +89,7 @@ const NewCatalogAddCards: BlitzPage = () => {
       const result = await response.json()
 
       form.setFieldValue(`cards.${index}.imageURL`, result.fileURL)
+      console.log("File uploaded successfully", result)
     } catch (error) {
       console.error("Error uploading cover", error)
     }
@@ -151,20 +171,13 @@ const NewCatalogAddCards: BlitzPage = () => {
   ))
 
   const removeCard = (index) => {
+    console.log({ index })
     form.removeListItem("cards", index.index)
   }
 
   return (
     <Layout title="Add cards to catalog">
       <main className={styles.main}>
-        <Box className={styles.container}>
-          <Stepper active={1}>
-            <Stepper.Step label="First step" description="Main settings" />
-            <Stepper.Step label="Second step" description="Adding cards to catalog" />
-            <Stepper.Step label="Final step" description="Catalog sharing" />
-          </Stepper>
-        </Box>
-
         <form name="addCards" onSubmit={form.onSubmit(handleSubmit)} className={styles.container}>
           <DragDropContext
             onDragEnd={({ destination, source }) =>
@@ -181,24 +194,28 @@ const NewCatalogAddCards: BlitzPage = () => {
               )}
             </Droppable>
           </DragDropContext>
-          <Group justify="center" mt="md">
+          <Group justify="center" mt="xl">
             <Button
               variant="filled"
               color="var(--mantine-color-blue-6)"
               radius="md"
               disabled={!form.isValid()}
               onClick={() =>
-                form.insertListItem("cards", { ...storedCardDefaults, key: randomId() })
+                form.insertListItem("cards", {
+                  ...storedCardDefaults,
+                  catalogId: catalog?.catalogId,
+                  key: randomId(),
+                })
               }
             >
               <IconCirclePlus /> Add card
             </Button>
-          </Group>
-          <Group justify="flex-end" mt="xl">
-            <Button variant="default" onClick={handleBack}>
-              Back
-            </Button>
-            <Button type="submit" disabled={!form.isValid()}>
+            <Button
+              type="submit"
+              variant="filled"
+              color="var(--mantine-color-lime-6)"
+              disabled={!form.isValid()}
+            >
               Next step
             </Button>
           </Group>
@@ -208,8 +225,10 @@ const NewCatalogAddCards: BlitzPage = () => {
   )
 }
 
-NewCatalogAddCards.getLayout = function getLayout(page) {
-  return <CreateCatalogLayout>{page}</CreateCatalogLayout>
-}
+export const getServerSideProps = gSSP(async ({ params, ctx }) => {
+  const id = (params as CatalogSchema).id
+  const catalog = await getCatalog({ id }, ctx)
+  return { props: { catalog } }
+})
 
-export default NewCatalogAddCards
+export default AddCard

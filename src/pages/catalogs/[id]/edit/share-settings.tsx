@@ -16,8 +16,9 @@ import { useEffect, useState } from "react"
 import { createCatalogSharingDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import { useMutation } from "@blitzjs/rpc"
-import createCatalog from "../mutations/createCatalog"
+import updateCatalog from "../../mutations/updateCatalog"
 import { notifications } from "@mantine/notifications"
+
 import classes from "src/styles/Notifications.module.css"
 
 const sharedWith = [
@@ -35,8 +36,8 @@ const sharedWith = [
   },
 ]
 
-const NewCatalogShareSettingsPage: BlitzPage = () => {
-  const [catalogMutation] = useMutation(createCatalog)
+const CatalogEditShareSettingsPage: BlitzPage = () => {
+  const [updateCatalogMutation] = useMutation(updateCatalog)
   const [checked, setChecked] = useState(false)
 
   const form = useForm({
@@ -47,17 +48,23 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
     validateInputOnBlur: true,
   })
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
-  const { push } = useRouter()
+  const { push, query } = useRouter()
 
   useEffect(() => {
+    if (!query.id) {
+      const redirectHome = async () => {
+        await push(Routes.Home())
+      }
+      redirectHome().catch(console.error)
+    }
     if (!formState) {
       const pushBack = async () => {
-        await push(Routes.NewCatalog())
+        await push(Routes.EditCatalog({ id: query?.catalogId as string }))
       }
 
       pushBack().catch(console.error)
     }
-  }, [formState, push])
+  }, [formState, push, query])
 
   const handleSuccess = async () => {
     await push(Routes.Catalogs())
@@ -71,10 +78,15 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
     } as CreateCatalogSchema
 
     try {
-      await catalogMutation(currentFormState, { onSuccess: handleSuccess })
+      await updateCatalogMutation(
+        { catalogId: query?.catalogId as string, ...currentFormState },
+        {
+          onSuccess: handleSuccess,
+        }
+      )
       notifications.show({
-        title: "Catalog Added",
-        message: `Catalog has been successfully added.`,
+        title: "Catalog Edited",
+        message: `Catalog has been successfully edited.`,
         position: "top-right",
         color: "green",
         classNames: classes,
@@ -83,8 +95,8 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
     } catch (error: any) {
       console.error({ error })
       notifications.show({
-        title: "Catalog Added",
-        message: `Catalog hasn't been successfully added.`,
+        title: "Failed to Edit Catalog",
+        message: `Catalog hasn't been successfully edited.`,
         position: "top-right",
         color: "red",
         classNames: classes,
@@ -96,7 +108,7 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
   }
 
   const handleBack = async () => {
-    await push(Routes.NewCatalogAddCards())
+    await push(Routes.CatalogEditCards({ id: query?.catalogId as string }))
   }
 
   return (
@@ -150,8 +162,8 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
   )
 }
 
-NewCatalogShareSettingsPage.getLayout = function getLayout(page) {
+CatalogEditShareSettingsPage.getLayout = function getLayout(page) {
   return <CreateCatalogLayout>{page}</CreateCatalogLayout>
 }
 
-export default NewCatalogShareSettingsPage
+export default CatalogEditShareSettingsPage

@@ -2,7 +2,7 @@ import Layout from "src/core/layouts/Layout"
 import { type BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import { Box, Flex } from "@mantine/core"
-import { useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Switch } from "@/components/Switch"
 import { Picker } from "@/components/Picker"
@@ -23,19 +23,8 @@ import type { FilterType } from "@/types/FilterType"
 import { sortBy } from "@/utils/sortBy"
 
 import { gSSP } from "src/blitz-server"
-
-const catalogSettings = [
-  {
-    label: "Edit",
-    path: Routes.NewCatalog(),
-    id: "edit",
-  },
-  {
-    label: "Delete",
-    path: Routes.Catalogs(),
-    id: "delete",
-  },
-]
+import { useMutation } from "@blitzjs/rpc"
+import deleteCatalog from "./mutations/deleteCatalog"
 
 const visibilityFilter = (isUser: boolean) =>
   isUser
@@ -58,6 +47,48 @@ const Catalogs: BlitzPage = ({
   })
   const [searchValue, setSearchValue] = useState(() => query.query || "")
   const router = useRouter()
+  const [deleteCatalogMutation] = useMutation(deleteCatalog)
+
+  async function handleDeleteCatalog(catalogId: string) {
+    try {
+      console.log("Attempting to delete catalog with ID:", catalogId)
+
+      await deleteCatalogMutation(catalogId, { onSuccess: () => console.log("success") })
+    } catch (error) {
+      console.error("Failed to delete catalog:", error)
+    }
+  }
+
+  async function handleEditCatalog(catalogId: string) {
+    try {
+      console.log("Attempting to delete catalog with ID:", catalogId)
+
+      await router.push(Routes.EditCatalog({ id: catalogId }))
+    } catch (error) {
+      console.error("Failed to delete catalog:", error)
+    }
+  }
+
+  const catalogSettings = query
+    ? [
+        {
+          label: "Add study plan",
+          path: Routes.NewStudyPlan(),
+          id: "newStudyPlan",
+        },
+        {
+          label: "Edit",
+          id: "edit",
+          action: (id) => handleEditCatalog(id),
+        },
+        {
+          label: "Delete",
+          path: Routes.Catalogs(),
+          id: "delete",
+          action: (id) => handleDeleteCatalog(id),
+        },
+      ]
+    : []
 
   const handleSearch = useDebouncedCallback(async (query: string) => {
     dispatch({
@@ -102,6 +133,16 @@ const Catalogs: BlitzPage = ({
 
     await router.push({ query: { ...router.query, sort: value } })
   }
+
+  useEffect(() => {
+    if (query.revalidatePath) {
+      const replaceRoute = async () => {
+        const { revalidatePath, ...updatedQuery } = router.query
+        await router.push({ query: { ...updatedQuery } })
+      }
+      replaceRoute().catch(console.error)
+    }
+  }, [])
 
   return (
     <Layout title="Catalogs">
