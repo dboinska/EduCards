@@ -17,8 +17,8 @@ import { notifications } from "@mantine/notifications"
 
 import classes from "src/styles/Notifications.module.css"
 import { cardSchema, CardSchema } from "@/schemas/Card.schema"
-import updateCard from "@/pages/catalogs/mutations/updateCard"
 import getCard from "@/pages/card/queries/getCard"
+import updateCard from "../mutations/updateCard"
 
 const EditCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   query,

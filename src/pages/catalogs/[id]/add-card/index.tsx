@@ -20,10 +20,10 @@ import { CatalogSchema } from "@/schemas/Catalog.schema"
 import { InferGetServerSidePropsType } from "next"
 import getCatalog from "../../queries/getCatalog"
 import { useMutation } from "@blitzjs/rpc"
-import createCards from "../../mutations/createCards"
 import { notifications } from "@mantine/notifications"
 
 import classes from "src/styles/Notifications.module.css"
+import createCards from "@/pages/card/mutations/createCards"
 
 const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   catalog,

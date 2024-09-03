@@ -5,7 +5,7 @@ import { IconX, IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-r
 import { clsx } from "clsx"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { useMutation } from "@blitzjs/rpc"
-import deleteCard from "@/pages/catalogs/mutations/deleteCard"
+import deleteCard from "@/pages/card/mutations/deleteCard"
 import { notifications } from "@mantine/notifications"
 import { Routes } from "@blitzjs/next"
 import { useRouter } from "next/router"
@@ -37,11 +37,8 @@ export const CatalogCard = ({
   onDelete,
 }: CatalogCardProps) => {
   const currentUser = useCurrentUser()
-
   const { push } = useRouter()
-
   const isFavorite = false
-
   const [deleteCardMutation] = useMutation(deleteCard)
   const [opened, { open, close }] = useDisclosure(false)
   const [loading, setLoading] = useState(false)
@@ -62,7 +59,6 @@ export const CatalogCard = ({
     try {
       setLoading(true)
       await deleteCardMutation(cardId)
-
       notifications.show({
         title: "Card Deleted",
         message: `The card "${term}" has been successfully deleted.`,
@@ -81,7 +77,7 @@ export const CatalogCard = ({
         color: "red",
         position: "top-right",
         classNames: classes,
-        autoclose: 5000,
+        autoClose: 5000,
       })
     } finally {
       setLoading(false)
