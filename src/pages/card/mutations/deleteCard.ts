@@ -9,8 +9,27 @@ export default async function deleteCard(cardId: string, ctx: Ctx) {
   try {
     const card = await db.card.findUnique({ where: { cardId: cardId } })
 
+    console.log({ card })
+
     if (!card || card.ownerId !== ctx.session.userId) {
       throw new Error("User not authorized to delete this card")
+    }
+
+    const drawerCard = await db.drawerCard.findFirst({
+      where: {
+        cardId,
+      },
+    })
+
+    console.log({ drawerCard })
+
+    if (drawerCard) {
+      await db.drawer.update({
+        where: { drawerId: drawerCard.drawerId },
+        data: {
+          numberOfCards: { decrement: 1 },
+        },
+      })
     }
 
     const [deletedCard] = await db.$transaction([
@@ -24,6 +43,20 @@ export default async function deleteCard(cardId: string, ctx: Ctx) {
         },
       }),
     ])
+
+    // if (card.drawerId) {
+    //   await db.drawer.update({
+    //     where: { drawerId: card.drawerId },
+    //     data: {
+    //       numberOfCards: { decrement: 1 },
+    //     },
+    //   })
+    // }
+
+    // zamiast card.drawerId
+    // wyszukaj w drawerCard rekord z cardId
+    // wyciągnij z tego rekordu drawerId
+    // zrób updare drawer o decrement pola
 
     return deletedCard
   } catch (error) {
