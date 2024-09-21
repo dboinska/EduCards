@@ -18,6 +18,7 @@ interface CatalogHeaderProps {
   settings?: boolean
   ownerId?: string
   catalogId?: string
+  drawerId?: string
 }
 
 const gradient =
@@ -31,6 +32,7 @@ export function CatalogHeader({
   settings,
   ownerId,
   catalogId,
+  drawerId,
 }: CatalogHeaderProps) {
   const currentUser = useCurrentUser()
 
@@ -82,7 +84,7 @@ export function CatalogHeader({
             size="sm"
             component={Link}
             //
-            href={Routes.AddCard({ id: catalogId as string })}
+            href={Routes.LearnPage({ id: drawerId as string, sliding: true })}
           >
             <IconCards /> Let&apos;s learn
           </Button>
