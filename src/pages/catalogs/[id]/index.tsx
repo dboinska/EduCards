@@ -6,11 +6,11 @@ import type { InferGetServerSidePropsType } from "next"
 import Layout from "@/core/layouts/Layout"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Box, Flex, TextInput } from "@mantine/core"
-import { DynamicBadge } from "@/components/DynamicBadge"
+import { DrawerCard } from "@/components/DrawerCard"
 import { Picker, PickerOption } from "@/components/Picker"
 import { sortBy } from "@/utils/sortBy"
 import styles from "src/styles/Catalogs.module.css"
-import getDrawer from "../queries/getDrawer"
+import getDrawer from "../../drawer/queries/getDrawer"
 import { useQuery } from "@blitzjs/rpc"
 import { UseDrawer } from "@/core/providers/drawerProvider"
 import { useSession } from "@blitzjs/auth"
@@ -20,6 +20,7 @@ import { actionTypes, dataReducer, initialState } from "@/reducers/dataReducer"
 import { useRouter } from "next/router"
 import { SortType } from "@/types/SortType"
 import { CatalogCard } from "@/components/CatalogCard"
+import { frequencyColorMap, frequencyDictionary } from "@/utils/frequency"
 
 const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   query,
@@ -34,12 +35,20 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
   })
   const [searchValue, setSearchValue] = useState(() => query.query || "")
   const [cards, setCards] = useState(() => catalog?.cards || [])
+  const [catalogDrawers, setCatalogDrawers] = useState(catalog?.drawers || [])
+
+  const drawers = catalog?.drawers
+
+  const [cardCounts, setCardCounts] = useState(drawers?.map((drawer) => drawer?.numberOfCards))
+
+  console.log({ amount: catalog?.amountOfDrawers })
 
   const handleCardDelete = (cardId: string) => {
     setCards((prevCards) => prevCards.filter((card) => card.cardId !== cardId))
   }
 
-  const drawers = catalogId.drawers
+  console.log({ drawers })
+  console.log({ cards })
   const session = useSession({ suspense: false })
 
   const ownerId = session?.userId || null
@@ -81,7 +90,7 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
       term={c.term}
       description={c.description}
       // settings={cardSettings}
-      isOwner={c.ownerId === ownerId}
+      // isOwner={c.ownerId === ownerId}
       owner={catalog?.owner}
       cardId={c.cardId}
       catalogId={c.catalogId}
@@ -99,15 +108,20 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
           settings
           catalogId={catalog?.catalogId}
         />
-        <Box w="100%">
+        <Box>
           <h2>Drawers:</h2>
-          <div className={styles.justifyLeft}>
-            <DynamicBadge
-              data={drawers}
-              drawerProps={drawerProps}
-              setDrawerProps={setDrawerProps}
-            />
-          </div>
+          <Flex m="0 auto" gap="8px" miw="100%" className={styles.drawersContainer}>
+            {catalog?.drawers.map((drawer, index) => (
+              <DrawerCard
+                key={drawer?.drawerId as string}
+                id={drawer?.drawerId as string}
+                header={`${index + 1} level`}
+                frequency={frequencyDictionary[drawer?.frequency!]}
+                color={frequencyColorMap[drawer?.frequency!]}
+                numberOfCards={drawers?.[index]?.numberOfCards}
+              />
+            ))}
+          </Flex>
         </Box>
         <h2>All cards:</h2>
         <div className={styles.filters}>
