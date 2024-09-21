@@ -1,7 +1,13 @@
 import type { Ctx } from "blitz"
 import { CreateCatalogSchema, createCatalogSchema } from "@/schemas/CreateCatalog.schema"
+import { CreateDrawerSchema } from "@/schemas/CreateDrawer.schema"
+import { CreateDrawerCardSchema } from "@/schemas/CreateDrawerCard.schema"
+
+import { DRAWER_LEVEL, DRAWER_LEVEL_NAME } from "@/utils/drawer"
 
 import db from "db"
+import createDrawer from "@/pages/drawer/mutations/createDrawer"
+import createDrawerCard from "@/pages/drawer/mutations/createDrawerCard"
 
 export default async function createCatalog(input: CreateCatalogSchema, ctx: Ctx) {
   ctx.session.$authorize()
@@ -30,11 +36,39 @@ export default async function createCatalog(input: CreateCatalogSchema, ctx: Ctx
       ownerId: ctx.session.userId as string,
     }))
 
-    const savedCards = await db.card.createMany({
+    const savedCards = await db.card.createManyAndReturn({
       data: cardList,
     })
 
-    console.log({ savedCards })
+    const drawer: CreateDrawerSchema = {
+      catalogId: result.catalogId,
+      // ownerId: ctx.session.userId as string,
+      frequency: DRAWER_LEVEL[amountOfDrawers],
+      levelName: DRAWER_LEVEL_NAME[amountOfDrawers],
+      numberOfCards: cardList.length,
+    }
+
+    const drawerResult = await createDrawer(drawer, ctx)
+    console.log({ drawerResult })
+
+    const firstLevelDrawer = drawerResult.find((drawer) => drawer.frequency === "DAILY")
+
+    if (!firstLevelDrawer?.drawerId) {
+      throw new Error("Error creatings drawers")
+    }
+
+    const drawerRelation = savedCards.map(({ cardId }) => ({
+      drawerId: firstLevelDrawer.drawerId,
+      cardId,
+    }))
+
+    await Promise.all(
+      drawerRelation.map(async (relation) => {
+        return await createDrawerCard(relation, ctx)
+      })
+    )
+
+    console.log({ savedCards, drawerRelation })
 
     return result
   } catch (error) {

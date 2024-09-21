@@ -1,6 +1,7 @@
 import type { Ctx } from "blitz"
 import db from "db"
 import { catalogSchema, type CatalogSchema } from "@/schemas/Catalog.schema"
+import { frequencySchema } from "@/utils/frequency"
 
 export default async function getCatalog(input: CatalogSchema, ctx: Ctx) {
   const data = catalogSchema.parse(input)
@@ -10,6 +11,7 @@ export default async function getCatalog(input: CatalogSchema, ctx: Ctx) {
     include: {
       owner: true,
       cards: true,
+      drawers: true,
     },
     where: {
       catalogId: data.id,
@@ -27,6 +29,19 @@ export default async function getCatalog(input: CatalogSchema, ctx: Ctx) {
 
   const { id, email, imageUrl, name } = catalog?.owner
   console.log({ catalog })
+
+  const level = catalog.drawers[0]?.levelName
+  if (level) {
+    const drawers = frequencySchema[level]
+      .map((fq) => {
+        const findDrawer = catalog.drawers.find((drawer) => drawer.frequency === fq)
+
+        return findDrawer ? { ...findDrawer } : undefined
+      })
+      .filter(Boolean)
+
+    return { ...catalog, owner: { id, email, imageUrl, name }, drawers }
+  }
 
   return { ...catalog, owner: { id, email, imageUrl, name } }
 }

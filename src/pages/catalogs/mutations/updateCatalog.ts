@@ -1,9 +1,21 @@
+import { cardSchema } from "@/schemas/Card.schema"
 import { createCatalogSchema, CreateCatalogSchema } from "@/schemas/CreateCatalog.schema"
 import { Ctx } from "blitz"
 import db from "db"
 import { z } from "zod"
 
-const updateCatalogSchema = createCatalogSchema.merge(z.object({ catalogId: z.string().uuid() }))
+const updateCatalogSchema = createCatalogSchema.merge(
+  z.object({
+    catalogId: z.string().uuid(),
+    cards: z.array(
+      cardSchema.omit({ cardId: true, ownerId: true, catalogId: true }).merge(
+        z.object({
+          cardId: z.string().optional(),
+        })
+      )
+    ),
+  })
+)
 
 type UpdateCatalogSchema = z.infer<typeof updateCatalogSchema>
 
@@ -38,12 +50,14 @@ export default async function updateCatalog(input: UpdateCatalogSchema, ctx: Ctx
     const existingCards = cardList.filter((card) => card.cardId)
     const newCards = cardList.filter((card) => !card.cardId)
 
+    console.log({ existingCards, newCards, cardList })
+
     const [updatedCards, savedCards] = await db.$transaction([
       db.card.updateMany({
         data: existingCards,
       }),
       db.card.createMany({
-        data: existingCards,
+        data: newCards,
       }),
     ])
 
