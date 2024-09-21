@@ -8,7 +8,7 @@ import { useEffect, useState } from "react"
 import { motion, useMotionValue, useTransform } from "framer-motion"
 
 export interface CardProps {
-  id: string
+  cardId: string
   imageURL?: string
   term: string
   termTranslated: string
@@ -19,10 +19,11 @@ export interface CardProps {
   onMoveRight?: () => void
   onMoveLeft?: () => void
   sliding: boolean
+  position: string
 }
 
 const Card = ({
-  id,
+  cardId,
   imageURL,
   term,
   termTranslated,
@@ -30,6 +31,7 @@ const Card = ({
   descriptionTranslated,
   catalogName,
   sliding,
+  position,
   onMoveLeft,
   onMoveRight,
 }: // isFavorite,
@@ -73,7 +75,7 @@ CardProps) => {
         unsubscribeX()
       }
     }
-  }, [x])
+  }, [x, sliding])
 
   const [exitX, setExitX] = useState(0)
 
@@ -126,7 +128,7 @@ CardProps) => {
           <Flex justify="center" className={classes.cardContainer}>
             <motion.div className={classes.cardContainer}>
               <motion.div
-                key={id}
+                key={cardId}
                 className="box"
                 style={{
                   x,
@@ -161,7 +163,7 @@ CardProps) => {
                     </Text>
                   </MantineCard.Section>{" "}
                   <Flex justify="space-between" align="center" mt="sm">
-                    <Text fz="sm">1/10</Text>
+                    <Text fz="sm">{position}</Text>
                     <Badge size="sm" variant="light" color="var(--main-color)">
                       {catalogName}
                     </Badge>
