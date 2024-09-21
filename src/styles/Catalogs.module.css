@@ -120,7 +120,7 @@
 .drawer {
   composes: body;
   padding: var(--mantine-spacing-sm);
-  min-width: auto;
+  min-width: 100px;
 }
 
 .withOverlay {
@@ -166,21 +166,6 @@
 @media (min-width: $mantine-breakpoint-md) {
   .maxWidth600 {
     max-width: 600px;
-  }
-}
-
-/* MOBILE */
-@media (max-width: 800px) {
-  .linkGrid {
-    width: 100%;
-  }
-
-  .body {
-    flex-wrap: wrap;
-  }
-
-  .buttonContainer {
-    flex-wrap: wrap;
   }
 }
 
@@ -299,5 +284,33 @@
   &:hover {
     background-color: var(--mantine-color-black);
     color: white;
+  }
+}
+
+.drawersContainer {
+  justify-content: center;
+
+  & > * {
+    width: 140px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 800px) {
+  .linkGrid {
+    width: 100%;
+  }
+
+  .body {
+    flex-wrap: wrap;
+  }
+
+  .buttonContainer {
+    flex-wrap: wrap;
+  }
+
+  .drawersContainer {
+    overflow-x: auto;
+    justify-content: left;
   }
 }
