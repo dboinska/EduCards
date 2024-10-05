@@ -1,5 +1,12 @@
 import { z } from "zod"
 
+export const username = z
+  .string()
+  .min(1, { message: "User name is required" })
+  .max(20, { message: "Name must be 20 characters or less" })
+
+export const avatar = z.string()
+
 export const email = z
   .string()
   .email()
@@ -7,14 +14,26 @@ export const email = z
 
 export const password = z
   .string()
-  .min(10)
-  .max(100)
+  .min(8, { message: "Password must have 8-12 characters" })
+  .max(12, { message: "Password must have 8-12 characters" })
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])/, {
+    message:
+      "Password must include at least one lowercase letter, one uppercase letter, and one special character",
+  })
   .transform((str) => str.trim())
 
-export const Signup = z.object({
-  email,
-  password,
-})
+export const Signup = z
+  .object({
+    username,
+    email,
+    avatar,
+    password,
+    passwordConfirmation: password,
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Passwords don't match",
+    path: ["passwordConfirmation"],
+  })
 
 export const Login = z.object({
   email,
