@@ -93,7 +93,7 @@ export const ImageUpload = ({
   }
 
   return (
-    <Container p="0">
+    <Container p="0" w="100%">
       {label && <label>{label}</label>}
       <Dropzone
         onDrop={handleOnDrop}

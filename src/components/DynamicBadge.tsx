@@ -21,6 +21,7 @@ export const DynamicBadge = ({ data, drawerProps, setDrawerProps }: DynamicBadge
       style={{
         border: `2px solid var(--mantine-color-gray-2)`,
       }}
+      miw="110px"
     >
       <Link
         href={Routes.Drawer()}
@@ -47,24 +48,33 @@ export const DynamicBadge = ({ data, drawerProps, setDrawerProps }: DynamicBadge
               {data.header || `${index + 1} level`}
             </h2>
           </div>
-          <h3
-            style={{
-              color: "var(--mantine-color-gray-7)",
-              fontSize: "var(--mantine-font-size-sm)",
-              whiteSpace: "pre-wrap",
-              width: "100%",
-              minHeight: "44px",
-            }}
-          >
-            {data.frequency}
-          </h3>
+          {data.frequency && (
+            <h3
+              style={{
+                color: "var(--mantine-color-gray-7)",
+                fontSize: "var(--mantine-font-size-sm)",
+                whiteSpace: "pre-wrap",
+                width: "100%",
+                minHeight: "44px",
+              }}
+            >
+              {data.frequency}
+            </h3>
+          )}
+
           {data.all_cards >= 0 && (
             <Badge variant="outline" color={data.color} m="0 auto">
               {data.all_cards} cards
             </Badge>
           )}
           {data.percent >= 0 && (
-            <p style={{ margin: 0, color: "var(--mantine-color-gray-8)", whiteSpace: "pre-line" }}>
+            <p
+              style={{
+                margin: "8px 0",
+                color: "var(--mantine-color-gray-8)",
+                whiteSpace: "pre-line",
+              }}
+            >
               <span style={{ color: data.color, fontWeight: 700 }}>{data.percent}% </span> completed
             </p>
           )}
