@@ -63,12 +63,18 @@ export const LoginForm = (props: LoginFormProps) => {
                   }
                 }}
               >
-                <LabeledTextField name="email" label="Email" placeholder="Email" />
+                <LabeledTextField
+                  name="email"
+                  label="Email"
+                  placeholder="Email"
+                  style={{ width: "100%" }}
+                />
                 <LabeledTextField
                   name="password"
                   label="Password"
                   placeholder="Password"
                   type="password"
+                  style={{ width: "100%" }}
                 />
                 <Button type="submit" w="100%" radius="md">
                   Login
