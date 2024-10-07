@@ -1,15 +1,38 @@
-import { Card, Avatar, Text, Group, Button } from "@mantine/core"
+import { Card, Avatar, Text, Group, Button, Radio, CheckIcon, Box } from "@mantine/core"
 import classes from "/src/styles/UserCard.module.css"
 import { Routes } from "@blitzjs/next"
 import Link from "next/link"
+import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import { IconDots, IconSettings } from "@tabler/icons-react"
+import { useRef, useState } from "react"
+import styles from "src/styles/Catalogs.module.css"
 
-const stats = [
-  { value: "13", label: "Catalogs" },
-  { value: "187", label: "Cards" },
-  { value: "16", label: "Favorites" },
-]
+export function UserCard({
+  query,
+  user,
+  totalCards,
+  totalCatalogs,
+  totalFavorites,
+}: {
+  query: any
+  user: any
+  totalCards: any
+  totalCatalogs: any
+}) {
+  const currentUser = useCurrentUser()
 
-export function UserCard() {
+  const [backgroundImage, setBackgroundImage] = useState(
+    "url(https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80)"
+  )
+
+  console.log({ query, user })
+
+  const stats = [
+    { value: totalCatalogs, label: "Catalogs" },
+    { value: totalCards, label: "Cards" },
+    { value: totalFavorites, label: "Favorites" },
+  ]
+
   const items = stats.map((stat) => (
     <div key={stat.label}>
       <Text ta="center" fz="lg" fw={500}>
@@ -21,37 +44,98 @@ export function UserCard() {
     </div>
   ))
 
+  const fileInputRef = useRef(null)
+
+  const handleDotsClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      const fileUrl = URL.createObjectURL(file)
+      setBackgroundImage(`url(${fileUrl})`)
+    }
+  }
+
   return (
     <Card withBorder padding="xl" radius="var(--mantine-spacing-md)" className={classes.card}>
       <Card.Section
-        h={140}
+        h={200}
         style={{
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80)",
+          backgroundImage: backgroundImage,
         }}
-      />
+        className={classes.cardBackground}
+      >
+        <IconDots onClick={handleDotsClick} className={classes.iconDots} />
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+      </Card.Section>
       <Avatar
-        src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-9.png"
+        src={currentUser?.imageUrl}
         size={80}
         radius={80}
         mx="auto"
         mt={-30}
         className={classes.avatar}
+        style={{ backgroundColor: "white" }}
       />
-      <Text ta="center" fz="lg" fw={500} mt="sm">
-        Bill Headbanger
-      </Text>
-      <Text ta="center" fz="sm" c="dimmed">
-        bheadbanger@gmail.com
-      </Text>
-      <Group mt="md" justify="center" gap={30}>
-        {items}
-      </Group>
-      <Link href={Routes.NewStudyPlan()}>
-        <Button fullWidth radius="md" mt="xl" size="md" variant="default">
-          Set study plan
+      <Box w="100%" m="0 auto" align="center" pos="relative">
+        <Text ta="center" fz="lg" fw={500} mt="sm">
+          {currentUser?.name}
+        </Text>
+        <Text ta="center" fz="sm" c="dimmed">
+          {currentUser?.email}
+        </Text>
+        <Group mt="md" justify="center" gap={30}>
+          {items}
+        </Group>
+
+        <Button
+          component={Link}
+          href={Routes.NewStudyPlan()}
+          fullWidth
+          radius="md"
+          my="xl"
+          size="md"
+          variant="filled"
+          maw="260px"
+        >
+          Create your new study plan
         </Button>
-      </Link>
+        <Radio
+          icon={CheckIcon}
+          label="Set profile as a public to receive shared resources"
+          name="check"
+          checked={currentUser?.isPublic}
+          disabled={!currentUser?.isPublic}
+          style={{ pointerEvents: "none" }}
+          color="lime.4"
+          maw="380px"
+        />
+
+        <Button
+          p="0 2px"
+          w="24"
+          h="24"
+          radius="xl"
+          className={styles.iconSettings}
+          variant="transparent"
+          color="var(--mantine-color-gray-8)"
+          style={{ position: "absolute", top: "-20px", right: "-12px", border: "none" }}
+          component={Link}
+          href={Routes.EditProfile()}
+        >
+          <IconSettings />
+        </Button>
+      </Box>
     </Card>
   )
 }

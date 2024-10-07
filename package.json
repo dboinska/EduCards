@@ -42,6 +42,7 @@
     "@mdi/react": "1.6.1",
     "@prisma/client": "5.19.1",
     "@tabler/icons-react": "2.47.0",
+    "axios": "1.7.7",
     "blitz": "2.0.5",
     "chart.js": "4.4.2",
     "clsx": "2.1.1",

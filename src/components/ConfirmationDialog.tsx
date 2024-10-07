@@ -30,15 +30,7 @@ export function ConfirmationDialog({
       size="md"
       radius="md"
       zIndex="9999"
-      styles={{
-        root: {
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 1000,
-        },
-      }}
+      position={{ top: "50%", left: 50 }}
     >
       <Text size="sm" mb="xs" fw={500}>
         {confirmationMessage}
