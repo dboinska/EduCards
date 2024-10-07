@@ -5,3 +5,25 @@
 .avatar {
   border: rem(2px) solid var(--mantine-color-body);
 }
+
+.cardBackground {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+
+.iconDots {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cardBackground:hover {
+  .iconDots {
+    opacity: 1;
+  }
+}
