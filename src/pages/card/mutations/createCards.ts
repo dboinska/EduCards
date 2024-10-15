@@ -1,7 +1,6 @@
 import type { Ctx } from "blitz"
 import db from "db"
 import { CreateCardSchema, createCardSchema } from "@/schemas/CreateCard.schema"
-import getDrawer from "@/pages/drawer/queries/getDrawer"
 import createDrawerCard from "@/pages/drawer/mutations/createDrawerCard"
 
 export default async function createCard(input: CreateCardSchema, ctx: Ctx) {
