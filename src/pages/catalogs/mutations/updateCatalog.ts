@@ -41,7 +41,7 @@ export default async function updateCatalog(input: UpdateCatalogSchema, ctx: Ctx
       throw new Error("Failed to create catalog.")
     }
 
-    const cardList = cards.map(({ key, ...card }) => ({
+    const cardList = cards.map(({ ...card }) => ({
       ...card,
       catalogId: result.catalogId,
       ownerId: ctx.session.userId as string,
@@ -50,18 +50,24 @@ export default async function updateCatalog(input: UpdateCatalogSchema, ctx: Ctx
     const existingCards = cardList.filter((card) => card.cardId)
     const newCards = cardList.filter((card) => !card.cardId)
 
-    console.log({ existingCards, newCards, cardList })
+    const [updatedCards, createdCards] = await db.$transaction([
+      ...existingCards.map((ec) =>
+        db.card.update({
+          where: {
+            cardId: ec.cardId,
+          },
+          data: {
+            ...ec,
+          },
+        })
+      ),
 
-    const [updatedCards, savedCards] = await db.$transaction([
-      db.card.updateMany({
-        data: existingCards,
-      }),
       db.card.createMany({
         data: newCards,
       }),
     ])
 
-    console.log({ savedCards })
+    console.log({ updatedCards, createdCards })
 
     return result
   } catch (error) {

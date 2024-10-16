@@ -88,7 +88,7 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
 
       const result = await response.json()
 
-      form.setFieldValue(`cards.${index}.imageURL`, result.fileURL)
+      form.setFieldValue(`cards.${index}.imageUrl`, result.fileURL)
       console.log("File uploaded successfully", result)
     } catch (error) {
       console.error("Error uploading cover", error)
@@ -96,7 +96,7 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
   }
 
   const handleOnRemove = async (index: number) => {
-    form.setFieldValue(`cards.${index}.imageURL`, "")
+    form.setFieldValue(`${index}.imageUrl`, "")
   }
 
   const cards = form.getValues().cards.map((item, index) => (
@@ -141,6 +141,8 @@ const AddCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>>
             </Flex>
           </Flex>
           <ImageUpload
+            label="Card cover:"
+            existingImageUrl={form.values[index]?.imageUrl}
             onDrop={(files) => handleOnDrop(files, index)}
             onRemove={() => handleOnRemove(index)}
           />

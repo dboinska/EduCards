@@ -220,8 +220,6 @@
   display: flex;
   border: 2px solid #e8e8e8;
   border-radius: var(--mantine-radius-md);
-  margin: var(--mantine-spacing-sm) 0;
-  /* padding: var(--mantine-spacing-sm); */
   justify-content: flex-start;
   overflow: hidden;
 }
@@ -271,7 +269,7 @@
 
 .deleteButton {
   background: transparent;
-  color: var(--mantine-color-black);
+  color: var(--mantine-color-gray-6);
   border: none;
 }
 

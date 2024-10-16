@@ -14,7 +14,7 @@ import getDrawer from "../../drawer/queries/getDrawer"
 import { useQuery } from "@blitzjs/rpc"
 import { UseDrawer } from "@/core/providers/drawerProvider"
 import { useSession } from "@blitzjs/auth"
-import { useState, useReducer } from "react"
+import { useState, useReducer, useEffect } from "react"
 import { useDebouncedCallback } from "@mantine/hooks"
 import { actionTypes, dataReducer, initialState } from "@/reducers/dataReducer"
 import { useRouter } from "next/router"
@@ -27,7 +27,7 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
   catalog,
 }) => {
   const router = useRouter()
-  const [catalogId] = useQuery(getDrawer, {})
+  const [catalogId] = useQuery(getDrawer, { id: catalog?.catalogId as string })
   const { drawerProps, setDrawerProps } = UseDrawer()
   const [_, dispatch] = useReducer(dataReducer, {
     ...initialState,
@@ -82,15 +82,30 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
     await router.push(routerQuery)
   }, 500)
 
+  useEffect(() => {
+    const fetchUpdatedCatalog = async () => {
+      const updatedCatalog = await fetch(`/api/catalog/${catalog?.catalogId}`).then((res) =>
+        res.json()
+      )
+      setCatalogDrawers(updatedCatalog.drawers)
+      setCardCounts(updatedCatalog.drawers.map((drawer) => drawer.numberOfCards))
+    }
+
+    if (cardCounts?.some((count, index) => count !== drawers?.[index]?.numberOfCards)) {
+      fetchUpdatedCatalog().catch(console.error)
+    }
+  }, [catalog?.catalogId, cardCounts, drawers])
+
+  useEffect(() => {
+    console.log({ cardCounts, catalogCards: catalog?.numberOfCards })
+  }, [cardCounts, catalog?.numberOfCards])
+
   const catalogItems = cards.map((c) => (
     <CatalogCard
       key={c.cardId}
-      // owner={c.ownerId}
-      imageUrl={c.imageURL}
+      imageUrl={c.imageUrl}
       term={c.term}
       description={c.description}
-      // settings={cardSettings}
-      // isOwner={c.ownerId === ownerId}
       owner={catalog?.owner}
       cardId={c.cardId}
       catalogId={c.catalogId}
@@ -146,7 +161,7 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
               Sort by:
             </label>
             <Box w="270px">
-              <Picker options={sortBy} onChange={handleSortChange} id="sort" />
+              <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
             </Box>
           </Flex>
         </div>

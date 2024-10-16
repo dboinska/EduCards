@@ -77,11 +77,11 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
 
   const handleOnReject = (files) => {
     console.log(files[0].errors[0].message)
-    form.setFieldError("imageURL", files[0].errors[0].message)
+    form.setFieldError("imageUrl", files[0].errors[0].message)
   }
 
   const handleOnRemove = async () => {
-    form.setFieldValue("imageURL", "")
+    form.setFieldValue("imageUrl", "")
   }
 
   return (
@@ -109,8 +109,14 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
             placeholder="Description"
             {...form.getInputProps("description")}
           />
-          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} onRemove={handleOnRemove} />
-          {form?.errors?.imageURL && <Input.Error>{form.errors.imageURL}</Input.Error>}
+          <ImageUpload
+            label="Catalog cover:"
+            existingImageUrl={form.values.imageUrl}
+            onDrop={handleOnDrop}
+            onReject={handleOnReject}
+            onRemove={handleOnRemove}
+          />
+          {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <NativeSelect
             label="Number of drawers"
             component="select"
@@ -140,7 +146,7 @@ export const getServerSideProps = gSSP(async ({ params, ctx }) => {
     const definedCard = {
       description: card.description || "",
       descriptionTranslated: card.descriptionTranslated || "",
-      imageURL: card.imageURL || "",
+      imageUrl: card.imageUrl || "",
       term: card.term || "",
       termTranslated: card.termTranslated || "",
       key: randomId(),

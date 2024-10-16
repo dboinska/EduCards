@@ -95,7 +95,12 @@ const NewCatalog: BlitzPage = () => {
             placeholder="Description"
             {...form.getInputProps("description")}
           />
-          <ImageUpload onDrop={handleOnDrop} onReject={handleOnReject} onRemove={handleOnRemove} />
+          <ImageUpload
+            label="Catalog cover:"
+            onDrop={handleOnDrop}
+            onReject={handleOnReject}
+            onRemove={handleOnRemove}
+          />
           {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <NativeSelect
             label="Number of drawers"
