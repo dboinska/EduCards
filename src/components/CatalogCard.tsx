@@ -1,4 +1,4 @@
-import { Avatar, Flex, ActionIcon, Button, Image, Badge } from "@mantine/core"
+import { Avatar, Flex, ActionIcon, Button, Image, Badge, useMantineTheme } from "@mantine/core"
 import styles from "src/styles/Catalogs.module.css"
 import classes from "src/styles/Notifications.module.css"
 import { IconX, IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
@@ -111,9 +111,12 @@ export const CatalogCard = ({
             color="red"
             className={styles.deleteButton}
             onClick={open}
+            radius="50%"
+            w="30px"
+            h="30px"
             p="var(--mantine-spacing-md) auto"
           >
-            <IconX />
+            <IconX size="20" />
           </Button>
         </div>
         <h3>{description}</h3>

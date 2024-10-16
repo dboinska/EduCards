@@ -1,18 +1,16 @@
-import { Ctx } from "blitz"
-import db from "db"
 import { IMAGE_MIME_TYPE } from "@mantine/dropzone"
+import { Ctx } from "blitz"
 import { z } from "zod"
 
 const MAX_FILE_SIZE = 5 * 1024 ** 2
 
 const imageUploadSchema = z.object({
-  image: z
-    .any()
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-    .refine(
-      (files) => IMAGE_MIME_TYPE.includes(files?.[0]?.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported."
-    ),
+  image: z.array(
+    z.object({
+      size: z.number().max(MAX_FILE_SIZE, "Max image size is 5MB."),
+      type: z.string().refine((type) => IMAGE_MIME_TYPE.includes(type), "Invalid file type"),
+    })
+  ),
 })
 
 const fileSchema = z.object({
@@ -25,13 +23,9 @@ const fileSchema = z.object({
 })
 
 export default async function imageUpload(input: z.infer<typeof fileSchema>, ctx: Ctx) {
-  // Validate input - very important for security
-
   console.log({ input })
 
   const data = fileSchema.parse(input)
-
-  // Require user to be logged in
   ctx.session.$authorize()
 
   return "asdasdas"

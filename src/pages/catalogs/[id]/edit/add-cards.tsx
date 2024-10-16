@@ -58,6 +58,10 @@ const CatalogEditCards: BlitzPage = () => {
   }
 
   const handleOnDrop = async (files: any, index: number) => {
+    if (!files[0]) {
+      console.error("No files selected")
+      return
+    }
     const formData = new FormData()
     formData.append("file", files[0])
 
@@ -73,14 +77,14 @@ const CatalogEditCards: BlitzPage = () => {
 
       const result = await response.json()
 
-      form.setFieldValue(`cards.${index}.imageURL`, result.fileURL)
+      form.setFieldValue(`cards.${index}.imageUrl`, result.fileURL)
     } catch (error) {
       console.error("Error uploading cover", error)
     }
   }
 
   const handleOnRemove = async (index: number) => {
-    form.setFieldValue(`cards.${index}.imageURL`, "")
+    form.setFieldValue(`cards.${index}.imageUrl`, "")
   }
 
   const cards = form.getValues().cards.map((item, index) => (
@@ -125,6 +129,8 @@ const CatalogEditCards: BlitzPage = () => {
             </Flex>
           </Flex>
           <ImageUpload
+            label="Card cover:"
+            existingImageUrl={form.values?.cards[index]?.imageUrl}
             onDrop={(files) => handleOnDrop(files, index)}
             onRemove={() => handleOnRemove(index)}
           />

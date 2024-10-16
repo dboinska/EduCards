@@ -21,11 +21,14 @@ model User {
   hashedPassword String?
   role           String   @default("USER")
   imageUrl       String?
+  isPublic       Boolean  @default(false)
+  cover          String?
 
   tokens   Token[]
   sessions Session[]
   Catalog  Catalog[]
   Card     Card[]
+  favorite Favorite[]
 }
 
 model Session {
@@ -79,9 +82,11 @@ model Catalog {
   imageUrl        String?
   type            String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
-  cards   Card[]
+  owner     User       @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  cards     Card[]
+  drawers   Drawer[]
+  favorites Favorite[]
 }
 
 model Card {
@@ -90,7 +95,7 @@ model Card {
   description           String?
   termTranslated        String
   descriptionTranslated String?
-  imageURL              String?
+  imageUrl              String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
@@ -99,7 +104,74 @@ model Card {
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
+
+  drawerCards DrawerCard[]
+  favorite    Favorite[]
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Frequency {
+  DAILY
+  EVERY2DAYS
+  EVERY4DAYS
+  WEEKLY
+  EVERY2WEEKS
+  MONTHLY
+  EVERY2MONTHS
+}
+
+model Drawer {
+  drawerId  String @id @default(uuid())
+  catalogId String
+
+  levelName     Level     @default(BEGINNER)
+  frequency     Frequency @default(DAILY)
+  numberOfCards Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  level         Int       @default(1)
+
+  catalog     Catalog      @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade, onUpdate: Cascade)
+  drawerCards DrawerCard[]
+}
+
+model DrawerCard {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  drawerId  String   @default(uuid())
+  cardId    String   @default(uuid())
+  drawer    Drawer   @relation(fields: [drawerId], references: [drawerId], onDelete: Cascade, onUpdate: Cascade)
+  card      Card     @relation(fields: [cardId], references: [cardId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+enum FavoriteType {
+  CARD
+  CATALOG
+}
+
+model Favorite {
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  favoriteType FavoriteType
+  userId       String
+  catalogId    String?
+  cardId       String?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalog Catalog? @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade)
+  card    Card?    @relation(fields: [cardId], references: [cardId], onDelete: Cascade)
+
+  @@unique([userId, catalogId, cardId])
 }
 
 // Next iteration
 // planCard PlanCard[]
+
+// tworzenie nowych szufladek przy udostępnianiu katalogu 

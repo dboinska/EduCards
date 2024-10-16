@@ -24,7 +24,7 @@ export const DynamicBadge = ({ data, drawerProps, setDrawerProps }: DynamicBadge
       miw="110px"
     >
       <Link
-        href={Routes.Drawer()}
+        href={Routes.Drawer({ id: data.drawerId })}
         style={{ height: "100%", minHeight: "100px" }}
         onClick={() => {
           if (!data.header) {

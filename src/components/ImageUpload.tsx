@@ -21,6 +21,7 @@ interface ImageUploadProps extends DropzoneProps {
   onRemove: () => void
   hidePreview?: boolean
   label?: string
+  existingImageUrl?: any
 }
 
 export const ImageUpload = ({
@@ -32,25 +33,36 @@ export const ImageUpload = ({
   placeholder,
   hidePreview,
   label,
+  existingImageUrl,
   ...props
 }: ImageUploadProps) => {
   const [files, setFiles] = useState<FileWithPath[]>([])
+  const [imageUrl, setImageUrl] = useState<string | null>(existingImageUrl || null)
 
   const maxFileSize = maxSize ?? 5 * 1024 ** 2
   const acceptType = accept ?? IMAGE_MIME_TYPE
 
   const fileHeight = "200px"
 
-  const removeCard = (index, event) => {
-    event.preventDefault()
-    event.stopPropagation()
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index))
+  const removeCard = (index?: number, event?: React.MouseEvent) => {
+    event?.preventDefault()
+    event?.stopPropagation()
+    if (index !== undefined) {
+      setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index))
+    } else {
+      setImageUrl(null)
+    }
+
     onRemove?.()
   }
 
   useEffect(() => {
     console.log({ files })
   }, [files])
+
+  useEffect(() => {
+    console.log("ImageUpload props:", { onDrop, onReject, onRemove, files })
+  }, [onDrop, onReject, onRemove, files])
 
   const theme = useMantineTheme()
 
@@ -108,7 +120,10 @@ export const ImageUpload = ({
           <Group wrap="nowrap" justify="left" gap="sm" w="100%" style={{ pointerEvents: "none" }}>
             <Group
               justify="start"
-              style={{ alignSelf: "flex-start", display: files.length > 0 ? "none" : "flex" }}
+              style={{
+                alignSelf: "flex-start",
+                display: files.length > 0 || (existingImageUrl && imageUrl) ? "none" : "flex",
+              }}
             >
               <Dropzone.Accept>
                 <IconUpload
@@ -137,7 +152,6 @@ export const ImageUpload = ({
                     width: rem(52),
                     height: rem(52),
                     color: "var(--mantine-color-dimmed)",
-                    // margin: "4px",
                   }}
                   stroke={1}
                 />
@@ -151,7 +165,6 @@ export const ImageUpload = ({
                       width: rem(52),
                       height: rem(52),
                       color: "var(--mantine-color-green-6)",
-                      // margin: "0 auto",
                       padding: `${theme.spacing.sm}`,
                     }}
                     stroke={1}
@@ -164,6 +177,27 @@ export const ImageUpload = ({
                 <SimpleGrid w="100%" style={{ overflow: "hidden" }}>
                   {previews}
                 </SimpleGrid>
+              ) : imageUrl ? (
+                <div style={{ position: "relative" }}>
+                  <Image
+                    src={imageUrl}
+                    alt="Existing Image"
+                    width="100%"
+                    height={fileHeight}
+                    style={{ objectFit: "cover", objectPosition: "center" }}
+                  />
+                  <IconX
+                    style={{
+                      position: "absolute",
+                      right: 10,
+                      top: 10,
+                      zIndex: 99999,
+                      cursor: "pointer",
+                      pointerEvents: "auto",
+                    }}
+                    onClick={(e) => removeCard(undefined, e)}
+                  />
+                </div>
               ) : (
                 <Box>
                   <Text size="sm" inline>

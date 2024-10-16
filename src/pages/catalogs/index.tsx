@@ -175,7 +175,7 @@ const Catalogs: BlitzPage = ({
               Sort by:
             </label>
             <Box w="240px">
-              <Picker options={sortBy} onChange={handleSortChange} id="sort" />
+              <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
             </Box>
           </Flex>
         </div>
@@ -184,7 +184,7 @@ const Catalogs: BlitzPage = ({
           {catalogs.map((c) => (
             <Catalog
               key={c.catalogId}
-              imageURL={c.imageUrl}
+              imageUrl={c.imageUrl}
               numberOfCards={c.numberOfCards}
               description={c.description}
               owner={c.owner}

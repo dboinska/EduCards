@@ -6,7 +6,7 @@ export const cardSchema = z.object({
   description: z.string().optional(),
   termTranslated: z.string().min(1),
   descriptionTranslated: z.string().optional(),
-  imageURL: z.string().optional(),
+  imageUrl: z.string().optional(),
   catalogId: z.string().uuid(),
 })
 

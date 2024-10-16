@@ -22,7 +22,7 @@ interface CatalogSetting {
 }
 
 interface CatalogProps {
-  imageURL?: string | null
+  imageUrl?: string | null
   numberOfCards: number
   description?: string | null
   owner: Owner
@@ -33,7 +33,7 @@ interface CatalogProps {
 
 const Catalog = ({
   children,
-  imageURL,
+  imageUrl,
   numberOfCards,
   description,
   owner,
@@ -91,14 +91,14 @@ const Catalog = ({
 
   return (
     <div
-      className={`${imageURL && styles.withOverlay} ${styles.body}`}
+      className={`${imageUrl && styles.withOverlay} ${styles.body}`}
       style={{
         position: "relative",
       }}
     >
-      {imageURL && (
+      {imageUrl && (
         <Image
-          src={imageURL}
+          src={imageUrl}
           alt="background image"
           w="100%"
           h="100%"
@@ -106,11 +106,16 @@ const Catalog = ({
         />
       )}
 
-      <div className={imageURL ? styles.overlay : ""}></div>
+      <div className={imageUrl ? styles.overlay : ""}></div>
       <Link className={styles.cardContent} href={Routes.CatalogId({ id: catalogId })}>
         <div className={styles.headerContainer}>
           <h2>{children}</h2>
-          <Badge size="sm" variant="filled" color="var(--mantine-color-lime-5)">
+          <Badge
+            size="sm"
+            variant="filled"
+            color="var(--mantine-color-lime-4)"
+            style={{ color: "var(--mantine-color-gray-9)" }}
+          >
             {numberOfCards} cards
           </Badge>
         </div>
@@ -120,14 +125,14 @@ const Catalog = ({
         <Flex align="center" gap="var(--mantine-spacing-sm)">
           <Avatar
             src={owner.imageUrl}
-            color={imageURL ? "white" : "blue"}
+            color={imageUrl ? "white" : "blue"}
             alt={owner?.name || "Persona image"}
             radius="xl"
             size="sm"
           />
           <Badge
             size="sm"
-            variant={imageURL ? "white" : "light"}
+            variant={imageUrl ? "white" : "light"}
             color="var(--mantine-color-blue-5)"
           >
             {owner.name || "Owner"}

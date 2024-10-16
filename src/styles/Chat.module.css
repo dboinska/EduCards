@@ -34,6 +34,35 @@
   overflow-y: auto;
 }
 
+.chatMessage {
+  position: fixed;
+  bottom: 60px;
+  margin: 8px;
+  margin-top: 23px;
+  display: flex;
+  width: calc(100% - 16px);
+  gap: 8px;
+  background-color: var(--mantine-color-white);
+  label {
+    display: none;
+  }
+
+  &::before {
+    content: "";
+    width: 100%;
+    border-bottom: solid 2px var(--mantine-color-gray-2);
+    position: absolute;
+    left: 0;
+    top: -12px;
+  }
+}
+
+.messageButton {
+  position: absolute;
+  bottom: 10px;
+  right: 8px;
+}
+
 .texareaContainer {
   border: 2px solid var(--mantine-color-gray-4);
   border-radius: 20px;

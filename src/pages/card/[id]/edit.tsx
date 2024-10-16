@@ -106,16 +106,18 @@ const EditCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
       }
 
       const result = await response.json()
+      console.log("Uploaded file URL:", result.fileURL)
 
-      form.setFieldValue("imageURL", result.fileURL)
+      form.setFieldValue("imageUrl", result.fileURL)
     } catch (error) {
       console.error("Error uploading cover", error)
     }
   }
 
   const handleOnRemove = async () => {
-    form.setFieldValue("imageURL", "")
+    form.setFieldValue("imageUrl", "")
   }
+  console.log({ form })
 
   return (
     <Layout title="Edit card">
@@ -146,7 +148,13 @@ const EditCard: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
                 />
               </Flex>
             </Flex>
-            <ImageUpload onDrop={handleOnDrop} onRemove={handleOnRemove} />
+            <ImageUpload
+              label="Card cover:"
+              existingImageUrl={form.values.imageUrl}
+              onDrop={(files) => handleOnDrop(files)}
+              onRemove={handleOnRemove}
+              {...form.getInputProps("imageUrl")}
+            />
             <Flex wrap={"wrap"} gap={"8px"} className={styles.fullWidth}>
               <Textarea
                 size="sm"
@@ -199,6 +207,7 @@ export const getServerSideProps = gSSP(async ({ query, ctx }) => {
     description: card?.description || "",
     termTranslated: card?.termTranslated || "",
     descriptionTranslated: card?.descriptionTranslated || "",
+    imageUrl: card?.imageUrl || "",
   }
 
   return { props: { query, card: parsedCard } }

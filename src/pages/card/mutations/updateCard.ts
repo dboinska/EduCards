@@ -5,11 +5,12 @@ import db from "db"
 export default async function updateCard(input: CardSchema, ctx: Ctx) {
   ctx.session.$authorize()
   const data = cardSchema.parse(input)
-  const { cardId, ...card } = data
+  const { cardId, imageUrl, ...card } = data
 
   const cardData = {
     ...card,
     ownerId: ctx.session.userId,
+    imageUrl: data.imageUrl,
   }
 
   try {
