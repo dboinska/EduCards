@@ -5,7 +5,7 @@ export const cardDefaults: Omit<CardSchema, "cardId" | "catalogId"> = {
   description: "",
   termTranslated: "",
   descriptionTranslated: "",
-  imageURL: "",
+  imageUrl: "",
 }
 
 export const storedCardDefaults: CardSchema = {

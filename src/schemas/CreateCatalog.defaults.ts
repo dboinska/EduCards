@@ -19,7 +19,7 @@ export const createCatalogCardsDefaults: NewCatalogCardsSchema = {
       description: "",
       termTranslated: "",
       descriptionTranslated: "",
-      imageURL: "",
+      imageUrl: "",
       key: randomId(),
     },
   ],

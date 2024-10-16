@@ -8,7 +8,7 @@ export const createCardDefaults = (catalogId: string): CreateCardSchema => ({
       description: "",
       termTranslated: "",
       descriptionTranslated: "",
-      imageURL: "",
+      imageUrl: "",
       key: randomId(),
       catalogId,
     },
