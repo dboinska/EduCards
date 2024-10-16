@@ -6,18 +6,9 @@ import { Avatar, Flex, Box, Badge } from "@mantine/core"
 import { AutocompleteLoading } from "src/components/AutocompleteLoading"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { Picker, PickerOption } from "@/components/Picker"
-import { UseDrawer } from "@/core/providers/drawerProvider"
 import { gSSP } from "@/blitz-server"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
-import { CommonInput } from "@/schemas/CommonInput"
-import { z } from "zod"
-import {
-  Frequency,
-  frequencyColorMap,
-  frequencyDictionary,
-  FrequencySchema,
-  frequencySchema,
-} from "@/utils/frequency"
+import { frequencyColorMap, frequencyDictionary, FrequencySchema } from "@/utils/frequency"
 import getDrawer from "../queries/getDrawer"
 import getDrawerCards from "../queries/getDrawerCards"
 import { sortBy } from "@/utils/sortBy"
@@ -26,11 +17,17 @@ import { useReducer } from "react"
 import { actionTypes, dataReducer, initialState } from "@/reducers/dataReducer"
 import { SortType } from "@/types/SortType"
 import router from "next/router"
-export interface DrawerProps {
-  id: number
-  header: string
-  desc?: string
-  cards: number
+import { ParsedUrlQuery } from "querystring"
+import type { Drawer as DrawerType, DrawerCard, User } from "db"
+import getDrawerColor from "@/utils/getDrawerColor"
+import translateFrequency from "@/utils/translateFrequency"
+import findFrequency from "@/utils/findFrequency"
+
+export interface DrawerPageProps {
+  query: ParsedUrlQuery
+  drawer: DrawerType
+  drawerCards: DrawerCard[]
+  user: User
 }
 
 const Drawer: BlitzPage = ({
@@ -43,8 +40,6 @@ const Drawer: BlitzPage = ({
     ...initialState,
     ...query,
   })
-  const { drawerProps } = UseDrawer()
-
   const handleSortChange = async ({ value }: PickerOption) => {
     dispatch({
       type: actionTypes.sort,
@@ -58,12 +53,6 @@ const Drawer: BlitzPage = ({
   console.log({ drawer })
   console.log({ drawerCards })
 
-  function findFrequency(frequency: Frequency, level: keyof FrequencySchema): number {
-    const index = frequencySchema[level].indexOf(frequency)
-
-    return index !== -1 ? index : 0
-  }
-
   const cardsLevel = () => {
     if (drawer?.frequency && drawer?.levelName) {
       const level = drawer.levelName as keyof FrequencySchema
@@ -71,27 +60,6 @@ const Drawer: BlitzPage = ({
       return index
     }
     return 0
-  }
-
-  function translateFrequency(frequency: keyof typeof frequencyDictionary | undefined): string {
-    if (!frequency) {
-      console.log("Invalid frequency")
-      return "Daily"
-    }
-
-    const result = frequencyDictionary[frequency]
-    console.log(result)
-    return result
-  }
-
-  function getDrawerColor(frequency: keyof typeof frequencyColorMap | undefined): string {
-    if (!frequency) {
-      console.log("Invalid frequency")
-      return "black"
-    }
-    const result = frequencyColorMap[frequency]
-    console.log(result)
-    return result
   }
 
   console.log(Object.values(frequencyDictionary))
@@ -103,12 +71,12 @@ const Drawer: BlitzPage = ({
         {card.map(({ id, card }) => (
           <div
             key={id}
-            className={`${card.imageURL && styles.withOverlay} ${styles.body}`}
+            className={`${card.imageUrl && styles.withOverlay} ${styles.body}`}
             style={{
-              backgroundImage: `url(${card.imageURL})`,
+              backgroundImage: `url(${card.imageUrl})`,
             }}
           >
-            <div className={card.imageURL && styles.overlay}></div>
+            <div className={card.imageUrl && styles.overlay}></div>
             <Link href={Routes.CardPage({ id: card.cardId })} className={styles.cardContent}>
               <div className={styles.headerContainer}>
                 <h2>{card.term}</h2>
@@ -119,7 +87,7 @@ const Drawer: BlitzPage = ({
               <Flex align="center" gap="var(--mantine-spacing-sm)">
                 <Avatar
                   src={user.imageUrl}
-                  color={card.imageURL ? "white" : "blue"}
+                  color={card.imageUrl ? "white" : "blue"}
                   alt="Persona image"
                   radius="xl"
                   size="sm"
@@ -127,7 +95,7 @@ const Drawer: BlitzPage = ({
                 <Badge
                   size="sm"
                   variant="light"
-                  color={card.imageURL ? "white" : "var(--mantine-color-blue-5)"}
+                  color={card.imageUrl ? "white" : "var(--mantine-color-blue-5)"}
                 >
                   {user.name || "Owner"}
                 </Badge>
@@ -139,8 +107,6 @@ const Drawer: BlitzPage = ({
     )
   }
 
-  console.log({ query, drawer })
-
   return (
     <Layout title="Catalog">
       <main className={styles.main}>
@@ -148,11 +114,11 @@ const Drawer: BlitzPage = ({
           header={"Catalog xfdgfg"}
           settings
           learningMode
-          drawerId={drawer?.drawerId}
+          drawerId={drawer?.drawerId as string}
         />
         <Box m="var(--mantine-spacing-md) 0">
           <h2 style={{ color: getDrawerColor(drawer?.frequency!), margin: "0" }}>
-            Cards from level: {cardsLevel() + 1}
+            Drawer no. {cardsLevel() + 1}
           </h2>
           <Flex
             align="center"
@@ -161,7 +127,10 @@ const Drawer: BlitzPage = ({
           >
             Repeating {translateFrequency(drawer?.frequency!)?.toLowerCase()}
             <Flex gap="var(--mantine-spacing-sm)">
-              <Badge color="var(--mantine-color-gray-6)">{drawer?.cards.length} learned</Badge>
+              {/* <Badge color="var(--mantine-color-gray-6)">
+                {drawerCards.length}
+                learned
+              </Badge> */}
               <Badge color="var(--mantine-color-gray-6)" variant="outline">
                 {drawerCards.length} left
               </Badge>
@@ -177,7 +146,7 @@ const Drawer: BlitzPage = ({
               Sort by:
             </label>
             <Box w="240px">
-              <Picker options={sortBy} onChange={handleSortChange} id="sort" />
+              <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
             </Box>
           </Flex>
         </div>
@@ -188,15 +157,17 @@ const Drawer: BlitzPage = ({
 }
 
 export const getServerSideProps = gSSP(async ({ query, ctx }) => {
-  const drawer = await getDrawer(query, ctx)
+  if (!ctx.session.userId) {
+    return
+  }
+  const user = await getUser(ctx)
+  const drawer = await getDrawer({ id: query.id as string }, ctx)
   console.log({ drawer, query })
   const drawerCards = await getDrawerCards({ drawerId: query?.id as string }, ctx)
-
-  const user = await getUser({ id: drawerCards[0]?.card.ownerId as string }, ctx)
 
   return {
     props: { query, drawer, drawerCards, user },
   }
-}) satisfies GetServerSideProps<{ query: z.infer<typeof CommonInput> }>
+}) satisfies GetServerSideProps<DrawerPageProps>
 
 export default Drawer
