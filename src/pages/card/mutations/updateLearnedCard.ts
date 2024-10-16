@@ -40,6 +40,10 @@ export default async function updateLearnedCards(input: LearnedCardsSchema, ctx:
 
   const nextFq = getNextFrequency(drawerFrequency, levelName)
 
+  if (nextFq === drawerFrequency) {
+    return
+  }
+
   const nextDrawer = await db.drawer.findFirst({
     where: {
       catalogId,
@@ -49,6 +53,20 @@ export default async function updateLearnedCards(input: LearnedCardsSchema, ctx:
 
   if (!nextDrawer) {
     console.error(`Cannot find drawer with catalogId: ${catalogId} and frequency: ${frequency}`)
+    return
+  }
+
+  const currentDrawer = await db.drawer.findFirst({
+    where: {
+      catalogId,
+      frequency: drawerFrequency,
+    },
+  })
+
+  if (!currentDrawer) {
+    console.error(
+      `Cannot find drawer with catalogId: ${catalogId} and frequency: ${drawerFrequency}`
+    )
     return
   }
 
@@ -63,6 +81,24 @@ export default async function updateLearnedCards(input: LearnedCardsSchema, ctx:
         },
       })
     ),
+    db.drawer.update({
+      where: { drawerId: nextDrawer.drawerId },
+
+      data: {
+        numberOfCards: {
+          increment: rememberedCardIds.length,
+        },
+      },
+    }),
+    db.drawer.update({
+      where: { drawerId: currentDrawer.drawerId },
+
+      data: {
+        numberOfCards: {
+          decrement: rememberedCardIds.length,
+        },
+      },
+    }),
   ])
 
   console.log({ nextDrawer })

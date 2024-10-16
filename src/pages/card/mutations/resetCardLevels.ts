@@ -5,6 +5,7 @@ import { frequency } from "@/utils/frequency"
 
 const unlearnedCardsSchema = z.object({
   unlearnedCardIds: z.array(z.string().uuid()),
+  drawerId: z.string().uuid(),
   catalogId: z.string().uuid(),
 })
 
@@ -13,7 +14,7 @@ type UnlearnedCardsSchema = z.infer<typeof unlearnedCardsSchema>
 export default async function updateUnlearnedCards(input: UnlearnedCardsSchema, ctx: Ctx) {
   ctx.session.$authorize()
 
-  const { unlearnedCardIds, catalogId } = unlearnedCardsSchema.parse(input)
+  const { unlearnedCardIds, drawerId, catalogId } = unlearnedCardsSchema.parse(input)
 
   const firstDrawer = await db.drawer.findFirst({
     where: {
@@ -38,6 +39,24 @@ export default async function updateUnlearnedCards(input: UnlearnedCardsSchema, 
         },
       })
     ),
+    db.drawer.update({
+      where: { drawerId: firstDrawer.drawerId },
+
+      data: {
+        numberOfCards: {
+          increment: unlearnedCardIds.length,
+        },
+      },
+    }),
+    db.drawer.update({
+      where: { drawerId },
+
+      data: {
+        numberOfCards: {
+          decrement: unlearnedCardIds.length,
+        },
+      },
+    }),
   ])
 
   return updatedCards
