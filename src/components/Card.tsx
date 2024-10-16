@@ -9,7 +9,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion"
 
 export interface CardProps {
   cardId: string
-  imageURL?: string
+  imageUrl?: string
   term: string
   termTranslated: string
   description?: string
@@ -24,7 +24,7 @@ export interface CardProps {
 
 const Card = ({
   cardId,
-  imageURL,
+  imageUrl,
   term,
   termTranslated,
   description,
@@ -149,7 +149,7 @@ CardProps) => {
                   }}
                 >
                   <MantineCard.Section>
-                    {imageURL && <Image src={imageURL} alt={term} height={200} />}
+                    {imageUrl && <Image src={imageUrl} alt={term} height={200} />}
                   </MantineCard.Section>
                   <MantineCard.Section className={classes.section}>
                     <Group justify="space-between">
@@ -234,7 +234,7 @@ CardProps) => {
                 </Text>
               </MantineCard.Section>
               <Flex justify="space-between" align="center" mt="sm">
-                <Text fz="sm">1/10</Text>
+                <Text fz="sm">{position}</Text>
                 <Badge variant="dark" size="sm">
                   {catalogName}
                 </Badge>

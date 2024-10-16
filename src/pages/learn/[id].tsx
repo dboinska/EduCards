@@ -7,6 +7,10 @@ import { InferGetServerSidePropsType } from "next"
 import getCatalog from "../catalogs/queries/getCatalog"
 import { useEffect, useState } from "react"
 import { Stats } from "@/components/Stats"
+import { Routes } from "@blitzjs/next"
+import { useMutation } from "@blitzjs/rpc"
+import updateLearnedCard from "../card/mutations/updateLearnedCard"
+import resetCardLevels from "../card/mutations/resetCardLevels"
 
 const LearnPage: BlitzPage = ({
   query,
@@ -14,53 +18,113 @@ const LearnPage: BlitzPage = ({
   catalog,
   drawer,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [numberOfCorrect, setNumberOfCorrect] = useState<number>(0)
-  const [numberOfWrong, setNumberOfWrong] = useState<number>(0)
+  const [learnedCards, setLearnedCards] = useState<string[]>([])
+  const [unlearnedCards, setUnlearnedCards] = useState<string[]>([])
+  const [currentCardIndex, setCurrentCardIndex] = useState<number>(0)
+  const [visibleStats, setVisibleStats] = useState<boolean>(false)
 
-  console.log({ drawerID: drawer?.drawerId })
+  const [updateDrawerLevels] = useMutation(updateLearnedCard)
+  const [resetDrawerLevels] = useMutation(resetCardLevels)
+
+  useEffect(() => {
+    setLearnedCards([]) // Clear learned cards
+    setUnlearnedCards([]) // Clear unlearned cards
+  }, [])
 
   const content = drawerCards.map(({ card }) => ({
     ...card,
     sliding: true,
-    imageURL: card.imageURL || "",
+    imageUrl: card.imageUrl || "",
     description: card.description || "",
     descriptionTranslated: card.descriptionTranslated || "",
   }))
 
-  const [currentCardIndex, setCurrentCardIndex] = useState<number>(0)
-  const [visibleStats, setVisibleStats] = useState<boolean>(false)
-
   const currentCard = content[currentCardIndex]
+
+  useEffect(() => {
+    if (!visibleStats || learnedCards.length + unlearnedCards.length < content.length - 1) {
+      return
+    }
+
+    if (learnedCards.length > 0) {
+      const saveLearned = async () => {
+        await updateDrawerLevels(
+          {
+            rememberedCardIds: learnedCards,
+            catalogId: catalog!.catalogId,
+            levelName: drawer!.levelName,
+            frequency: drawer!.frequency,
+          },
+          {
+            onSuccess: () => {
+              console.log("learnedCards updated")
+            },
+          }
+        )
+      }
+
+      void saveLearned()
+    }
+
+    if (unlearnedCards.length > 0 && drawer?.frequency !== "DAILY") {
+      const saveUnlearned = async () => {
+        await resetDrawerLevels(
+          {
+            unlearnedCardIds: unlearnedCards,
+            catalogId: catalog!.catalogId,
+            drawerId: drawer!.drawerId,
+          },
+          {
+            onSuccess: () => {
+              console.log("unlearnedCards updated")
+            },
+          }
+        )
+      }
+      void saveUnlearned()
+    }
+  }, [
+    visibleStats,
+    learnedCards,
+    unlearnedCards,
+    content.length,
+    catalog,
+    drawer,
+    resetDrawerLevels,
+    updateDrawerLevels,
+  ])
 
   const nextCard = () => {
     if (currentCardIndex < content.length - 1) {
       setCurrentCardIndex(currentCardIndex + 1)
-    } else {
-      setVisibleStats(true)
+
+      return
     }
+
+    setVisibleStats(true)
   }
 
-  useEffect(() => {
-    console.log({ numberOfCorrect, numberOfWrong, currentCard })
-  }, [numberOfCorrect, numberOfWrong, currentCard])
-
   const handleMove = (isCorrect: boolean) => {
-    nextCard()
+    const drawerCard = drawerCards.find((dc) => dc.cardId === currentCard!.cardId)
 
-    if (isCorrect) {
-      setNumberOfCorrect((current) => current + 1)
+    if (!isCorrect) {
+      setUnlearnedCards((unlearnedCards) => [...unlearnedCards, drawerCard!.id])
     } else {
-      setNumberOfWrong((current) => current + 1)
+      setLearnedCards((learnedCards) => [...learnedCards, drawerCard!.id])
     }
+
+    nextCard()
   }
 
   if (visibleStats) {
     return (
       <Stats
-        correct={numberOfCorrect}
-        wrong={numberOfWrong}
+        correct={learnedCards.length}
+        wrong={unlearnedCards.length}
         newAttemptId={"newSessionId"}
-        currentCatalogId={catalog?.catalogId}
+        currentItemId={catalog?.catalogId}
+        backButtonLabel="Back to catalog"
+        backButtonHref={Routes.CatalogId({ id: catalog?.catalogId as string })}
       />
     )
   }
@@ -73,7 +137,7 @@ const LearnPage: BlitzPage = ({
           cardId={currentCard.cardId}
           term={currentCard.term}
           termTranslated={currentCard.termTranslated}
-          imageURL={currentCard.imageURL ?? ""}
+          imageUrl={currentCard.imageUrl ?? ""}
           catalogName={catalog?.name ?? "Unknown Catalog"}
           sliding={true}
           position={`${currentCardIndex + 1} / ${drawerCards.length}`}
@@ -86,8 +150,7 @@ const LearnPage: BlitzPage = ({
 }
 
 export const getServerSideProps = gSSP(async ({ query, ctx }) => {
-  const drawer = await getDrawer(query, ctx)
-  console.log({ drawer, query })
+  const drawer = await getDrawer({ id: query.id as string }, ctx)
   const drawerCards = await getDrawerCards({ drawerId: query?.id as string }, ctx)
 
   const catalog = await getCatalog({ id: drawerCards[0]?.card.catalogId as string }, ctx)
