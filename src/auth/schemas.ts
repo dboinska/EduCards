@@ -52,10 +52,26 @@ export const ResetPassword = z
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: "Passwords don't match",
-    path: ["passwordConfirmation"], // set the path of the error
+    path: ["passwordConfirmation"],
   })
 
 export const ChangePassword = z.object({
   currentPassword: z.string(),
   newPassword: password,
 })
+
+export const EditProfileSchema = z
+  .object({
+    username: z.string().min(1, "Username is required"),
+    email: z.string().email("Invalid email"),
+    isPublic: z.boolean(),
+    imageUrl: z.string().nullable().optional(),
+    cover: z.string().nullable().optional(),
+    currentPassword: z.string(),
+    newPassword: z.union([password, z.literal("").optional()]),
+    newPasswordConfirmation: z.union([password, z.literal("").optional()]),
+  })
+  .refine((data) => data.newPassword === data.newPasswordConfirmation, {
+    message: "Passwords don't match",
+    path: ["passwordConfirmation"],
+  })

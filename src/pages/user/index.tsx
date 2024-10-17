@@ -3,14 +3,11 @@ import { UserCard } from "@/components/UserCard"
 import styles from "src/styles/Catalogs.module.css"
 import Layout from "@/core/layouts/Layout"
 import Link from "next/link"
-import { IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
-import { Badge, Flex, Avatar, Box } from "@mantine/core"
+import { Flex, Box } from "@mantine/core"
 import { DynamicBadge } from "@/components/DynamicBadge"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 
 import getUser from "@/users/queries/getUser"
-import { GetServerSideProps, InferGetServerSidePropsType } from "next"
-import { UserSchema } from "@/schemas/User.schema"
+import { InferGetServerSidePropsType } from "next"
 import { gSSP } from "@/blitz-server"
 import db from "db"
 
@@ -54,8 +51,8 @@ const UserPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
     return (
       <>
         {items.map((item) => {
-          const hasImage = item.imageUrl || item.imageURL
-          const backgroundImage = hasImage ? `url(${item.imageUrl || item.imageURL})` : "none"
+          const hasImage = item.imageUrl
+          const backgroundImage = hasImage ? `url(${item.imageUrl})` : "none"
           const textColor = hasImage ? "white" : "black"
           const linkId = item.catalogId || item.cardId
           const title = item.name || item.term
@@ -124,9 +121,14 @@ const UserPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
   )
 }
 
-export const getServerSideProps = gSSP(async ({ params, query, ctx }) => {
+export const getServerSideProps = gSSP(async ({ query, ctx }) => {
   if (!ctx.session.userId) {
-    return
+    return {
+      redirect: {
+        destination: Routes.Home(),
+        permanent: false,
+      },
+    }
   }
   const user = await getUser(ctx)
 
