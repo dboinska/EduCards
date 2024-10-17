@@ -3,8 +3,8 @@ import classes from "/src/styles/UserCard.module.css"
 import { Routes } from "@blitzjs/next"
 import Link from "next/link"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
-import { IconDots, IconSettings } from "@tabler/icons-react"
-import { useRef, useState } from "react"
+import { IconSettings } from "@tabler/icons-react"
+import { useState } from "react"
 import styles from "src/styles/Catalogs.module.css"
 
 export function UserCard({
@@ -22,10 +22,12 @@ export function UserCard({
   const currentUser = useCurrentUser()
 
   const [backgroundImage, setBackgroundImage] = useState(
-    "url(https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80)"
+    user.cover
+      ? `url(${user.cover})`
+      : "url(https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80)"
   )
 
-  console.log({ query, user })
+  console.log({ query, user, cover: user?.cover })
 
   const stats = [
     { value: totalCatalogs, label: "Catalogs" },
@@ -44,22 +46,6 @@ export function UserCard({
     </div>
   ))
 
-  const fileInputRef = useRef(null)
-
-  const handleDotsClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click()
-    }
-  }
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      const fileUrl = URL.createObjectURL(file)
-      setBackgroundImage(`url(${fileUrl})`)
-    }
-  }
-
   return (
     <Card withBorder padding="xl" radius="var(--mantine-spacing-md)" className={classes.card}>
       <Card.Section
@@ -68,16 +54,7 @@ export function UserCard({
           backgroundImage: backgroundImage,
         }}
         className={classes.cardBackground}
-      >
-        <IconDots onClick={handleDotsClick} className={classes.iconDots} />
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
-      </Card.Section>
+      ></Card.Section>
       <Avatar
         src={currentUser?.imageUrl}
         size={80}
