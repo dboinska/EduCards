@@ -123,7 +123,12 @@ const UserPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
 
 export const getServerSideProps = gSSP(async ({ query, ctx }) => {
   if (!ctx.session.userId) {
-    return
+    return {
+      redirect: {
+        destination: Routes.Home(),
+        permanent: false,
+      },
+    }
   }
   const user = await getUser(ctx)
 

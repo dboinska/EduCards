@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import classes from "../styles/Header.module.css"
 import logout from "src/auth/mutations/logout"
 import { useMutation } from "@blitzjs/rpc"
@@ -27,9 +27,15 @@ import {
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 import { Routes } from "@blitzjs/next"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import router from "next/router"
 
 export function HeaderUserAccount(auth) {
-  const [logoutMutation] = useMutation(logout)
+  const [logoutMutation] = useMutation(logout, {
+    onSuccess: async () => {
+      console.log("success")
+      await router.push(Routes.Home())
+    },
+  })
 
   const [userMenuOpened, setUserMenuOpened] = useState(false)
 
@@ -43,7 +49,7 @@ export function HeaderUserAccount(auth) {
       className={`${classes.link} ${link.className ? classes[link.className] : ""}`}
       data-active={isCurrentPath(link)}
       onClick={() => {
-        closeDrawer()
+        // closeDrawer()
       }}
       href={link.path}
     >
@@ -57,6 +63,11 @@ export function HeaderUserAccount(auth) {
       name: loggedUser?.name,
       email: loggedUser?.email,
       image: loggedUser?.imageUrl,
+    }
+
+    const handleLogout = async () => {
+      console.log("xxxxxxxxxxxxxxxxxxxxx")
+      await logoutMutation()
     }
 
     return (
@@ -139,10 +150,7 @@ export function HeaderUserAccount(auth) {
 
             <Menu.Item
               color="red"
-              onClick={async (event) => {
-                event.preventDefault()
-                await logoutMutation()
-              }}
+              onClick={handleLogout}
               leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
             >
               Logout
@@ -153,9 +161,9 @@ export function HeaderUserAccount(auth) {
     )
   }
 
-  function closeDrawer() {
-    throw new Error("Function not implemented.")
-  }
+  // function closeDrawer() {
+  //   throw new Error("Function not implemented.")
+  // }
 
   return (
     <Box>
@@ -165,7 +173,7 @@ export function HeaderUserAccount(auth) {
             <Link
               key={"Home"}
               onClick={() => {
-                closeDrawer()
+                // closeDrawer()
               }}
               href={"/"}
             >
