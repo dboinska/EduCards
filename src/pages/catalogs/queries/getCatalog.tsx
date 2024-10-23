@@ -12,14 +12,10 @@ export default async function getCatalog(input: CatalogSchema, ctx: Ctx) {
       owner: true,
       cards: true,
       drawers: true,
+      sharedCatalog: true,
     },
     where: {
       catalogId: data.id,
-      // cards: {
-      //   is: {
-      //     name: "bob",
-      //   },
-      // },
     },
   })
 
