@@ -5,7 +5,7 @@ import { cardSchema } from "./Card.schema"
 export const createCatalogBaseSchema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
-  imageUrl: z.string().optional(),
+  imageUrl: z.string().nullable().optional(),
   amountOfDrawers: z.string().default("3"),
 })
 
