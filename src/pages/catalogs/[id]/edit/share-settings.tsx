@@ -22,7 +22,7 @@ import { CreateCatalogContextProps, useCatalogContext } from "@/contexts/CreateC
 import { CreateCatalogLayout } from "@/layouts/CreateCatalogLayout"
 import { zodResolver } from "mantine-form-zod-resolver"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { createCatalogSharingDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import { useMutation } from "@blitzjs/rpc"
@@ -54,14 +54,10 @@ const CatalogEditShareSettingsPage: BlitzPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ catalog, sharedProfiles, userProfiles }) => {
   const [updateCatalogMutation] = useMutation(updateCatalog)
-
-  const [value, setValue] = useState(false)
-
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push, query } = useRouter()
 
   console.log({ userProfiles })
-
   console.log({ sharedProfiles })
 
   const form = useForm({
