@@ -293,6 +293,9 @@
   }
 }
 
+.nativeSelectDescription {
+  color: var(--mantine-color-red-6);
+}
 /* MOBILE */
 @media (max-width: 800px) {
   .linkGrid {
