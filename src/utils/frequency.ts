@@ -51,3 +51,11 @@ export const frequencySchema: FrequencySchema = {
     "EVERY2MONTHS",
   ],
 }
+
+export const Level = {
+  BEGINNER: "BEGINNER",
+  INTERMEDIATE: "INTERMEDIATE",
+  ADVANCED: "ADVANCED",
+} as const
+
+export type LevelType = (typeof Level)[keyof typeof Level]
