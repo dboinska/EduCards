@@ -139,18 +139,20 @@ export const CatalogCard = ({
           </Badge>
         </Flex>
         <Flex className={styles.controls}>
-          <Button
-            p="0 2px"
-            w="24"
-            h="24"
-            radius="xl"
-            onClick={() => handleEdit(cardId)}
-            className={styles.iconSettings}
-            variant="transparent"
-            color="var(--mantine-color-gray-8)"
-          >
-            <IconSettings />
-          </Button>
+          {currentUser?.id === owner.id && (
+            <Button
+              p="0 2px"
+              w="24"
+              h="24"
+              radius="xl"
+              onClick={() => handleEdit(cardId)}
+              className={styles.iconSettings}
+              variant="transparent"
+              color="var(--mantine-color-gray-8)"
+            >
+              <IconSettings />
+            </Button>
+          )}
           {favCard}
         </Flex>
       </div>
