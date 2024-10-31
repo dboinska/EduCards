@@ -48,8 +48,8 @@ export function Picker({ defaultValue, options, onChange, id, hideImages, search
       data={options.map((option) => ({
         value: option.value,
         label: option.label,
-        image: option.image,
-        imageAlt: option.imageAlt,
+        image: option?.image,
+        imageAlt: option?.imageAlt,
       }))}
       rightSection={<IconChevronDown size="1rem" />}
       miw="200px"

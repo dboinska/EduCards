@@ -1,4 +1,5 @@
 import { Routes, type BlitzPage } from "@blitzjs/next"
+import { Ctx } from "blitz"
 import { useRouter } from "next/router"
 import { Box, Button, Input, NativeSelect, Stepper, TextInput } from "@mantine/core"
 import { useForm } from "@mantine/form"
@@ -118,8 +119,12 @@ const EditCatalog: BlitzPage<InferGetServerSidePropsType<typeof getServerSidePro
           />
           {form?.errors?.imageUrl && <Input.Error>{form.errors.imageUrl}</Input.Error>}
           <NativeSelect
+            classNames={{
+              description: styles.nativeSelectDescription,
+            }}
             label="Number of drawers"
             component="select"
+            description="WARNING: Changing the number of drawers returns all cards to drawer no. 1"
             data={["3", "5", "7"]}
             mt="md"
             {...form.getInputProps("amountOfDrawers")}
@@ -142,6 +147,16 @@ EditCatalog.getLayout = function getLayout(page) {
 export const getServerSideProps = gSSP(async ({ params, ctx }) => {
   const id = (params as CatalogSchema).id
   const catalog = await getCatalog({ id }, ctx)
+
+  if (catalog?.owner.id !== ctx.session.userId) {
+    return {
+      redirect: {
+        destination: Routes.Home(),
+        permanent: false,
+      },
+    }
+  }
+
   const cards = catalog?.cards.map((card) => {
     const definedCard = {
       description: card.description || "",
@@ -157,7 +172,9 @@ export const getServerSideProps = gSSP(async ({ params, ctx }) => {
     return definedCard
   })
 
-  return { props: { catalog: { ...catalog, cards: cards || [] } } }
+  const sharedWith = catalog?.sharedCatalog.map((sc) => sc.userId) || []
+
+  return { props: { catalog: { ...catalog, cards: cards || [], sharedWith } } }
 })
 
 export default EditCatalog

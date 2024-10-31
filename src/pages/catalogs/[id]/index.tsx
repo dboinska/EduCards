@@ -12,7 +12,6 @@ import { sortBy } from "@/utils/sortBy"
 import styles from "src/styles/Catalogs.module.css"
 import getDrawer from "../../drawer/queries/getDrawer"
 import { useQuery } from "@blitzjs/rpc"
-import { UseDrawer } from "@/core/providers/drawerProvider"
 import { useSession } from "@blitzjs/auth"
 import { useState, useReducer, useEffect } from "react"
 import { useDebouncedCallback } from "@mantine/hooks"
@@ -28,7 +27,6 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
 }) => {
   const router = useRouter()
   const [catalogId] = useQuery(getDrawer, { id: catalog?.catalogId as string })
-  const { drawerProps, setDrawerProps } = UseDrawer()
   const [_, dispatch] = useReducer(dataReducer, {
     ...initialState,
     ...query,

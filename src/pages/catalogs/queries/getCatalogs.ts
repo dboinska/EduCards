@@ -21,7 +21,14 @@ export default async function getCatalogs(input: z.infer<typeof CommonInput>, ct
   const catalogType = {
     own: { ownerId: ctx.session.userId },
     public: { type: "public" },
-    shared: { isShared: true },
+    shared: {
+      isShared: true,
+      sharedCatalog: {
+        some: {
+          userId: ctx.session.userId,
+        },
+      },
+    },
   }
 
   const catalogs = await db.catalog.findMany({

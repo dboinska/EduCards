@@ -24,11 +24,12 @@ model User {
   isPublic       Boolean  @default(false)
   cover          String?
 
-  tokens   Token[]
-  sessions Session[]
-  Catalog  Catalog[]
-  Card     Card[]
-  favorite Favorite[]
+  tokens        Token[]
+  sessions      Session[]
+  Catalog       Catalog[]
+  Card          Card[]
+  favorite      Favorite[]
+  sharedCatalog SharedCatalog[]
 }
 
 model Session {
@@ -82,11 +83,22 @@ model Catalog {
   imageUrl        String?
   type            String
 
-  owner     User       @relation(fields: [ownerId], references: [id])
-  ownerId   String
-  cards     Card[]
-  drawers   Drawer[]
-  favorites Favorite[]
+  owner         User            @relation(fields: [ownerId], references: [id])
+  ownerId       String
+  cards         Card[]
+  drawers       Drawer[]
+  favorites     Favorite[]
+  sharedCatalog SharedCatalog[]
+}
+
+model SharedCatalog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  catalogId String   @default(uuid())
+  userId    String   @default(uuid())
+  catalog   Catalog  @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Card {

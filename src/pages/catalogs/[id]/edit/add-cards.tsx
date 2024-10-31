@@ -20,8 +20,14 @@ import { ImageUpload } from "@/components/ImageUpload"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCatalogCardsDefaults } from "@/schemas/CreateCatalog.defaults"
 import { useEffect } from "react"
+import { gSSP } from "@/blitz-server"
+import { CatalogSchema } from "@/schemas/Catalog.schema"
+import getCatalog from "../../queries/getCatalog"
+import { InferGetServerSidePropsType } from "next"
 
-const CatalogEditCards: BlitzPage = () => {
+const CatalogEditCards: BlitzPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({}) => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push, query } = useRouter()
 
@@ -221,5 +227,21 @@ const CatalogEditCards: BlitzPage = () => {
 CatalogEditCards.getLayout = function getLayout(page) {
   return <CreateCatalogLayout>{page}</CreateCatalogLayout>
 }
+
+export const getServerSideProps = gSSP(async ({ params, ctx }) => {
+  const id = (params as CatalogSchema).id
+  const catalog = await getCatalog({ id }, ctx)
+
+  if (catalog?.ownerId !== ctx.session.userId) {
+    return {
+      redirect: {
+        destination: Routes.Home(),
+        permanent: false,
+      },
+    }
+  }
+
+  return { props: { catalog: { ...catalog } } }
+})
 
 export default CatalogEditCards

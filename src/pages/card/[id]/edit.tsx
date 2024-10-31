@@ -200,6 +200,15 @@ export const getServerSideProps = gSSP(async ({ query, ctx }) => {
     },
     ctx
   )
+
+  if (card?.owner.id !== ctx.session.userId) {
+    return {
+      redirect: {
+        destination: Routes.Home(),
+        permanent: false,
+      },
+    }
+  }
   const parsedCard = {
     catalogId: query.catalogId as string,
     cardId: (query?.id as string) || "",

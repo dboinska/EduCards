@@ -1,7 +1,17 @@
 import { Routes, type BlitzPage } from "@blitzjs/next"
 import Layout from "@/core/layouts/Layout"
 import styles from "src/styles/Catalogs.module.css"
-import { Box, Button, Checkbox, Flex, Group, MultiSelect, Stepper, Text } from "@mantine/core"
+import {
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Group,
+  MultiSelect,
+  Stepper,
+  Text,
+} from "@mantine/core"
 import { useForm } from "@mantine/form"
 import {
   CreateCatalogSchema,
@@ -9,7 +19,6 @@ import {
   NewCatalogShareSettingsSchema,
 } from "@/schemas/CreateCatalog.schema"
 import { CreateCatalogContextProps, useCatalogContext } from "@/contexts/CreateCatalog.context"
-import { CreateCatalogLayout } from "@/layouts/CreateCatalogLayout"
 import { zodResolver } from "mantine-form-zod-resolver"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
@@ -19,25 +28,28 @@ import { useMutation } from "@blitzjs/rpc"
 import createCatalog from "../mutations/createCatalog"
 import { notifications } from "@mantine/notifications"
 import classes from "src/styles/Notifications.module.css"
+import getUsers from "@/users/queries/getUsers"
+import getSharedProfiles from "@/users/queries/getSharedProfiles"
+import { InferGetServerSidePropsType } from "next"
+import { gSSP } from "@/blitz-server"
+import { CreateCatalogLayout } from "@/layouts/CreateCatalogLayout"
 
-const sharedWith = [
-  {
-    label: "CDS",
-    value: "c508fe56-c466-4ee1-ab24-e0c52aa9a3d6",
-    image:
-      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
-  },
-  {
-    label: "XSD",
-    value: "cf12f0ba-b092-4304-9862-7a7343a93c4f",
-    image:
-      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
-  },
-]
+const renderMultiSelectOption = ({ option }) => (
+  <Flex gap="md">
+    <Avatar src={option.image} size={24} radius="xl" />
+    <div>
+      <Text size="sm">{option.label}</Text>
+      <Text size="xs" color="dimmed">
+        {option.email}
+      </Text>
+    </div>
+  </Flex>
+)
 
-const NewCatalogShareSettingsPage: BlitzPage = () => {
+const NewCatalogShareSettingsPage: BlitzPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ userProfiles }) => {
   const [catalogMutation] = useMutation(createCatalog)
-  const [checked, setChecked] = useState(false)
 
   const form = useForm({
     mode: "uncontrolled",
@@ -111,28 +123,38 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
         </Box>
         <form name="newCatalog" onSubmit={form.onSubmit(handleSubmit)}>
           <Flex gap={"var(--mantine-spacing-md)"} direction={"column"} className={styles.container}>
-            <Checkbox.Card
-              className={styles.root}
-              radius="md"
-              checked={checked}
-              onClick={() => setChecked((c) => !c)}
-              {...form.getInputProps("isShared")}
+            <Flex
+              gap="lg"
+              my="lg"
+              align="center"
+              style={{
+                border: "1px solid var(--mantine-color-gray-4)",
+                borderRadius: "var(--mantine-radius-md)",
+              }}
             >
-              <Group wrap="nowrap" align="flex-start">
-                <Checkbox.Indicator />
-                <div>
-                  <Text className={styles.label}>Share as public catalog.</Text>
-                  <Text className={styles.description}>
-                    Your catalog will also be visible to non-logged-in users.
-                  </Text>
-                </div>
-              </Group>
-            </Checkbox.Card>
+              <Checkbox
+                className={styles.root}
+                radius="sm"
+                ml="sm"
+                {...form.getInputProps("isShared", { type: "checkbox" })}
+              ></Checkbox>
+              <Flex direction="column" py="md">
+                <Text className={styles.label}>Share as public catalog.</Text>
+                <Text className={styles.description} size="sm" color="dimmed">
+                  Your catalog will also be visible to non-logged-in users.
+                </Text>
+              </Flex>
+            </Flex>
+
             <MultiSelect
               label="Select users to share the catalog"
               placeholder="Pick users"
-              data={sharedWith}
+              data={userProfiles}
+              nothingFoundMessage="No shared profiles found"
+              renderOption={renderMultiSelectOption}
+              maxDropdownHeight={300}
               checkIconPosition="right"
+              clearable
               {...form.getInputProps("sharedWith")}
             />
             <Group justify="flex-end" mt="xl">
@@ -149,6 +171,24 @@ const NewCatalogShareSettingsPage: BlitzPage = () => {
     </Layout>
   )
 }
+
+export const getServerSideProps = gSSP(async ({ params, ctx }) => {
+  const users = await getUsers({}, ctx)
+  const publicProfiles = await getSharedProfiles({}, ctx)
+
+  const userProfiles = publicProfiles.map(({ name, id, imageUrl }) => ({
+    label: name,
+    value: id,
+    image:
+      imageUrl ||
+      "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
+  }))
+  const sharedProfiles = await getSharedProfiles({}, ctx)
+
+  console.log({ sharedProfiles })
+
+  return { props: { sharedProfiles, userProfiles } }
+})
 
 NewCatalogShareSettingsPage.getLayout = function getLayout(page) {
   return <CreateCatalogLayout>{page}</CreateCatalogLayout>
