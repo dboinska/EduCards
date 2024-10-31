@@ -19,11 +19,12 @@ import { IconCirclePlus, IconGripVertical, IconX } from "@tabler/icons-react"
 import { ImageUpload } from "@/components/ImageUpload"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createCatalogCardsDefaults } from "@/schemas/CreateCatalog.defaults"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 const NewCatalogAddCards: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push } = useRouter()
+  const router = useRouter()
 
   useEffect(() => {
     if (!formState) {
@@ -34,6 +35,13 @@ const NewCatalogAddCards: BlitzPage = () => {
       pushBack().catch(console.error)
     }
   }, [formState, push])
+
+  useEffect(() => {
+    if (router.isReady) {
+      form.setFieldValue("cards.0.term", router.query.term)
+      form.setFieldValue("cards.0.termTranslated", router.query.termTranslated)
+    }
+  }, [router.isReady])
 
   const form = useForm<NewCatalogCardsSchema>({
     validate: zodResolver(newCatalogCardsSchema),

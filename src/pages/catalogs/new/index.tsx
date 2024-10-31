@@ -1,5 +1,5 @@
 import { Routes, type BlitzPage } from "@blitzjs/next"
-import { useRouter } from "next/router"
+import router, { useRouter } from "next/router"
 import { Box, Button, Input, NativeSelect, Stepper, TextInput } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { zodResolver } from "mantine-form-zod-resolver"
@@ -18,10 +18,17 @@ import {
 import { createCatalogBaseDefaults } from "@/schemas/CreateCatalog.defaults"
 
 import type { CreateCatalogContextProps } from "@/contexts/CreateCatalog.context"
+import { useEffect } from "react"
 
 const NewCatalog: BlitzPage = () => {
   const { formState, setFormState } = useCatalogContext() as CreateCatalogContextProps
   const { push } = useRouter()
+
+  useEffect(() => {
+    if (router.isReady && router.query.name) {
+      form.setFieldValue("name", router.query.name as string)
+    }
+  }, [router.isReady, router.query.name])
 
   const form = useForm({
     mode: "uncontrolled",
@@ -33,9 +40,15 @@ const NewCatalog: BlitzPage = () => {
 
   const handleSubmit = async (values: CreateCatalogBaseSchema) => {
     console.log({ values })
+    console.log({ query: router.query })
 
     setFormState((state) => ({ ...state, ...values }))
-    await push(Routes.NewCatalogAddCards())
+    await push({
+      ...Routes.NewCatalogAddCards(),
+      query: {
+        ...router.query,
+      },
+    })
   }
 
   const handleOnDrop = async (files) => {
@@ -86,7 +99,7 @@ const NewCatalog: BlitzPage = () => {
             label="Catalog name"
             withAsterisk
             placeholder="Catalog name"
-            error={form.errors.catalogueName}
+            error={form.errors.catalogName}
             {...form.getInputProps("name", { isRequired: true })}
           />
           <TextInput

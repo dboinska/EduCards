@@ -28,14 +28,13 @@ import { useMutation } from "@blitzjs/rpc"
 import createCatalog from "../mutations/createCatalog"
 import { notifications } from "@mantine/notifications"
 import classes from "src/styles/Notifications.module.css"
-import { CatalogSchema } from "@/schemas/Catalog.schema"
-import getCatalog from "../queries/getCatalog"
 import getUsers from "@/users/queries/getUsers"
 import getSharedProfiles from "@/users/queries/getSharedProfiles"
-import getCatalogViewers from "../queries/getCatalogViewers"
 import { InferGetServerSidePropsType } from "next"
+import { gSSP } from "@/blitz-server"
+import { CreateCatalogLayout } from "@/layouts/CreateCatalogLayout"
 
-const renderMultiSelectOption = ({ option, ...others }) => (
+const renderMultiSelectOption = ({ option }) => (
   <Flex gap="md">
     <Avatar src={option.image} size={24} radius="xl" />
     <div>
@@ -49,9 +48,8 @@ const renderMultiSelectOption = ({ option, ...others }) => (
 
 const NewCatalogShareSettingsPage: BlitzPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ catalog, sharedProfiles, userProfiles }) => {
+> = ({ userProfiles }) => {
   const [catalogMutation] = useMutation(createCatalog)
-  const [checked, setChecked] = useState(false)
 
   const form = useForm({
     mode: "uncontrolled",
@@ -175,23 +173,8 @@ const NewCatalogShareSettingsPage: BlitzPage<
 }
 
 export const getServerSideProps = gSSP(async ({ params, ctx }) => {
-  const id = (params as CatalogSchema).id
-  const catalog = await getCatalog({ id }, ctx)
   const users = await getUsers({}, ctx)
   const publicProfiles = await getSharedProfiles({}, ctx)
-  const viewers = await getCatalogViewers({ id }, ctx)
-
-  for (const viewerId of viewers) {
-    const viewer = publicProfiles.find((profile) => profile.id === viewerId)
-
-    if (!viewer) {
-      const privateProfile = users.find((user) => user.id === viewerId)
-
-      if (privateProfile) {
-        publicProfiles.push(privateProfile)
-      }
-    }
-  }
 
   const userProfiles = publicProfiles.map(({ name, id, imageUrl }) => ({
     label: name,
@@ -200,21 +183,15 @@ export const getServerSideProps = gSSP(async ({ params, ctx }) => {
       imageUrl ||
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
   }))
-
-  if (catalog?.ownerId !== ctx.session.userId) {
-    return {
-      redirect: {
-        destination: Routes.Home(),
-        permanent: false,
-      },
-    }
-  }
-
   const sharedProfiles = await getSharedProfiles({}, ctx)
 
   console.log({ sharedProfiles })
 
-  return { props: { catalog: { ...catalog }, sharedProfiles, userProfiles } }
+  return { props: { sharedProfiles, userProfiles } }
 })
+
+NewCatalogShareSettingsPage.getLayout = function getLayout(page) {
+  return <CreateCatalogLayout>{page}</CreateCatalogLayout>
+}
 
 export default NewCatalogShareSettingsPage
