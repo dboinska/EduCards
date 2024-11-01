@@ -14,9 +14,11 @@ import { Picker, PickerOption } from "@/components/Picker"
 import { Loader } from "@mantine/core"
 import db from "db"
 import createCards from "./card/mutations/createCards"
-import { useMutation } from "@blitzjs/rpc"
+import { useMutation, useQuery } from "@blitzjs/rpc"
 import { useRouter } from "next/router"
 import { notifications } from "@mantine/notifications"
+
+import getSuggestion from "./user/queries/getSuggestions"
 
 import classes from "src/styles/Notifications.module.css"
 
@@ -45,16 +47,22 @@ const Suggestions: BlitzPage = ({
   const [opened, { open, close }] = useDisclosure(false)
   const currentUser = useCurrentUser()
   const { push } = useRouter()
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+
   const [selectedOption, setSelectedOption] = useState<PickerOption>(() => ({
     label: userCatalogs[0]?.label || "",
     value: userCatalogs[0]?.value || "",
   }))
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion>(initialSuggestion)
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
 
   const [cardMutation] = useMutation(createCards)
+
+  const [data, { isError, isLoading, isSuccess }] = useQuery(
+    getSuggestion,
+    {
+      catalogIds: latestCatalogIds,
+    },
+    { suspense: false, refetchOnWindowFocus: false }
+  )
 
   const favCard = currentUser ? (
     <ActionIcon variant="subtle" radius="md" size={22}>
@@ -66,51 +74,17 @@ const Suggestions: BlitzPage = ({
     </ActionIcon>
   ) : null
 
-  // zamień na react-query
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        const response = await fetch("/api/suggestions/fetchSuggestions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: currentUser?.id,
-            latestCatalogIds,
-          }),
-        })
-
-        if (!response.ok) {
-          setHasError(true)
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const data = await response.json()
-        console.log({ data: data.suggestions })
-        setSuggestions(data.suggestions)
-      } catch (error) {
-        console.error("Failed to load suggestions:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void fetchData()
-  }, [currentUser])
-
   const addToExistingCatalog = async (
     catalogId: string,
     { category, ...suggestion }: Suggestion
   ) => {
     console.log("Adding suggestion:", { catalogId, suggestion, userId })
     try {
-      const data = {
+      const dataToMutate = {
         cards: [{ ...suggestion, catalogId, key: new Date().getTime().toString() }],
       }
 
-      await cardMutation(data, {
+      await cardMutation(dataToMutate, {
         onSuccess: () => {
           notifications.show({
             title: "Suggestion added",
@@ -173,11 +147,11 @@ const Suggestions: BlitzPage = ({
             </Flex>
           )}
 
-          {!isLoading &&
-            suggestions.length > 0 &&
-            suggestions.map((suggestion) => (
+          {isSuccess &&
+            data?.suggestions?.length! > 0 &&
+            data?.suggestions.map((suggestion) => (
               <div key={suggestion.id} className={styles.body}>
-                <Link className={styles.cardContent} href={Routes.Cards()}>
+                <Link className={styles.cardContent} href={Routes.CardPage({ id: suggestion.id })}>
                   <div className={styles.headerContainer}>
                     <h2>
                       Term:{" "}
@@ -230,11 +204,11 @@ const Suggestions: BlitzPage = ({
               </div>
             ))}
 
-          {!isLoading && suggestions.length <= 0 && (
+          {!isError && data?.suggestions.length! <= 0 && (
             <p>There are no suggestions, create a new directory to display them</p>
           )}
 
-          {hasError &&
+          {isError &&
             notifications.show({
               title: "An error occurred while retrieving suggestions",
               message: `Try again`,
