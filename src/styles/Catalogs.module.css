@@ -45,8 +45,8 @@
   flex-direction: column;
   align-self: center;
   max-width: calc(min(var(--screen-width), 800px));
-  max-width: 400px;
-  height: 190px;
+  max-width: 322px;
+  height: 180px;
   position: relative;
 
   justify-content: end;
@@ -66,7 +66,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 200px;
+      max-width: 210px;
       cursor: pointer;
     }
   }
