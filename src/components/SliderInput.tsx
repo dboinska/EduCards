@@ -2,32 +2,45 @@ import { useState } from "react"
 import { NumberInput, Slider } from "@mantine/core"
 import classes from "src/styles/SliderInput.module.css"
 
-export function SliderInput({ label, placeholder, step, min, max, size }) {
-  const [value, setValue] = useState<number | string>(max)
+export function SliderInput({ error, label, placeholder, step, min, max, size, value, onChange }) {
+  const handleSliderChange = (value) => {
+    onChange(value)
+  }
+
+  const handleNumberInputChange = (value) => {
+    if (value !== undefined) {
+      onChange(value)
+    }
+  }
+
   return (
-    <div className={classes.wrapper}>
-      <NumberInput
-        value={value}
-        onChange={setValue}
-        label={label}
-        placeholder={placeholder}
-        step={step}
-        min={min}
-        max={max}
-        hideControls
-        classNames={{ input: classes.input, label: classes.label }}
-      />
-      <Slider
-        max={max}
-        step={step}
-        min={min}
-        label={null}
-        value={typeof value === "string" ? 0 : value}
-        onChange={setValue}
-        size={size}
-        className={classes.slider}
-        classNames={classes}
-      />
-    </div>
+    <>
+      <div className={classes.wrapper}>
+        <NumberInput
+          value={value}
+          onChange={handleNumberInputChange}
+          label={label}
+          placeholder={placeholder}
+          step={step}
+          min={min}
+          max={max}
+          hideControls
+          classNames={{ input: classes.input, label: classes.label }}
+        />
+        <Slider
+          max={max}
+          step={step}
+          min={min}
+          label={null}
+          labelAlwaysOn
+          value={typeof value === "string" ? 0 : value}
+          onChangeEnd={handleSliderChange}
+          size={size}
+          className={classes.slider}
+          classNames={classes}
+        />
+      </div>
+      {error && <div style={{ color: "red", fontSize: "12px", paddingLeft: "12px" }}>{error}</div>}
+    </>
   )
 }
