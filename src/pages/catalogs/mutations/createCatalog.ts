@@ -1,7 +1,6 @@
 import type { Ctx } from "blitz"
 import { CreateCatalogSchema, createCatalogSchema } from "@/schemas/CreateCatalog.schema"
 import { CreateDrawerSchema } from "@/schemas/CreateDrawer.schema"
-import { CreateDrawerCardSchema } from "@/schemas/CreateDrawerCard.schema"
 
 import { DRAWER_LEVEL, DRAWER_LEVEL_NAME } from "@/utils/drawer"
 

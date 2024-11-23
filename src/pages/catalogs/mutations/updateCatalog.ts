@@ -9,6 +9,7 @@ import unshareCatalog from "./unshareCatalog"
 import { DRAWER_LEVEL, DRAWER_LEVEL_NAME } from "@/utils/drawer"
 import db from "db"
 import { z } from "zod"
+import { Ctx } from "blitz"
 
 const updateCatalogSchema = createCatalogSchema.merge(
   z.object({
