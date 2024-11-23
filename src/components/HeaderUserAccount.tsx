@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import classes from "../styles/Header.module.css"
 import logout from "src/auth/mutations/logout"
 import { useMutation } from "@blitzjs/rpc"
@@ -18,11 +18,11 @@ import {
 } from "@mantine/core"
 import {
   IconLogout,
-  IconHeart,
   IconStar,
   IconMessage,
   IconSettings,
   IconChevronDown,
+  IconChartDots,
 } from "@tabler/icons-react"
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 import { Routes } from "@blitzjs/next"
@@ -101,7 +101,7 @@ export function HeaderUserAccount(auth) {
             <Link href={Routes.Statistics()}>
               <Menu.Item
                 leftSection={
-                  <IconHeart
+                  <IconChartDots
                     style={{ width: rem(16), height: rem(16) }}
                     color={theme.colors.red[6]}
                     stroke={1.5}
