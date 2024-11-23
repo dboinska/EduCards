@@ -114,7 +114,7 @@ const Chat: BlitzPage = () => {
             ))}
             {loading && (
               <Flex justify="center" align="center" mt="md">
-                <Loader size="sm" /> {/* Mantine's Loader component */}
+                <Loader size="sm" />
                 <Text ml="sm">Waiting for the bot&apos;s response...</Text>
               </Flex>
             )}
@@ -126,7 +126,7 @@ const Chat: BlitzPage = () => {
             onSubmit={handleSubmit}
             className={classes.chatMessage}
           >
-            <Flex maw="100%" className={classes.texareaContainer} mx={theme.spacing.sm}>
+            <Flex w="100%" className={classes.texareaContainer} mx={theme.spacing.sm}>
               <LabeledTextArea
                 placeholder="Message"
                 label=""
