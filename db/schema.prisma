@@ -30,6 +30,7 @@ model User {
   Card          Card[]
   favorite      Favorite[]
   sharedCatalog SharedCatalog[]
+  StudyPlan     StudyPlan[]
 }
 
 model Session {
@@ -89,6 +90,7 @@ model Catalog {
   drawers       Drawer[]
   favorites     Favorite[]
   sharedCatalog SharedCatalog[]
+  StudyPlan     StudyPlan[]
 }
 
 model SharedCatalog {
@@ -181,6 +183,22 @@ model Favorite {
   card    Card?    @relation(fields: [cardId], references: [cardId], onDelete: Cascade)
 
   @@unique([userId, catalogId, cardId])
+}
+
+model StudyPlan {
+  id             String   @id @default(uuid())
+  name           String
+  daysPerWeek    Int      @default(7)
+  secondsPerDay  Int      @default(900)
+  wordsPerDay    Int      @default(4)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  completionDate DateTime
+  catalogId      String
+  color          String
+  catalog        Catalog  @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade, onUpdate: Cascade)
+  ownerId        String
+  owner          User     @relation(fields: [ownerId], references: [id])
 }
 
 // Next iteration
