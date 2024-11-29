@@ -11,6 +11,7 @@ import { Routes } from "@blitzjs/next"
 import { useMutation } from "@blitzjs/rpc"
 import updateLearnedCard from "../card/mutations/updateLearnedCard"
 import resetCardLevels from "../card/mutations/resetCardLevels"
+import updateActiveLearnSession from "../drawer/mutations/updateActiveLearnSession"
 
 const LearnPage: BlitzPage = ({
   query,
@@ -25,10 +26,11 @@ const LearnPage: BlitzPage = ({
 
   const [updateDrawerLevels] = useMutation(updateLearnedCard)
   const [resetDrawerLevels] = useMutation(resetCardLevels)
+  const [updateLearnSessionMutation] = useMutation(updateActiveLearnSession)
 
   useEffect(() => {
-    setLearnedCards([]) // Clear learned cards
-    setUnlearnedCards([]) // Clear unlearned cards
+    setLearnedCards([])
+    setUnlearnedCards([])
   }, [])
 
   const content = drawerCards.map(({ card }) => ({
@@ -115,6 +117,25 @@ const LearnPage: BlitzPage = ({
 
     nextCard()
   }
+
+  useEffect(() => {
+    if (visibleStats) {
+      const saveSession = async () => {
+        try {
+          const updatedSession = await updateLearnSessionMutation({
+            drawerId: drawer?.drawerId as string,
+            learnedCards: learnedCards.length,
+          })
+
+          console.log("Learn session updated:", updatedSession)
+        } catch (error) {
+          console.error("Failed to update learn session:", error)
+        }
+      }
+
+      void saveSession()
+    }
+  }, [visibleStats, learnedCards])
 
   if (visibleStats) {
     return (

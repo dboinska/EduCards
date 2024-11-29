@@ -4,6 +4,7 @@ export const createLearnSessionSchema = z.object({
   userId: z.string().uuid(),
   catalogId: z.string().uuid(),
   drawerId: z.string().uuid(),
+  sessionStart: z.date().optional(),
 })
 
 export type CreateLearnSessionSchema = z.infer<typeof createLearnSessionSchema>

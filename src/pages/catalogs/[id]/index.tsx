@@ -10,8 +10,6 @@ import { DrawerCard } from "@/components/DrawerCard"
 import { Picker, PickerOption } from "@/components/Picker"
 import { sortBy } from "@/utils/sortBy"
 import styles from "src/styles/Catalogs.module.css"
-import getDrawer from "../../drawer/queries/getDrawer"
-import { useQuery } from "@blitzjs/rpc"
 import { useSession } from "@blitzjs/auth"
 import { useState, useReducer, useEffect } from "react"
 import { useDebouncedCallback } from "@mantine/hooks"
@@ -20,24 +18,110 @@ import { useRouter } from "next/router"
 import { SortType } from "@/types/SortType"
 import { CatalogCard } from "@/components/CatalogCard"
 import { frequencyColorMap, frequencyDictionary } from "@/utils/frequency"
+import LottieAnimation from "@/components/LottieAnimation"
+import trophyAnimation from "public/animations/trophy.json"
+import checkAnimation from "public/animations/check.json"
+import starAnimation from "public/animations/star.json"
+import achievementAnimation from "public/animations/achievement.json"
+import { showNotification } from "@mantine/notifications"
+import getStudyPlans from "@/pages/studyPlan/queries/getStudyPlans"
+import getLearnSessions from "@/pages/drawer/queries/getLearnSessions"
+import { getDailyAggregatedResult } from "@/utils/getDailyAggregatedResults"
+import { AggregatedResult } from "@/types/AggregatedResult"
+import { getWeeklyAggregatedResult } from "@/utils/getWeeklyAggregatedResults"
+import { getCompletionPercentage } from "@/utils/getCompletionPercentage"
+import { getDateHelpers } from "@/utils/getDateHelpers"
+import { filterSessionByDate } from "@/utils/filterSessionsByDate"
+import { filterSessionsByRange } from "@/utils/filterSessionsByRange"
+import { isDateWithinRange } from "@/utils/isDateWithinRange"
+
+const useNotifications = () => {
+  const showAnimation = (
+    title: string,
+    message: string,
+    animation: any,
+    width: number,
+    height: number,
+    marginRight: number
+  ) => {
+    showNotification({
+      title,
+      message: (
+        <Flex align="center">
+          <LottieAnimation
+            animationData={animation}
+            loop
+            style={{ width: width, height: height, marginRight: marginRight }}
+          />
+          <span>{message}</span>
+        </Flex>
+      ),
+      color: "green",
+      autoClose: 5000,
+    })
+  }
+  return {
+    handleStudyPlanSuccess: () =>
+      showAnimation(
+        "Study plan completed!",
+        "Congratulations on completing your study plan.",
+        trophyAnimation,
+        80,
+        80,
+        10
+      ),
+    handleTimeSuccess: () =>
+      showAnimation(
+        "Daily goal achieved!",
+        "Time of daily study completed.",
+        checkAnimation,
+        60,
+        60,
+        10
+      ),
+    handleCardSuccess: () =>
+      showAnimation(
+        "Daily goal achieved!",
+        "Mastered daily amount of cards.",
+        starAnimation,
+        60,
+        60,
+        10
+      ),
+    handleWeeklySuccess: () =>
+      showAnimation(
+        "Weekly goal achieved!",
+        "Achieved planned study days this week.",
+        achievementAnimation,
+        80,
+        80,
+        10
+      ),
+  }
+}
 
 const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   query,
   catalog,
+  dailyAggregatedResult,
+  studyPlanForCatalog,
+  completionPercentage,
 }) => {
   const router = useRouter()
-  const [catalogId] = useQuery(getDrawer, { id: catalog?.catalogId as string })
   const [_, dispatch] = useReducer(dataReducer, {
     ...initialState,
     ...query,
   })
   const [searchValue, setSearchValue] = useState(() => query.query || "")
   const [cards, setCards] = useState(() => catalog?.cards || [])
-  const [catalogDrawers, setCatalogDrawers] = useState(catalog?.drawers || [])
+  const [_catalogDrawers, setCatalogDrawers] = useState(catalog?.drawers || [])
 
   const drawers = catalog?.drawers
 
   const [cardCounts, setCardCounts] = useState(drawers?.map((drawer) => drawer?.numberOfCards))
+
+  const { handleStudyPlanSuccess, handleTimeSuccess, handleCardSuccess, handleWeeklySuccess } =
+    useNotifications()
 
   console.log({ amount: catalog?.amountOfDrawers })
 
@@ -81,6 +165,52 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
   }, 500)
 
   useEffect(() => {
+    if (!dailyAggregatedResult || typeof dailyAggregatedResult !== "object") {
+      console.warn("dailyAggregatedResult is invalid:", dailyAggregatedResult)
+      return
+    }
+    const totalCardsSum = Object.values(dailyAggregatedResult).reduce(
+      (sum, entry) => sum + ((entry as AggregatedResult)?.totalLearnedCards || 0),
+      0
+    )
+
+    const totalDurationMins = Object.values(dailyAggregatedResult).reduce(
+      (sum, entry) => sum + ((entry as AggregatedResult).totalDurationMins || 0),
+      0
+    )
+
+    const totalDays = Object.keys(dailyAggregatedResult).length
+
+    console.log({
+      totalCardsSum,
+      studyPlanForCatalog,
+      studyPlanCards: studyPlanForCatalog[0]?.wordsPerDay,
+      totalDurationMins,
+    })
+
+    if (Number(totalCardsSum) >= Number(studyPlanForCatalog[0]?.wordsPerDay)) {
+      handleCardSuccess()
+    }
+
+    const requiredStudyTime = studyPlanForCatalog[0]?.secondsPerDay
+      ? Number((Number(studyPlanForCatalog[0].secondsPerDay) / 60).toFixed(2))
+      : 0
+
+    console.log({ requiredStudyTime })
+
+    if (totalDurationMins && Number(totalDurationMins) >= requiredStudyTime) {
+      handleTimeSuccess()
+    }
+
+    console.log({ totalDays })
+    console.log({ dailyAggregatedResult, studyPlanForCatalog })
+
+    if (Number(totalDays) >= Number(studyPlanForCatalog[0]?.daysPerWeek)) {
+      handleWeeklySuccess()
+    }
+  }, [dailyAggregatedResult, studyPlanForCatalog])
+
+  useEffect(() => {
     const fetchUpdatedCatalog = async () => {
       const updatedCatalog = await fetch(`/api/catalog/${catalog?.catalogId}`).then((res) =>
         res.json()
@@ -104,12 +234,27 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
       imageUrl={c.imageUrl}
       term={c.term}
       description={c.description}
-      owner={catalog?.owner}
+      owner={catalog?.owner || { id: "", email: "", imageUrl: null, name: null }}
       cardId={c.cardId}
       catalogId={c.catalogId}
       onDelete={handleCardDelete}
     />
   ))
+
+  useEffect(() => {
+    console.log({
+      completionPercentage,
+      completionDate: studyPlanForCatalog[0]?.completionDate,
+    })
+    if (
+      Number(completionPercentage) === 100 &&
+      studyPlanForCatalog[0]?.completionDate &&
+      isDateWithinRange(studyPlanForCatalog[0].completionDate)
+    ) {
+      console.log(true)
+      handleStudyPlanSuccess()
+    }
+  }, [completionPercentage])
 
   return (
     <Layout title={`Catalog ${catalog?.name}`}>
@@ -172,7 +317,39 @@ const CatalogId: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps
 export const getServerSideProps = gSSP(async ({ params, query, ctx }) => {
   const id = (params as CatalogSchema).id
   const catalog = await getCatalog({ id }, ctx)
-  return { props: { catalog, query } }
+  const allStudyPlans = await getStudyPlans({ id }, ctx)
+  const studyPlanForCatalog = allStudyPlans.filter((sp) => sp.catalogId === id)
+  const learnSessions = await getLearnSessions(
+    {
+      userId: ctx?.session?.userId as string,
+      catalogId: id,
+    },
+    ctx
+  )
+
+  const { formattedDate, lastMonday, nextSunday } = getDateHelpers()
+
+  console.log({ formattedDate, lastMonday, nextSunday })
+
+  const todaySessions = filterSessionByDate(learnSessions, formattedDate)
+  const weeklySessions = filterSessionsByRange(learnSessions, lastMonday, nextSunday)
+
+  const dailyAggregatedResult = getDailyAggregatedResult(todaySessions || [])
+  const weeklyAggregatedResult = getWeeklyAggregatedResult(weeklySessions || [])
+  console.log({ weeklySessions, weeklyAggregatedResult })
+
+  const completionPercentage = getCompletionPercentage(catalog)
+
+  return {
+    props: {
+      catalog,
+      query,
+      dailyAggregatedResult,
+      studyPlanForCatalog,
+      completionPercentage,
+      weeklyAggregatedResult,
+    },
+  }
 })
 
 export default CatalogId
