@@ -9,6 +9,8 @@ import { ToggleMenu } from "./ToggleMenu"
 import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { useMutation } from "@blitzjs/rpc"
 import deleteCatalog from "@/pages/catalogs/mutations/deleteCatalog"
+import createLearnSession from "@/pages/drawer/mutations/createLearnSession"
+import { useState } from "react"
 
 interface CatalogHeaderProps {
   header: string
@@ -35,8 +37,10 @@ export function CatalogHeader({
   drawerId,
 }: CatalogHeaderProps) {
   const currentUser = useCurrentUser()
+  const [isClicked, setIsClicked] = useState(false)
 
   const [deleteCatalogMutation] = useMutation(deleteCatalog)
+  const [createLearnSessionMutation] = useMutation(createLearnSession)
 
   const handleSuccess = () => {
     console.log("xxx")
@@ -72,6 +76,30 @@ export function CatalogHeader({
       ]
     : []
 
+  async function handleLearn() {
+    if (!currentUser) {
+      console.error("User not found")
+    }
+    setIsClicked(true)
+    try {
+      console.log("Attempting to create learn session")
+
+      console.log({ userId: currentUser?.id, catalog: catalogId, drawerId: drawerId })
+
+      await createLearnSessionMutation(
+        {
+          userId: currentUser?.id as string,
+          catalogId: catalogId as string,
+          drawerId: drawerId as string,
+          sessionStart: new Date(),
+        },
+        { onSuccess: handleSuccess }
+      )
+    } catch (error) {
+      console.error("Failed to create learn session:", error)
+    }
+  }
+
   return (
     <div className={styles.header}>
       <h1>{header}</h1>
@@ -85,6 +113,9 @@ export function CatalogHeader({
             component={Link}
             //
             href={Routes.LearnPage({ id: drawerId as string, sliding: true })}
+            onClick={handleLearn}
+            loading={isClicked}
+            disabled={isClicked}
           >
             <IconCards /> Let&apos;s learn
           </Button>
