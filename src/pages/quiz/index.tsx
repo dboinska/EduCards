@@ -11,7 +11,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { gSSP } from "@/blitz-server"
 import { CommonInput } from "@/schemas/CommonInput"
 import getCatalogs from "../catalogs/queries/getCatalogs"
-import { z } from "zod"
+import { number, z } from "zod"
 import router, { useRouter } from "next/router"
 
 interface SelectedCatalog {
@@ -112,7 +112,11 @@ const Quiz: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
                   <Picker
                     options={simplifiedCatalogs}
                     onChange={(selectedOption) => {
-                      setSelectedCatalog(selectedOption)
+                      setSelectedCatalog({
+                        value: selectedOption.value,
+                        label: selectedOption.label,
+                        numberOfCards: Number(selectedOption.numberOfCards),
+                      })
                     }}
                     id="sort"
                     hideImages

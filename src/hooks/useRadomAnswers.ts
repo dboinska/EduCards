@@ -1,6 +1,5 @@
 import type { CardSchema } from "@/schemas/Card.schema"
 import { useState, useEffect } from "react"
-import { isValid } from "zod"
 
 function getRandomUniqueNumbers(numberOfCards: number, count: number = 3): number[] {
   const randomNumbers = new Set<number>()
