@@ -2,7 +2,29 @@ import { useState } from "react"
 import { NumberInput, Slider } from "@mantine/core"
 import classes from "src/styles/SliderInput.module.css"
 
-export function SliderInput({ error, label, placeholder, step, min, max, size, value, onChange }) {
+type SliderProps = {
+  error?: string
+  label?: string
+  placeholder?: string
+  step?: number
+  min: number
+  max: number
+  size?: any
+  value?: number
+  onChange?: any
+}
+
+export function SliderInput({
+  error,
+  label,
+  placeholder,
+  step,
+  min,
+  max,
+  size,
+  value,
+  onChange,
+}: SliderProps) {
   const handleSliderChange = (value) => {
     onChange(value)
   }

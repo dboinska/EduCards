@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react"
 import { Select } from "@mantine/core"
 import { IconChevronDown } from "@tabler/icons-react"
-
-export interface PickerOption {
-  label: string
-  imageAlt?: string
-  value: string
-  image?: string
-}
+import type { PickerOption } from "@/types/PickerOption"
 
 type PickerProps = {
   options: PickerOption[]

@@ -1,24 +1,25 @@
-import Layout from "src/core/layouts/Layout"
+import Layout from "@/layouts/Root.layout"
 import { BlitzPage, Routes } from "@blitzjs/next"
-import styles from "src/styles/Catalogs.module.css"
+import styles from "@/styles/Catalogs.module.css"
 import Link from "next/link"
 import { ActionIcon, Avatar, Box, Flex, Badge, Button, Modal } from "@mantine/core"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { IconHeart, IconHeartFilled, IconCirclePlus } from "@tabler/icons-react"
 import { CatalogHeader } from "@/components/CatalogHeader"
 import { useDisclosure } from "@mantine/hooks"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { gSSP } from "@/blitz-server"
 import type { InferGetServerSidePropsType } from "next"
-import { Picker, PickerOption } from "@/components/Picker"
+import { Picker } from "@/components/Picker"
+import type { PickerOption } from "@/types/PickerOption"
 import { Loader } from "@mantine/core"
 import db from "db"
-import createCards from "./card/mutations/createCards"
 import { useMutation, useQuery } from "@blitzjs/rpc"
 import { useRouter } from "next/router"
 import { notifications } from "@mantine/notifications"
 
-import getSuggestion from "./user/queries/getSuggestions"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
+import createCards from "@/modules/card/mutations/createCards"
+import getSuggestion from "@/modules/user/queries/getSuggestions"
 
 import classes from "src/styles/Notifications.module.css"
 
@@ -137,7 +138,7 @@ const Suggestions: BlitzPage = ({
   return (
     <Layout title="Suggestions">
       <main className={styles.main}>
-        <CatalogHeader authorId="" header={"Suggestions"} />
+        <CatalogHeader header={"Suggestions"} />
 
         <div className={styles.gridCatalogs}>
           {isLoading && (

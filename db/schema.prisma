@@ -208,7 +208,7 @@ model LearnSession {
   id           String    @id @default(uuid())
   userId       String
   catalogId    String
-  drawerId     String
+  drawerId     String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
   sessionStart DateTime  @default(now())
@@ -218,7 +218,7 @@ model LearnSession {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   catalog Catalog @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade)
-  drawer  Drawer  @relation(fields: [drawerId], references: [drawerId], onDelete: Cascade, onUpdate: Cascade)
+  drawer  Drawer? @relation(fields: [drawerId], references: [drawerId], onDelete: Cascade, onUpdate: Cascade)
 }
 
 // Next iteration

@@ -1,7 +1,7 @@
 import { Container, Title, Text, Button } from "@mantine/core"
 import classes from "../styles/Home.module.css"
 import { BlitzPage } from "@blitzjs/next"
-import Layout from "src/core/layouts/Layout"
+import Layout from "@/layouts/Root.layout"
 
 const Home: BlitzPage = () => {
   return (

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import classes from "../styles/Header.module.css"
-import logout from "src/auth/mutations/logout"
+import logout from "@/modules/auth/mutations/logout"
 import { useMutation } from "@blitzjs/rpc"
 import Link from "next/link"
 
@@ -26,7 +26,7 @@ import {
 } from "@tabler/icons-react"
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 import { Routes } from "@blitzjs/next"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 import router from "next/router"
 
 export function HeaderUserAccount(auth) {

@@ -4,5 +4,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "jest.runMode": "on-demand"
+  "jest.runMode": "on-demand",
+  "WillLuke.nextjs.hasPrompted": true
 }

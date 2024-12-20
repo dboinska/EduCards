@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 
-import { CreateCatalogSchema } from "@/schemas/CreateCatalog.schema"
-import { CreateCatalogContext } from "@/contexts/CreateCatalog.context"
+import { CreateCatalogSchema } from "@/modules/catalog/schemas/CreateCatalog.schema"
+import { CreateCatalogContext } from "@/modules/catalog/contexts/CreateCatalog.context"
 
 export const CreateCatalogLayout = ({ children }) => {
   const [formState, setFormState] = useState<CreateCatalogSchema | null>(null)

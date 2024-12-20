@@ -1,4 +1,5 @@
-import type { PickerOption } from "@/components/Picker"
+import type { PickerOption } from "@/types/PickerOption"
+
 import { sortTypes, type SortType } from "@/types/SortType"
 
 export interface SortBy extends Omit<PickerOption, "value"> {
@@ -34,4 +35,4 @@ export const sortBy: SortBy[] = [
       "https://extraextrabricks.pl/environment/cache/images/500_500_productGfx_3935/Mini-figurka-LEGO-City-kobieta--mama-w-fioletowej-bluzie%2C-piaskowych-spodniach.webp",
     value: sortTypes.ALFA_DESC,
   },
-] as const
+]

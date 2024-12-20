@@ -10,7 +10,13 @@ import styles from "src/styles/Catalogs.module.css"
 import classes from "src/styles/Notifications.module.css"
 import { ConfirmationDialog } from "./ConfirmationDialog"
 
-export function ToggleMenu({ item, settings, sm }) {
+type MenuType = {
+  item: string
+  settings: any
+  sm?: boolean
+}
+
+export function ToggleMenu({ item, settings, sm }: MenuType) {
   const deleteSetting = settings.find((setting) => setting.id === "delete")
   const editSetting = settings.find((setting) => setting.id === "edit")
   const newStudyPlanSetting = settings.find((setting) => setting.id === "newStudyPlan")

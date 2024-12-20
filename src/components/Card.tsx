@@ -1,8 +1,8 @@
 import { IconHeart, IconHeartFilled } from "@tabler/icons-react"
 import { Card as MantineCard, Image, Text, Group, Badge, ActionIcon, Flex } from "@mantine/core"
 import classes from "../styles/Cards.module.css"
-import Layout from "@/core/layouts/Layout"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import Layout from "@/layouts/Root.layout"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 import { useEffect, useState } from "react"
 
 import { motion, useMotionValue, useTransform } from "framer-motion"

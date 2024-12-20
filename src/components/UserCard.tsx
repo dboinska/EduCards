@@ -1,8 +1,8 @@
-import { Card, Avatar, Text, Group, Button, Radio, CheckIcon, Box } from "@mantine/core"
+import { Card, Avatar, Text, Group, Button, Radio, CheckIcon, Box, Flex } from "@mantine/core"
 import classes from "/src/styles/UserCard.module.css"
 import { Routes } from "@blitzjs/next"
 import Link from "next/link"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 import { IconSettings } from "@tabler/icons-react"
 import { useState } from "react"
 import styles from "src/styles/Catalogs.module.css"
@@ -18,6 +18,7 @@ export function UserCard({
   user: any
   totalCards: any
   totalCatalogs: any
+  totalFavorites: any
 }) {
   const currentUser = useCurrentUser()
 
@@ -64,7 +65,7 @@ export function UserCard({
         className={classes.avatar}
         style={{ backgroundColor: "white" }}
       />
-      <Box w="100%" m="0 auto" align="center" pos="relative">
+      <Box w="100%" m="0 auto" pos="relative" style={{ align: "center" }}>
         <Text ta="center" fz="lg" fw={500} mt="sm">
           {currentUser?.name}
         </Text>
@@ -74,29 +75,30 @@ export function UserCard({
         <Group mt="md" justify="center" gap={30}>
           {items}
         </Group>
-
-        <Button
-          component={Link}
-          href={Routes.NewStudyPlan()}
-          fullWidth
-          radius="md"
-          my="xl"
-          size="md"
-          variant="filled"
-          maw="260px"
-        >
-          Create your new study plan
-        </Button>
-        <Radio
-          icon={CheckIcon}
-          label="Set profile as a public to receive shared resources"
-          name="check"
-          checked={currentUser?.isPublic}
-          disabled={!currentUser?.isPublic}
-          style={{ pointerEvents: "none" }}
-          color="lime.4"
-          maw="380px"
-        />
+        <Flex align="center" direction="column">
+          <Button
+            component={Link}
+            href={Routes.NewStudyPlan()}
+            fullWidth
+            radius="md"
+            my="xl"
+            size="md"
+            variant="filled"
+            maw="260px"
+          >
+            Create your new study plan
+          </Button>
+          <Radio
+            icon={CheckIcon}
+            label="Set profile as a public to receive shared resources"
+            name="check"
+            checked={currentUser?.isPublic}
+            disabled={!currentUser?.isPublic}
+            style={{ pointerEvents: "none" }}
+            color="lime.4"
+            maw="380px"
+          />
+        </Flex>
 
         <Button
           p="0 2px"

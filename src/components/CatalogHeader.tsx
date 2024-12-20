@@ -6,10 +6,10 @@ import Link from "next/link"
 
 import styles from "src/styles/CatalogHeader.module.css"
 import { ToggleMenu } from "./ToggleMenu"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 import { useMutation } from "@blitzjs/rpc"
-import deleteCatalog from "@/pages/catalogs/mutations/deleteCatalog"
-import createLearnSession from "@/pages/drawer/mutations/createLearnSession"
+import deleteCatalog from "@/modules/catalog/mutations/deleteCatalog"
+import createLearnSession from "@/modules/drawer/mutations/createLearnSession"
 import { useState } from "react"
 
 interface CatalogHeaderProps {

@@ -8,7 +8,9 @@ interface ColorSelectionProps {
 
 export function ColorSelection({ value, onChange }: ColorSelectionProps) {
   const theme = useMantineTheme()
-  const colors = Object.keys(theme.colors).map((color) => theme.colors[color][6])
+  const colors = Object.keys(theme.colors)
+    .map((color) => theme.colors[color]?.[6])
+    .filter(Boolean) as string[]
 
   const [checked, setChecked] = useState(value)
 
