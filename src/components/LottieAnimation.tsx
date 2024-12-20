@@ -1,5 +1,4 @@
-import Lottie from "lottie-react"
-import React from "react"
+import dynamic from "next/dynamic"
 
 interface LottieAnimationProps {
   animationData: any
@@ -7,12 +6,10 @@ interface LottieAnimationProps {
   style?: React.CSSProperties
 }
 
-const LottieAnimation: React.FC<LottieAnimationProps> = ({
-  animationData,
-  loop = false,
-  style,
-}) => {
-  return <Lottie animationData={animationData} loop={loop} style={style} />
-}
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false })
+
+const LottieAnimation = ({ animationData, loop = false, style }: LottieAnimationProps) => (
+  <Lottie animationData={animationData} loop={loop} style={style} />
+)
 
 export default LottieAnimation

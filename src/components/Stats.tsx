@@ -1,4 +1,4 @@
-import Layout from "@/core/layouts/Layout"
+import Layout from "@/layouts/Root.layout"
 import { Routes } from "@blitzjs/next"
 import { Text, Paper, Group, Flex, Button } from "@mantine/core"
 import Link from "next/link"
@@ -10,7 +10,7 @@ interface StatsProps {
   newAttemptId: string
   currentItemId: string
   backButtonLabel: string
-  backButtonHref?: string
+  backButtonHref?: any
   onClick?: () => void
 }
 

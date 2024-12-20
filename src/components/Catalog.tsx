@@ -31,7 +31,7 @@ interface CatalogProps {
   catalogId: string
 }
 
-const Catalog = ({
+export const Catalog = ({
   children,
   imageUrl,
   numberOfCards,
@@ -160,5 +160,3 @@ const Catalog = ({
     </div>
   )
 }
-
-export default Catalog

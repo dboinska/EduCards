@@ -1,4 +1,4 @@
-import type { CardSchema } from "@/schemas/Card.schema"
+import type { CardSchema } from "@/modules/card/schemas/Card.schema"
 import { useState, useEffect } from "react"
 
 function getRandomUniqueNumbers(numberOfCards: number, count: number = 3): number[] {

@@ -5,6 +5,8 @@ import type { SegmentedControlProps } from "@mantine/core"
 
 interface SwitchProps extends SegmentedControlProps {
   containerClass?: string
+  setValue?: React.Dispatch<React.SetStateAction<string>>
+  pathname?: string
 }
 
 export const Switch = ({ containerClass, ...props }: SwitchProps) => (

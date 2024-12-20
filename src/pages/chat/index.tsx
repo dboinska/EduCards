@@ -1,7 +1,6 @@
-import Layout from "src/core/layouts/Layout"
+import { useEffect, useRef, useState } from "react"
 import { BlitzPage } from "@blitzjs/next"
-
-import classes from "../../styles/Chat.module.css"
+import { useMutation } from "@blitzjs/rpc"
 import {
   Avatar,
   Button,
@@ -13,15 +12,17 @@ import {
   useMantineTheme,
   Loader,
 } from "@mantine/core"
-import { Form, FORM_ERROR } from "src/core/components/Form"
-import { IconArrowNarrowUp } from "@tabler/icons-react"
-import { ChatMessage } from "@/chat/schemas"
-import { useMutation } from "@blitzjs/rpc"
-import createChatMessage from "@/chat/mutations/createChatMessage"
+
+import Layout from "@/layouts/Root.layout"
 import LabeledTextArea from "@/core/components/LabeledTextArea"
+import { Form, FORM_ERROR } from "@/core/components/Form"
+import { IconArrowNarrowUp } from "@tabler/icons-react"
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 
-import { useEffect, useRef, useState } from "react"
+import createChatMessage from "@/modules/chat/mutations/createChatMessage"
+import { chatMessageSchema } from "@/modules/chat/schemas/ChatMessage.schema"
+
+import classes from "@/styles/Chat.module.css"
 
 const Chat: BlitzPage = () => {
   const [createMessageMutation, { isSuccess }] = useMutation(createChatMessage)
@@ -121,7 +122,7 @@ const Chat: BlitzPage = () => {
           </Container>
 
           <Form
-            schema={ChatMessage}
+            schema={chatMessageSchema}
             initialValues={{ prompt: "" }}
             onSubmit={handleSubmit}
             className={classes.chatMessage}

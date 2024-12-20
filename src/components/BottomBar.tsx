@@ -3,12 +3,13 @@ import classes from "../styles/BottomBar.module.css"
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 import { SegmentedControl } from "@mantine/core"
 import { useRouter } from "next/router"
+import { SegmentedControlOption } from "./SegmentedControlOption"
 
 type SegmentData = {
-  label: JSX.Element
+  label: React.ReactNode
   value: string
 }
-//
+
 export function BottomBar() {
   const { menuLinks, isCurrentPath, currentUser } = useNavigationLinks()
 
@@ -20,25 +21,12 @@ export function BottomBar() {
 
     return {
       label: (
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Icon
-            className="icon"
-            style={{
-              color: isActive ? "white" : "var(--mantine-color-lime-filled)",
-            }}
-            path={link.icon}
-            size={1}
-          />
-          <span
-            style={{
-              marginLeft: "4px",
-              display: isActive && isAnySegmentActive ? "block" : "none",
-              width: !isActive ? "0" : "auto",
-            }}
-          >
-            {link.alias}
-          </span>
-        </div>
+        <SegmentedControlOption
+          isActive={isActive}
+          isAnySegmentActive={isAnySegmentActive}
+          icon={link.icon}
+          alias={link.alias}
+        />
       ),
       value: link.path.href,
     }

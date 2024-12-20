@@ -1,8 +1,6 @@
-import type { CommonInput } from "@/schemas/CommonInput"
 import type { FilterType } from "@/types/FilterType"
 import type { PayloadMap } from "@/types/PayloadMap"
 import type { SortType } from "@/types/SortType"
-import type { z } from "zod"
 
 export const initialState = {
   filter: "all",

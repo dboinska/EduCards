@@ -1,4 +1,4 @@
-import Layout from "src/core/layouts/Layout"
+import Layout from "@/layouts/Root.layout"
 import { BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import { Box, Flex, Badge, Group, Text, Grid, useMantineTheme } from "@mantine/core"
@@ -7,6 +7,7 @@ import { Progress } from "@/components/Progress"
 import { IconCards, IconClockHour2, IconPuzzle, IconCalendarMonth } from "@tabler/icons-react"
 import BarChart from "@/components/BarChart"
 import PieChart from "@/components/PieChart"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 
 export interface StatisticsProps {
   id: number
@@ -120,6 +121,7 @@ const lastSession = () => {
 }
 
 const StudyPlan: BlitzPage = ({ id, authorId }: StatisticsProps) => {
+  const currentUser = useCurrentUser()
   const theme = useMantineTheme()
   const pieChartData = {
     labels: pieChartLabel,
@@ -152,7 +154,7 @@ const StudyPlan: BlitzPage = ({ id, authorId }: StatisticsProps) => {
   return (
     <Layout title="Study Plan">
       <main className={styles.main}>
-        <CatalogHeader authorId={authorId} header={"Study Plan XYZ"} studyPlanMode />
+        <CatalogHeader ownerId={currentUser?.id} header={"Study Plan XYZ"} studyPlanMode />
         <Flex justify="space-between" my="var(--mantine-spacing-sm)" wrap="wrap" gap="md">
           <Flex gap="var(--mantine-spacing-xs)">
             <Badge color="var(--mantine-color-gray-6)">Started: 03.03.2024</Badge>

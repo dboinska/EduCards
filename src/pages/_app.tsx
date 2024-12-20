@@ -1,18 +1,20 @@
+import Head from "next/head"
 import { Suspense } from "react"
-import { ErrorFallbackProps, ErrorComponent, ErrorBoundary, AppProps } from "@blitzjs/next"
+
+import { ErrorComponent, ErrorBoundary } from "@blitzjs/next"
 import { AuthenticationError, AuthorizationError } from "blitz"
-import { withBlitz } from "src/blitz-client"
-import "src/styles/globals.css"
 
-import "@mantine/core/styles.css"
-import "@mantine/notifications/styles.css"
-
-import { MantineProvider, createTheme } from "@mantine/core"
+import { createTheme, MantineProvider } from "@mantine/core"
 import { Notifications } from "@mantine/notifications"
-
 import { DrawerProvider } from "@/core/providers/drawerProvider"
 
-import Head from "next/head"
+import { withBlitz } from "src/blitz-client"
+
+import type { ErrorFallbackProps, AppProps } from "@blitzjs/next"
+
+import "src/styles/globals.css"
+import "@mantine/core/styles.css"
+import "@mantine/notifications/styles.css"
 
 const theme = createTheme({})
 

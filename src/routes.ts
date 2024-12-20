@@ -5,12 +5,12 @@ import { mdiFolderOutline, mdiHeartOutline, mdiMessageTextOutline, mdiPuzzle } f
 export type Route = {
   path: RouteUrlObject
   alias: string
-  icon?: string
+  icon: string
   className?: string
   protected?: boolean
 }
 
-export const authRoutes: Route[] = [
+export const authRoutes: Omit<Route, "icon">[] = [
   { path: Routes.SignupPage(), alias: "Sign up", className: "linkLimeColor" },
   { path: Routes.LoginPage(), alias: "Login", className: "linkLimeLight" },
 ]

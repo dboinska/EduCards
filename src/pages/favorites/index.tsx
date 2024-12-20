@@ -1,4 +1,4 @@
-import Layout from "src/core/layouts/Layout"
+import Layout from "@/layouts/Root.layout"
 import { BlitzPage, Routes } from "@blitzjs/next"
 import styles from "src/styles/Catalogs.module.css"
 import Link from "next/link"
@@ -6,7 +6,11 @@ import { CatalogHeader } from "@/components/CatalogHeader"
 import { Switch } from "@/components/Switch"
 import { AutocompleteLoading } from "@/components/AutocompleteLoading"
 import { useState } from "react"
-import getFavorites, { CardsDTO, CatalogsDTO, StudyPlansDTO } from "./queries/getFavorites"
+import getFavorites, {
+  CardsDTO,
+  CatalogsDTO,
+  StudyPlansDTO,
+} from "@/modules/favorites/queries/getFavorites"
 import { useQuery } from "@blitzjs/rpc"
 import { Avatar, Badge, Flex } from "@mantine/core"
 
@@ -24,7 +28,11 @@ const Favorites: BlitzPage = () => {
     return (
       <>
         {cards.map((card) => (
-          <Link key={card.card_id} className={styles.body} href={Routes.Cards()}>
+          <Link
+            key={card.card_id}
+            className={styles.body}
+            href={Routes.CardPage({ id: card.card_id })}
+          >
             <div className={styles.headerContainer}>
               <h2>{card.term}</h2>
             </div>
@@ -52,7 +60,10 @@ const Favorites: BlitzPage = () => {
               }}
             >
               <div className={styles.overlay}></div>
-              <Link className={styles.cardContent} href={Routes.Catalog()}>
+              <Link
+                className={styles.cardContent}
+                href={Routes.CatalogId({ id: catalog.catalog_id })}
+              >
                 <div className={styles.headerContainer}>
                   <h2>NameNameNameNameNameNameNameName</h2>
                   <Badge size="sm" variant="outline" color="var(--mantine-color-gray-3)">

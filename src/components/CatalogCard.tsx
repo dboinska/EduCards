@@ -1,17 +1,18 @@
 import { Avatar, Flex, ActionIcon, Button, Image, Badge, useMantineTheme } from "@mantine/core"
-import styles from "src/styles/Catalogs.module.css"
-import classes from "src/styles/Notifications.module.css"
+import styles from "@/styles/Catalogs.module.css"
+import classes from "@/styles/Notifications.module.css"
 import { IconX, IconHeart, IconHeartFilled, IconSettings } from "@tabler/icons-react"
 import { clsx } from "clsx"
-import { useCurrentUser } from "@/users/hooks/useCurrentUser"
 import { useMutation } from "@blitzjs/rpc"
-import deleteCard from "@/pages/card/mutations/deleteCard"
 import { notifications } from "@mantine/notifications"
 import { Routes } from "@blitzjs/next"
 import { useRouter } from "next/router"
 import { useDisclosure } from "@mantine/hooks"
 import { useState } from "react"
 import { ConfirmationDialog } from "./ConfirmationDialog"
+
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
+import deleteCard from "@/modules/card/mutations/deleteCard"
 
 interface CatalogCardProps {
   imageUrl?: string | null
