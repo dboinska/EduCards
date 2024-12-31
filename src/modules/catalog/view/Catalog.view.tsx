@@ -278,7 +278,7 @@ export const CatalogView = ({
           catalogId={catalog?.catalogId}
         />
         <Box>
-          <h2>Drawers:</h2>
+          {Number(catalog?.amountOfDrawers) > 0 && Number(catalog?.cards) > 0 && <h2>Drawers:</h2>}
           <Flex m="0 auto" gap="8px" miw="100%" className={styles.drawersContainer}>
             {catalog?.drawers.map((drawer, index) => (
               <DrawerCard
@@ -292,34 +292,38 @@ export const CatalogView = ({
             ))}
           </Flex>
         </Box>
-        <h2>All cards:</h2>
-        <div className={styles.filters}>
-          <Flex align="center" justify="space-between">
-            <label
-              style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}
-              htmlFor="search"
-            >
-              Search:
-            </label>
-            <Box w="240px">
-              <TextInput value={searchValue} onChange={handleTextChange} id="search" />
-            </Box>
-          </Flex>
-          <Flex align={"center"} justify={"space-between"}>
-            <label
-              style={{
-                fontSize: "var(--mantine-font-size-sm)",
-                fontWeight: 500,
-              }}
-            >
-              Sort by:
-            </label>
-            <Box w="270px">
-              <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
-            </Box>
-          </Flex>
-        </div>
-        <div className={styles.gridCatalogs}>{catalogItems}</div>
+        {catalogItems.length > 0 && (
+          <>
+            <h2>All cards:</h2>
+            <div className={styles.filters}>
+              <Flex align="center" justify="space-between">
+                <label
+                  style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}
+                  htmlFor="search"
+                >
+                  Search:
+                </label>
+                <Box w="240px">
+                  <TextInput value={searchValue} onChange={handleTextChange} id="search" />
+                </Box>
+              </Flex>
+              <Flex align={"center"} justify={"space-between"}>
+                <label
+                  style={{
+                    fontSize: "var(--mantine-font-size-sm)",
+                    fontWeight: 500,
+                  }}
+                >
+                  Sort by:
+                </label>
+                <Box w="270px">
+                  <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
+                </Box>
+              </Flex>
+            </div>
+            <div className={styles.gridCatalogs}>{catalogItems}</div>
+          </>
+        )}
       </main>
     </Layout>
   )
