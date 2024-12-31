@@ -19,7 +19,8 @@ import { notifications } from "@mantine/notifications"
 
 import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 import createCards from "@/modules/card/mutations/createCards"
-import getSuggestion from "@/modules/user/queries/getSuggestions"
+import getSuggestion from "@/modules/suggestion/queries/getSuggestions"
+import addSuggestion from "@/modules/suggestion/mutations/addSuggestion"
 
 import classes from "src/styles/Notifications.module.css"
 
@@ -56,6 +57,7 @@ const Suggestions: BlitzPage = ({
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion>(initialSuggestion)
 
   const [cardMutation] = useMutation(createCards)
+  const [addNewSuggestion] = useMutation(addSuggestion)
 
   const [data, { isError, isLoading, isSuccess }] = useQuery(
     getSuggestion,
@@ -79,27 +81,31 @@ const Suggestions: BlitzPage = ({
     catalogId: string,
     { category, ...suggestion }: Suggestion
   ) => {
-    console.log("Adding suggestion:", { catalogId, suggestion, userId })
     try {
       const dataToMutate = {
         cards: [{ ...suggestion, catalogId, key: new Date().getTime().toString() }],
       }
 
-      await cardMutation(dataToMutate, {
-        onSuccess: () => {
-          notifications.show({
-            title: "Suggestion added",
-            message: `The suggestion "${suggestion.term}" has been successfully added.`,
-            position: "top-right",
-            color: "green",
-            classNames: classes,
-            autoClose: 5000,
-          })
-        },
+      await cardMutation(dataToMutate)
+      notifications.show({
+        title: "Suggestion added",
+        message: `The suggestion "${suggestion.term}" has been successfully added.`,
+        position: "top-right",
+        color: "green",
+        classNames: classes,
+        autoClose: 5000,
       })
+      await addNewSuggestion()
     } catch (error) {
+      notifications.show({
+        title: "Error",
+        message: "Failed to add suggestion to catalog.",
+        position: "top-right",
+        color: "red",
+        classNames: classes,
+        autoClose: false,
+      })
       console.error("Error adding suggestion to catalog:", error)
-      throw new Error("Failed to add suggestion to catalog")
     }
   }
 
@@ -125,7 +131,6 @@ const Suggestions: BlitzPage = ({
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    console.log("submit")
     try {
       await addToExistingCatalog(selectedOption.value, selectedSuggestion)
       close()
@@ -287,12 +292,6 @@ export const getServerSideProps = gSSP(async ({ query, ctx }) => {
     ...query,
     where: { ownerId: userId },
   })
-  catalogs.forEach((catalog) => {
-    console.log("Catalog ID:", catalog.catalogId, "Created At:", catalog.createdAt)
-  })
-
-  console.log("Current time (now):", now)
-  console.log("Cutoff time (oneDayAgo):", oneWeekAgo)
 
   const latestCatalogIds = catalogs
     .filter((catalog) => {

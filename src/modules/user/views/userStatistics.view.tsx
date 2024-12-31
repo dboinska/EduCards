@@ -1,6 +1,6 @@
 import Layout from "@/layouts/Root.layout"
 import styles from "src/styles/Catalogs.module.css"
-import { Box, Flex, Group, Text, Grid } from "@mantine/core"
+import { Box, Flex, Group, Text, Grid, BackgroundImage } from "@mantine/core"
 import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
 
 import { Progress } from "@/components/Progress"
@@ -17,7 +17,19 @@ import { DynamicBadge } from "@/components/DynamicBadge"
 
 import { useMantineTheme } from "@mantine/core"
 import { useQuery } from "@blitzjs/rpc"
-import getStatistics from "@/modules/user/queries/getStatistics"
+import getDailyLearning from "../queries/getDailyLearning"
+import getWeeksLearning from "../queries/getWeeklyLearning"
+import { startOfWeek } from "date-fns"
+import getWeeksLearnedCards from "../../card/queries/getWeeklyLearnedCards"
+import getLastSessionStatistics from "@/modules/user/queries/getLastSessionStatistics"
+import getLastWeekStatistics from "../queries/getWeeklyStatistics"
+import getActiveStudyPlans from "../queries/getActiveStudyPlans"
+import getWeeksCatalogs from "../../catalog/queries/getWeeklyCatalogs"
+import getDailyCompletedQuizzes from "@/modules/quiz/queries/getDailyCompletedQuizzes"
+import getWeeklyCompletedQuizzes from "@/modules/quiz/queries/getWeeklyCompletedQuizzes"
+import getWeeklyCards from "../../card/queries/getWeeklyLearnedCards"
+import getDailySuggestions from "@/modules/suggestion/queries/getDailySuggestions"
+import getWeeklySuggestions from "@/modules/suggestion/queries/getWeeklySuggestions"
 
 export interface StatisticsViewProps {
   id: number
@@ -28,110 +40,39 @@ export interface StatisticsViewProps {
   authorId: number
 }
 
-const data = [
-  {
-    header: "Time",
-    label: "Every day",
-    icon: <IconClockHour2 />,
-    value: "1.5h",
-  },
-  {
-    header: "Cards",
-    label: "Every day",
-    icon: <IconCards />,
-    value: 223,
-  },
-  {
-    header: "Used suggestions",
-    label: "Every day",
-    icon: <IconCirclePlus />,
-    value: 12,
-  },
-  {
-    header: "Catalogs",
-    label: "Every day",
-    icon: <IconFolder />,
-    value: 1,
-  },
-  {
-    header: "Quizzes",
-    label: "Every day",
-    icon: <IconPuzzle />,
-    value: 4,
-  },
-]
+const WEEKDAYS = ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."]
+const today = new Date()
+const weekStart = startOfWeek(today, { weekStartsOn: 1 })
 
-const studyPlansData = [
-  {
-    color: "var(--mantine-color-yellow-6)",
-    header: "English",
-    label: "Grammar",
-    percent: 30,
-  },
-  {
-    color: "var(--mantine-color-lime-6)",
-    header: "Polish",
-    label: "Vocabulary",
-    percent: 23,
-  },
-  {
-    color: "var(--mantine-color-green-6)",
-    header: "French",
-    label: "Tenses",
-    percent: 12,
-  },
-  {
-    color: "var(--mantine-color-teal-6)",
-    header: "Deutch",
-    label: "Every week",
-    percent: 11,
-  },
-  {
-    color: "var(--mantine-color-yellow-6)",
-    header: "English",
-    label: "Grammar",
-    percent: 30,
-  },
-  {
-    color: "var(--mantine-color-lime-6)",
-    header: "Polish",
-    label: "Vocabulary",
-    percent: 23,
-  },
-  {
-    color: "var(--mantine-color-green-6)",
-    header: "French",
-    label: "Tenses",
-    percent: 12,
-  },
-  {
-    color: "var(--mantine-color-teal-6)",
-    header: "Deutch",
-    label: "Every week",
-    percent: 11,
-  },
-]
+interface StudyPlanBadge {
+  color: string
+  header: string
+  label: string
+  percent: number
+}
 
-const barChartData = {
-  labels: ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."],
-  datasets: [
-    {
-      label: "Learned",
-      data: [12, 19, 3, 5, 2, 3, 7],
-      backgroundColor: "#c0eb75",
-      borderColor: "#a9e34b",
-      borderWidth: 1,
-      barThickness: 12,
-    },
-    {
-      label: "Added",
-      data: [10, 11, 7, 8, 9, 15, 11],
-      backgroundColor: "#74c0fc",
-      borderColor: "#4dabf7",
-      borderWidth: 1,
-      barThickness: 12,
-    },
-  ],
+interface StudyPlan {
+  id: string
+  name: string
+  daysPerWeek: number
+  secondsPerDay: number
+  wordsPerDay: number
+  createdAt: Date
+  updatedAt: Date
+  completionDate: Date
+  catalogId: string
+  color: string
+  ownerId: string
+  active: boolean
+}
+
+function convertStudyPlanToBadge(studyPlan: StudyPlan): StudyPlanBadge {
+  return {
+    color: studyPlan.color,
+    header: studyPlan.name,
+    label: `${studyPlan.daysPerWeek} days/week`,
+    percent: Number(((studyPlan.wordsPerDay / studyPlan.secondsPerDay) * 100).toFixed(2)),
+  }
 }
 
 const barChartOptions = {
@@ -150,67 +91,268 @@ const barChartOptions = {
     },
   },
 }
-const pieChartLabel = ["Catalog X", "Catalog Y", "Catalog Z"]
 
-const lastSession = () => {
-  const items = data.map((data, index) => (
-    <Flex key={index} my="var(--mantine-spacing-sm)" gap="var(--mantine-spacing-md)">
-      <Flex className="border" p="var(--mantine-spacing-md) " align="center">
-        {data.icon}
-      </Flex>
-      <Flex w="70%" justify="space-between">
-        <Flex direction="column">
-          <h3 style={{ margin: 0 }}>{data.header}</h3>
+export const UserStatisticsView = ({}) => {
+  const currentUser = useCurrentUser()
+  const [lastSessionStatistics] = useQuery(getLastSessionStatistics, currentUser?.id as string)
+  const [lastWeekStatistics] = useQuery(getLastWeekStatistics, currentUser?.id as string)
+  const [todaysLearning] = useQuery(getDailyLearning, {})
+  const [weeksLearning] = useQuery(getWeeksLearning, {})
+  const [weeksCards] = useQuery(getWeeklyCards, {})
+  const [weeksLearnedCards] = useQuery(getWeeksLearnedCards, {})
+  const studyPlans = useQuery(getActiveStudyPlans, {})
+  console.log({ lastSessionStatistics, weeksLearnedCards, studyPlans })
+  const studyPlansData = studyPlans[0]?.studyPlans
+    ? studyPlans[0].studyPlans.map(convertStudyPlanToBadge)
+    : []
+  const practicedCatalogs = useQuery(getWeeksCatalogs, {})
+  console.log({ studyPlansData, practicedCatalogs })
+
+  const dailyCompletedQuizzes = useQuery(getDailyCompletedQuizzes, {
+    userId: currentUser?.id as string,
+  })
+  const weeklyCompletedQuizzes = useQuery(getWeeklyCompletedQuizzes, {
+    userId: currentUser?.id as string,
+  })
+  const dailySuggestions = useQuery(getDailySuggestions, {
+    userId: currentUser?.id as string,
+  })
+  const weeklySuggestions = useQuery(getWeeklySuggestions, {
+    userId: currentUser?.id as string,
+  })
+
+  console.log({ weeksCards, dailyCompletedQuizzes })
+  const lastSession = lastSessionStatistics || {}
+
+  const addedCardsByDay = Array(7).fill(0)
+  weeksCards?.forEach((card) => {
+    const dayIndex = new Date(card.createdAt).getDay()
+    const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
+    addedCardsByDay[adjustedIndex]++
+  })
+
+  const learnedCardsByDay = Array(7).fill(0)
+  weeksLearnedCards?.forEach((day) => {
+    const dayIndex = new Date(day.date).getDay()
+    const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
+    learnedCardsByDay[adjustedIndex] = day.learnedCards
+  })
+  console.log({ addedCardsByDay, lastWeekStatistics })
+
+  const lastSessionData = [
+    {
+      header: "Time",
+      label: "Total learning duration in minutes",
+      icon: <IconClockHour2 />,
+      value: `${lastSession?.duration || 0}`,
+    },
+    {
+      header: "Cards",
+      label: "Amount of studied cards",
+      icon: <IconCards />,
+      value: lastSession?.learnedCards,
+    },
+    {
+      header: "Used suggestions",
+      label: "New hints added",
+      icon: <IconCirclePlus />,
+      value: dailySuggestions[0]?.length,
+    },
+    {
+      header: "Catalogs",
+      label: "Practiced catalogs",
+      icon: <IconFolder />,
+      value: lastSession?.totalCatalogs,
+    },
+    {
+      header: "Quizzes",
+      label: "Knowledge checks completed",
+      icon: <IconPuzzle />,
+      value: dailyCompletedQuizzes[0]?.length,
+    },
+  ]
+
+  const lastWeekData = [
+    {
+      header: "Time",
+      label: "Total learning duration in minutes",
+      icon: <IconClockHour2 />,
+      value: lastWeekStatistics?.duration,
+    },
+    {
+      header: "Cards",
+      label: "Amount of studied cards",
+      icon: <IconCards />,
+      value: lastWeekStatistics?.learnedCards,
+    },
+    {
+      header: "Used suggestions",
+      label: "New hints added",
+      icon: <IconCirclePlus />,
+      value: weeklySuggestions[0]?.length,
+    },
+    {
+      header: "Catalogs",
+      label: "Practiced catalogs",
+      icon: <IconFolder />,
+      value: lastWeekStatistics?.totalCatalogs,
+    },
+    {
+      header: "Quizzes",
+      label: "Knowledge checks completed",
+      icon: <IconPuzzle />,
+      value: weeklyCompletedQuizzes[0]?.length,
+    },
+  ]
+
+  const overviewItems = (data) => {
+    const items = data.map((data, index) => (
+      <Flex key={index} my="var(--mantine-spacing-sm)" gap="var(--mantine-spacing-md)">
+        <Flex className="border" p="var(--mantine-spacing-md) " align="center">
+          {data.icon}
+        </Flex>
+        <Flex w="70%" justify="space-between">
+          <Flex direction="column">
+            <h3 style={{ margin: 0 }}>{data.header}</h3>
+            <h4
+              style={{
+                margin: 0,
+                fontSize: "var(--mantine-font-size-sm)",
+                color: "var(--mantine-color-gray-6)",
+              }}
+            >
+              {data.label}
+            </h4>
+          </Flex>
           <h4
             style={{
-              margin: 0,
-              fontSize: "var(--mantine-font-size-sm)",
-              color: "var(--mantine-color-gray-6)",
+              color: "var(--mantine-color-blue-6",
+              fontSize: "var(--mantine-font-size-md",
             }}
           >
-            {data.label}
+            {data.value}
           </h4>
         </Flex>
-        <h4
-          style={{
-            color: "var(--mantine-color-blue-6",
-            fontSize: "var(--mantine-font-size-md",
-          }}
-        >
-          {data.value}
-        </h4>
       </Flex>
-    </Flex>
-  ))
-  return items
-}
-
-export const UserStatisticsView = ({
-  id,
-  image,
-  header,
-  desc,
-  isFavorite,
-  authorId,
-}: Partial<StatisticsViewProps>) => {
-  const currentUser = useCurrentUser()
-  const statistics = useQuery(getStatistics, {})
-  console.log({ statistics })
+    ))
+    return items
+  }
 
   const theme = useMantineTheme()
-  const pieChartData = {
-    labels: pieChartLabel,
+  const barChartData = {
+    labels: ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."],
     datasets: [
       {
-        label: "# of Votes",
-        data: [12, 19, 3],
-        backgroundColor: [theme.colors.pink[3], theme.colors.blue[3], theme.colors.yellow[3]],
-        borderColor: [theme.colors.pink[4], theme.colors.blue[4], theme.colors.yellow[4]],
+        label: "Learned",
+        data: learnedCardsByDay,
+        backgroundColor: "#c0eb75",
+        borderColor: "#a9e34b",
+        borderWidth: 1,
+        barThickness: 12,
+      },
+      {
+        label: "Added",
+        data: addedCardsByDay,
+        backgroundColor: "#74c0fc",
+        borderColor: "#4dabf7",
+        borderWidth: 1,
+        barThickness: 12,
+      },
+    ],
+  }
+
+  type CatalogData = {
+    catalogId: string
+    catalogName: string
+    duration: number
+    percent: number
+  }
+
+  const catalogsData = practicedCatalogs?.[0]
+
+  const filteredData = catalogsData
+    .filter((catalog) => catalog && catalog.catalogName && catalog.duration > 0)
+    .sort((a, b) => b.duration - a.duration)
+
+  console.log({ catalogsData, filteredData })
+  console.log({ catalogs: catalogsData.map((catalog) => catalog.catalogName) })
+
+  const pieChartData = {
+    labels: filteredData.map((catalog) => catalog.catalogName),
+    datasets: [
+      {
+        label: filteredData.map((catalog) => catalog.catalogName),
+        data: filteredData.map((catalog) => catalog.duration),
+        backgroundColor: [
+          theme.colors.blue[4],
+          theme.colors.cyan[4],
+          theme.colors.grape[4],
+          theme.colors.green[4],
+          theme.colors.indigo[4],
+          theme.colors.orange[4],
+          theme.colors.pink[4],
+          theme.colors.red[4],
+          theme.colors.teal[4],
+          theme.colors.violet[4],
+          theme.colors.yellow[4],
+        ].slice(0, filteredData.length),
+        borderColor: [
+          theme.colors.blue[6],
+          theme.colors.cyan[6],
+          theme.colors.grape[6],
+          theme.colors.green[6],
+          theme.colors.indigo[6],
+          theme.colors.orange[6],
+          theme.colors.pink[6],
+          theme.colors.red[6],
+          theme.colors.teal[6],
+          theme.colors.violet[6],
+          theme.colors.yellow[6],
+        ].slice(0, filteredData.length),
         borderWidth: 1,
         cutout: "65%",
       },
     ],
   }
+
+  const pieChartOptions = {
+    plugins: {
+      legend: {
+        display: true,
+        position: "bottom",
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          boxWidth: 20,
+          boxHeight: 20,
+          font: {
+            size: 12,
+          },
+          generateLabels: (chart) => {
+            const datasets = chart.data.datasets[0]
+            const labels = chart.data.labels
+
+            return labels.map((label, i) => ({
+              text: label,
+              fillStyle: datasets.backgroundColor[i],
+              strokeStyle: datasets.borderColor[i],
+              lineWidth: 1,
+              hidden: false,
+              index: i,
+            }))
+          },
+        },
+      },
+    },
+    layout: {
+      padding: {
+        top: 10,
+        bottom: 0,
+      },
+    },
+  }
+
+  console.log({ weeksLearning })
 
   return (
     <Layout title="Statistics">
@@ -224,15 +366,17 @@ export const UserStatisticsView = ({
                   <h3>Today&apos;s learning</h3>
                 </Group>
                 <Progress
-                  percent={100}
+                  percent={todaysLearning.totalTime > 0 ? 100 : 0}
                   color="var(--mantine-color-blue-6)"
-                  text={"30 min"}
+                  text={`${todaysLearning.totalTime || 0} ${
+                    todaysLearning.totalTime !== 1 ? "mins" : "min"
+                  }`}
                   size={160}
                   textSize="lg"
                 />
                 <Group py="16px">
                   <Text size="sm" fw={700} m="0 auto">
-                    of your 5-minute target
+                    of today&apos;s learning sessions
                   </Text>
                 </Group>
               </Flex>
@@ -243,86 +387,39 @@ export const UserStatisticsView = ({
                 mb="0"
               >
                 <Group>
-                  <h3>This week</h3>
+                  <h3>This week&apos;s learning sessions</h3>
                 </Group>
-                <Flex my="var(--mantine-spacing-md)" justify="space-between">
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Mon.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Tue.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Wed.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Thu.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Fri.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Sat.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
-                  <Flex align="center" direction="column">
-                    <Text size="sm" fw={700} m="0 auto">
-                      Sun.
-                    </Text>
-                    <Progress
-                      percent={100}
-                      color="var(--mantine-color-blue-6)"
-                      size={40}
-                      thickness={4}
-                    />
-                  </Flex>
+                <Flex gap="8px" justify="center">
+                  {weeksLearning.weeklyTimes.map((time, index) => {
+                    const currentDate = new Date(weekStart)
+                    currentDate.setDate(weekStart.getDate() + index)
+
+                    const isFutureDate = currentDate > today
+
+                    return (
+                      <Flex
+                        key={index}
+                        align="center"
+                        direction="column"
+                        style={{ opacity: isFutureDate ? 0.5 : 1 }}
+                      >
+                        <Text size="sm" fw={700} m="0 auto">
+                          {WEEKDAYS[index]}
+                        </Text>
+                        <Progress
+                          percent={isFutureDate ? 0 : Math.min(((time || 0) / 10) * 100, 100)}
+                          color="var(--mantine-color-blue-6)"
+                          size={40}
+                          thickness={4}
+                        />
+                        <Text size="xs" fw="700" c="var(--mantine-color-gray-6)">
+                          {isFutureDate
+                            ? "-"
+                            : `${time} ${time !== 1 && time !== 0 ? "mins" : "min"}`}
+                        </Text>
+                      </Flex>
+                    )
+                  })}
                 </Flex>
               </Box>
             </Flex>
@@ -330,8 +427,8 @@ export const UserStatisticsView = ({
 
           <Grid.Col span={{ base: 12, md: 7 }}>
             <Box p="var(--mantine-spacing-md)" className="border" h="100%">
-              <h3>Last session</h3>
-              <Box>{lastSession()}</Box>
+              <h3>Login session overview</h3>
+              <Box>{overviewItems(lastSessionData)}</Box>
             </Box>
           </Grid.Col>
         </Grid>
@@ -344,7 +441,7 @@ export const UserStatisticsView = ({
           >
             <h3>Active study plans</h3>
 
-            <div className={`${styles.justifyLeft} ${styles.maxWidth600}`}>
+            <div className={`${styles.justifyLeft} `}>
               <DynamicBadge data={studyPlansData} />
             </div>
           </Box>
@@ -361,16 +458,16 @@ export const UserStatisticsView = ({
           <Grid.Col span={{ base: 12, md: 7 }}>
             <Flex direction="column">
               <Flex direction="column" className="border" p="var(--mantine-spacing-md)">
-                <h3>Period mean</h3>
-                <Box>{lastSession()}</Box>
+                <h3>Period mean- last week</h3>
+                <Box>{overviewItems(lastWeekData)}</Box>
               </Flex>
             </Flex>
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Box p="var(--mantine-spacing-md)" className="border" h="100%">
-              <h3>Practiced catalogs</h3>
-              <PieChart data={pieChartData} />
+              <h3>Catalogs practiced this week</h3>
+              <PieChart data={pieChartData} options={pieChartOptions} />
             </Box>
           </Grid.Col>
         </Grid>

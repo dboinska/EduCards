@@ -1,7 +1,7 @@
 import type { Ctx } from "blitz"
 import OpenAI from "openai"
 import db from "db"
-import { suggestionSchema, SuggestionSchema } from "../schemas/Suggestion.schema"
+import { SuggestionSchema, suggestionSchema } from "../schemas/Suggestion.schema"
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
