@@ -3,8 +3,13 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-const PieChart = ({ data }) => {
-  return <Doughnut data={data} />
+type PieChartProps = {
+  data: any
+  options?: any
+}
+
+const PieChart = ({ data, options }: PieChartProps) => {
+  return <Doughnut data={data} options={options} />
 }
 
 export default PieChart
