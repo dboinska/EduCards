@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 import { Title } from "@mantine/core"
 
 import Layout from "@/layouts/Root.layout"
@@ -9,6 +9,9 @@ import { useRandomAnswers } from "@/hooks/useRadomAnswers"
 import styles from "src/styles/Quiz.module.css"
 
 import type { Catalog, Card } from "db"
+import { useMutation } from "@blitzjs/rpc"
+import { useCurrentUser } from "@/modules/user/hooks/useCurrentUser"
+import addCompletedQuiz from "../mutations/addCompletedQuiz"
 
 type Answers = {
   id: string
@@ -41,14 +44,43 @@ export const QuizView = ({ catalog, numberOfQuestions }: QuizViewProps) => {
   const [numberOfCorrect, setNumberOfCorrect] = useState<number>(0)
   const [numberOfWrong, setNumberOfWrong] = useState<number>(0)
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([])
-
   const [showAnswers, setShowAnswers] = useState<boolean>(false)
+
+  const [createQuizMutation] = useMutation(addCompletedQuiz)
+  const currentUser = useCurrentUser()
+
+  const quizSubmittedRef = useRef<boolean>(false)
+
+  const submitQuizResults = useCallback(async () => {
+    if (quizSubmittedRef.current) {
+      return
+    }
+
+    quizSubmittedRef.current = true
+
+    if (!catalog?.catalogId || !currentUser?.id) {
+      console.error("Missing catalogId or userId")
+      return
+    }
+
+    try {
+      await createQuizMutation({
+        catalogId: catalog.catalogId,
+        userId: currentUser.id,
+      })
+      console.log("Quiz submitted successfully")
+    } catch (error) {
+      console.error("Failed to save quiz results:", error)
+      quizSubmittedRef.current = false
+    }
+  }, [catalog?.catalogId, currentUser?.id, createQuizMutation])
 
   useEffect(() => {
     if (questionIndex > limitedCards.length - 1) {
+      void submitQuizResults()
       setVisibleStats(true)
     }
-  }, [questionIndex, limitedCards])
+  }, [questionIndex, limitedCards, submitQuizResults])
 
   console.log({ questionIndex, lc: limitedCards.length })
 
