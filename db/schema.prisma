@@ -32,6 +32,28 @@ model User {
   sharedCatalog SharedCatalog[]
   StudyPlan     StudyPlan[]
   learnSession  LearnSession[]
+  quiz          Quiz[]
+  suggestion    Suggestion[]
+}
+
+model Quiz {
+  id        String   @id @default(uuid())
+  userId    String
+  catalogId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  catalog Catalog @relation(fields: [catalogId], references: [catalogId])
+}
+
+model Suggestion {
+  id        String   @id @default(uuid())
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Session {
@@ -93,6 +115,7 @@ model Catalog {
   sharedCatalog SharedCatalog[]
   StudyPlan     StudyPlan[]
   learnSession  LearnSession[]
+  quizzes       Quiz[]
 }
 
 model SharedCatalog {
@@ -202,6 +225,7 @@ model StudyPlan {
   catalog        Catalog  @relation(fields: [catalogId], references: [catalogId], onDelete: Cascade, onUpdate: Cascade)
   ownerId        String
   owner          User     @relation(fields: [ownerId], references: [id])
+  active         Boolean  @default(true)
 }
 
 model LearnSession {
