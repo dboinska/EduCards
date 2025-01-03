@@ -34,6 +34,16 @@ model User {
   learnSession  LearnSession[]
   quiz          Quiz[]
   suggestion    Suggestion[]
+  apiKeys       ApiKey[]
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String
+  iv        String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model Quiz {
