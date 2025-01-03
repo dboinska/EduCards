@@ -2,7 +2,16 @@ import { useState } from "react"
 import { useRouter } from "next/router"
 import { Routes } from "@blitzjs/next"
 import { useMutation } from "@blitzjs/rpc"
-import { Button, Flex, Tabs, TextInput, Notification, Modal, Checkbox } from "@mantine/core"
+import {
+  Button,
+  Flex,
+  Tabs,
+  TextInput,
+  Notification,
+  Modal,
+  Checkbox,
+  PasswordInput,
+} from "@mantine/core"
 import { zodResolver } from "mantine-form-zod-resolver"
 import { useForm } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -20,6 +29,7 @@ import classes from "@/styles/Notifications.module.css"
 import styles from "@/styles/Catalogs.module.css"
 
 import type { User } from "db"
+import addApiKey from "../mutations/addApiKey"
 
 interface EditProfileProps {
   user: User
@@ -44,9 +54,11 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
     currentPassword: "",
     newPassword: "",
     newPasswordConfirmation: "",
+    apiKey: "",
   }
 
   const [deleteProfileMutation] = useMutation(deleteProfile)
+  const [addApiKeyMutation] = useMutation(addApiKey)
 
   const form = useForm({
     mode: "uncontrolled",
@@ -98,6 +110,30 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
           await router.push(Routes.UserPage({ id: user.id }))
         },
       })
+
+      if (values.apiKey) {
+        try {
+          console.log("API Key:", values.apiKey)
+          await addApiKeyMutation(values.apiKey)
+          notifications.show({
+            title: "Success",
+            message: "API key has been saved successfully",
+            color: "green",
+            position: "top-right",
+            classNames: classes,
+            autoClose: 5000,
+          })
+        } catch (apiKeyError) {
+          notifications.show({
+            title: "Failed to save API key",
+            message: apiKeyError.message || "There was an issue saving your API key",
+            color: "red",
+            position: "top-right",
+            classNames: classes,
+            autoClose: 5000,
+          })
+        }
+      }
     } catch (error: any) {
       if (error.code === "P2002" && error.meta?.target?.includes("email")) {
         notifications.show({
@@ -160,6 +196,7 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
 
   console.log({ isLoading })
   console.log("Form errors:", form.errors)
+  console.log("input:", JSON.stringify(form.getInputProps("apiKey"), null, 2))
 
   return (
     <>
@@ -191,9 +228,10 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
                   }}
                 >
                   <Tabs.List justify="start" style={{ display: "flex", flexWrap: "nowrap" }}>
-                    <Tabs.Tab value="basicInfo">Basic Information</Tabs.Tab>
+                    <Tabs.Tab value="basicInfo">Basics</Tabs.Tab>
                     <Tabs.Tab value="imagesSettings">Avatar & Cover</Tabs.Tab>
                     <Tabs.Tab value="passwordSettings">Password Settings</Tabs.Tab>
+                    <Tabs.Tab value="apiKey">API Key</Tabs.Tab>
                     <Tabs.Tab value="deleteAccount">Delete Account</Tabs.Tab>
                   </Tabs.List>
                 </div>
@@ -259,18 +297,16 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
                     />
                   </Flex>
                 </Tabs.Panel>
-
                 <Tabs.Panel value="passwordSettings" my="md">
                   <Flex direction="column" gap="sm" m="0 auto">
-                    <TextInput
+                    <PasswordInput
                       label="Password"
                       placeholder="Password"
-                      type="password"
                       style={{ width: "100%" }}
                       size="sm"
                       {...form.getInputProps("currentPassword")}
                     />
-                    <TextInput
+                    <PasswordInput
                       label="New password"
                       placeholder="New password"
                       type="password"
@@ -278,13 +314,25 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
                       size="sm"
                       {...form.getInputProps("newPassword")}
                     />
-                    <TextInput
+                    <PasswordInput
                       label="Confirm new password"
                       placeholder="Confirm new password"
                       type="password"
                       style={{ width: "100%" }}
                       size="sm"
                       {...form.getInputProps("newPasswordConfirmation")}
+                    />
+                  </Flex>
+                </Tabs.Panel>
+                <Tabs.Panel value="apiKey" my="md">
+                  <Flex direction="column" gap="sm" m="0 auto">
+                    <PasswordInput
+                      label="Chat GPT API Key"
+                      placeholder="Chat GPT API Key"
+                      style={{ width: "100%" }}
+                      size="sm"
+                      {...form.getInputProps("apiKey")}
+                      onChange={(event) => form.setFieldValue("apiKey", event.currentTarget.value)}
                     />
                   </Flex>
                 </Tabs.Panel>

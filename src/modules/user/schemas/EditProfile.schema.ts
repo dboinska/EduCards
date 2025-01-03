@@ -12,6 +12,7 @@ export const editProfileSchema = z
     currentPassword: z.string(),
     newPassword: z.union([passwordFieldSchema, z.literal("").optional()]),
     newPasswordConfirmation: z.union([passwordFieldSchema, z.literal("").optional()]),
+    apiKey: z.string().nullable().optional(),
   })
   .refine((data) => data.newPassword === data.newPasswordConfirmation, {
     message: "Passwords don't match",
