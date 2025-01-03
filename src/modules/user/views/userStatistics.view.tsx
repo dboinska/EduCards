@@ -126,7 +126,7 @@ export const UserStatisticsView = ({}) => {
 
   const addedCardsByDay = Array(7).fill(0)
   weeksCards?.forEach((card) => {
-    const dayIndex = new Date(card.createdAt).getDay()
+    const dayIndex = new Date(card.date).getDay()
     const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
     addedCardsByDay[adjustedIndex]++
   })
