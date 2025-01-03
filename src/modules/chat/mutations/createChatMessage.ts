@@ -1,77 +1,104 @@
-import axios from "axios"
-import "dotenv/config"
+import { resolver } from "@blitzjs/rpc"
+import OpenAI from "openai"
 import { chatMessageSchema } from "../schemas/ChatMessage.schema"
-
 import type { Ctx } from "blitz"
 import type { ChatMessageSchema } from "../schemas/ChatMessage.schema"
+import getApiKey from "@/modules/user/queries/getApiKey"
+import { decrypt } from "@/utils/crypto"
+import { notifications } from "@mantine/notifications"
 
-const OPENAI_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
+import classes from "src/styles/Notifications.module.css"
 
-export default async function createChatMessage(input: ChatMessageSchema, ctx: Ctx) {
-  const { prompt } = chatMessageSchema.parse(input)
-
-  ctx.session.$authorize()
-
-  try {
-    const systemMessage = {
-      role: "system",
-      content: `You are a highly knowledgeable tutor and language expert. You can only discuss topics strictly related to learning, education, language acquisition, grammar, vocabulary, and language practice. If the user asks for anything outside these topics, politely refuse and steer the conversation back to language learning. Do not entertain questions about cooking, recipes, hobbies, or other unrelated topics.`,
-    }
-
-    const response = await axios.post(
-      OPENAI_COMPLETIONS_URL,
-      {
-        model: "gpt-4",
-        messages: [systemMessage, { role: "user", content: prompt }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
-
-    const botReply = response.data.choices[0].message.content
-    return { reply: botReply }
-  } catch (error) {
-    console.error("Error communicating with OpenAI API:", error)
-    throw new Error("Failed to get a response from the chat bot.")
-  }
+interface ApiKeyData {
+  iv: string
+  key: string
 }
 
-/*
-OLD SOLUTION
+export default resolver.pipe(
+  resolver.zod(chatMessageSchema),
+  resolver.authorize(),
+  async (input: ChatMessageSchema, ctx: Ctx) => {
+    const { prompt } = chatMessageSchema.parse(input)
 
-import { resolver } from "@blitzjs/rpc"
+    try {
+      const encryptApiKey = (await getApiKey(null, ctx)) as ApiKeyData
 
-export default resolver.pipe(resolver.zod(chatMessageSchema), async ({ prompt }) => {
-  console.log({ prompt })
-  try {
-    const systemMessage = {
-      role: "system",
-      content: `You are a highly knowledgeable tutor and language expert. You can only discuss topics strictly related to learning, education, language acquisition, grammar, vocabulary, and language practice. If the user asks for anything outside these topics, politely refuse and steer the conversation back to language learning. Do not entertain questions about cooking, recipes, hobbies, or other unrelated topics.`,
-    }
+      if (!encryptApiKey) {
+        notifications.show({
+          title: "Error",
+          message: "API key not found in database.",
+          position: "top-right",
+          color: "red",
+          classNames: classes,
+          autoClose: 5000,
+        })
+        console.log("API key not found in database.")
+      }
 
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
+      const decrpytedApiKey = decrypt({
+        iv: encryptApiKey.iv,
+        encryptedData: encryptApiKey.key,
+      })
+
+      const openai = new OpenAI({
+        apiKey: decrpytedApiKey,
+        dangerouslyAllowBrowser: true,
+      })
+
+      const systemMessage = {
+        role: "system" as const,
+        content: `You are a highly knowledgeable tutor and language expert. You can only discuss topics strictly related to learning, education, language acquisition, grammar, vocabulary, and language practice. If the user asks for anything outside these topics, politely refuse and steer the conversation back to language learning. Do not entertain questions about cooking, recipes, hobbies, or other unrelated topics.`,
+      }
+
+      const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [systemMessage, { role: "user", content: prompt }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
+        max_tokens: 1000,
+      })
 
-    const botReply = response.data.choices[0].message.content
-    return { reply: botReply }
-  } catch (error) {
-    console.error("Error communicating with OpenAI API:", error)
-    throw new Error("Failed to get a response from the chat bot.")
+      const botReply = response?.choices[0]?.message?.content
+
+      if (!botReply) {
+        throw new Error("No response generated")
+      }
+
+      return { reply: botReply }
+    } catch (error: any) {
+      console.error("Error communicating with OpenAI API:", error)
+      notifications.show({
+        title: "Failed",
+        message: "Error communicating with OpenAI API",
+        position: "top-right",
+        color: "red",
+        classNames: classes,
+        autoClose: 5000,
+      })
+
+      if (error.status === 401) {
+        notifications.show({
+          title: "Error",
+          message: "Invalid API key. Please check your API key in settings.",
+          position: "top-right",
+          color: "red",
+          classNames: classes,
+          autoClose: 5000,
+        })
+        console.log("Invalid API key.")
+      }
+
+      if (error.status === 429) {
+        notifications.show({
+          title: "Error",
+          message: "Rate limit exceeded. Please try again later.",
+          position: "top-right",
+          color: "red",
+          classNames: classes,
+          autoClose: 5000,
+        })
+        console.log("Rate limit exceeded.")
+      }
+
+      throw new Error("Failed to get a response from the chat bot.")
+    }
   }
-})
-*/
+)
