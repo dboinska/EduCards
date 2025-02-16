@@ -5,6 +5,8 @@ import db from "db"
 import { authenticateUser } from "./login"
 import { changePasswordSchema } from "../schemas/ChangePassword.schema"
 
+import { passwordChangedMailer } from "mailers/passwordChanged.mailer"
+
 export default resolver.pipe(
   resolver.zod(changePasswordSchema),
   resolver.authorize(),
@@ -26,6 +28,12 @@ export default resolver.pipe(
       where: { id: user.id },
       data: { hashedPassword },
     })
+
+    await passwordChangedMailer({
+      to: user.email,
+      username: user.name!,
+      updatedDate: new Date(),
+    }).send()
 
     return true
   }

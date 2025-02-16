@@ -13,7 +13,7 @@ const Layout: BlitzLayout<{ title?: string; children?: React.ReactNode }> = ({
   return (
     <>
       <Head>
-        <title>{title || "blitz-app"}</title>
+        <title key="title">{title || "blitz-app"}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Suspense fallback="Loading...">

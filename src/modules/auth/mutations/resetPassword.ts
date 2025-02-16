@@ -5,6 +5,8 @@ import db from "db"
 import { resetPasswordSchema } from "../schemas/ResetPassword.schema"
 import login from "./login"
 
+import { passwordChangedMailer } from "mailers/passwordChanged.mailer"
+
 export class ResetPasswordError extends Error {
   name = "ResetPasswordError"
   message = "Reset password link is invalid or it has expired."
@@ -40,6 +42,12 @@ export default resolver.pipe(
       where: { id: savedToken.userId },
       data: { hashedPassword },
     })
+
+    await passwordChangedMailer({
+      to: user.email,
+      username: user.name!,
+      updatedDate: new Date(),
+    }).send()
 
     // 6. Revoke all existing login sessions for this user
     await db.session.deleteMany({ where: { userId: user.id } })

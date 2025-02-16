@@ -110,7 +110,7 @@ blitz-app
 │   └── seeds.ts
 ├── integrations/
 ├── mailers/
-│   └── forgotPasswordMailer.ts
+│   └── forgotPassword.mailer.ts
 ├── public/
 │   ├── favicon.ico
 │   └── logo.png

@@ -2,6 +2,8 @@ import { resolver } from "@blitzjs/rpc"
 import { SecurePassword } from "@blitzjs/auth/secure-password"
 import db from "db"
 
+import { signupMailer } from "mailers/signup.mailer"
+
 import { signupSchema } from "../schemas/SignUp.schema"
 
 import type { Role } from "types"
@@ -22,7 +24,8 @@ export default resolver.pipe(
     })
 
     await ctx.session.$create({ userId: user.id, role: user.role as Role })
-    console.log({ user })
+    await signupMailer({ to: user.email, username: user.name! }).send()
+
     return user
   }
 )
