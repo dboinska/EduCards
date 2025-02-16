@@ -10,7 +10,7 @@ export default function Page404() {
   return (
     <>
       <Head>
-        <title>
+        <title key="title">
           {statusCode}: {title}
         </title>
       </Head>

@@ -90,9 +90,7 @@ export const LoginForm = (props: LoginFormProps) => {
                 </div>
               </Form>
               <Flex justify="right" my="lg">
-                <Link href={Routes.SignupPage()}>
-                  <Title order={6}>Sign Up</Title>
-                </Link>
+                <Link href={Routes.SignupPage()}>Sign Up</Link>
               </Flex>
             </Flex>
           </Flex>

@@ -1,0 +1,90 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: 22
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  lint:
+    name: ESLint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: Lint
+        run: npm run lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push'
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENCRYPTION_KEY: ${{secrets.ENCRYPTION_KEY}}
+          SESSION_SECRET_KEY: ${{secrets.SESSION_SECRET_KEY}}
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Store artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: educards-${{ github.run_id }}
+          path: |
+            dist
+            !dist/educards/.env
+          retention-days: 90
+          include-hidden-files: true
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-22.04
+    needs: build
+    if: github.event_name == 'push'
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: educards-${{ github.run_id }}
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "educards-app-we"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./educards

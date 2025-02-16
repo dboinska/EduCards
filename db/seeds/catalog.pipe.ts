@@ -2,7 +2,7 @@ import db from "../index"
 import { pipe } from "../utils/pipe"
 import { createCatalogList, createCardList, createDrawerList } from "./catalog.seed"
 
-import type { Catalog, Card, Drawer } from "../index"
+import type { Catalog, Card, Drawer, DrawerCard } from "../index"
 import type { Dictionary } from "../dictionaries/types"
 
 type PipelineData = {
@@ -14,6 +14,8 @@ type PipelineData = {
   savedCards?: Card[]
   drawers?: ReturnType<typeof createDrawerList>
   savedDrawers?: Drawer[]
+  cardDrawerRelation?: Pick<DrawerCard, "cardId" | "drawerId">[]
+  savedDrawerCardRelation?: DrawerCard[]
   result?: { catalog: Catalog; cards: Card[] }[]
 }
 
@@ -60,27 +62,35 @@ const commitDrawers = async (data: PipelineData): Promise<PipelineData> => ({
   savedDrawers: await db.drawer.createManyAndReturn({ data: data.drawers! }),
 })
 
-const commitFirstLevelDrawerCards = async (data: PipelineData): Promise<PipelineData> => {
-  const firstLevelDrawer = data.savedDrawers?.find((drawer) => drawer.frequency === "DAILY")
+const prepareCardDrawerRelation = async (data: PipelineData): Promise<PipelineData> => {
+  const firstLevelDrawers = data.savedDrawers?.filter((drawer) => drawer.frequency === "DAILY")
 
-  if (!firstLevelDrawer?.drawerId || !data.savedCards) {
+  if (!firstLevelDrawers || firstLevelDrawers.length <= 0 || !data.savedCards) {
     throw new Error("First level drawer or saved cards are not defined")
   }
 
-  const drawerRelation = data.savedCards.map(({ cardId }) => ({
-    drawerId: firstLevelDrawer.drawerId,
+  const drawerRelation = data.savedCards.map(({ cardId, catalogId }) => ({
+    drawerId: firstLevelDrawers.find((drawer) => drawer.catalogId === catalogId)!.drawerId,
     cardId,
   }))
 
-  await Promise.all(
-    drawerRelation.map(async (relation) => {
-      return await db.drawerCard.create({
-        data: relation,
-      })
-    })
-  )
+  return {
+    ...data,
+    cardDrawerRelation: drawerRelation,
+  }
+}
 
-  return data
+const commitCardDrawerRelation = async (data: PipelineData): Promise<PipelineData> => {
+  if (!data.cardDrawerRelation || data.cardDrawerRelation.length <= 0) {
+    throw new Error("Card drawer relation is not defined")
+  }
+
+  return {
+    ...data,
+    savedDrawerCardRelation: await db.drawerCard.createManyAndReturn({
+      data: data.cardDrawerRelation,
+    }),
+  }
 }
 
 const prepareResult = async (data: PipelineData): Promise<PipelineData> => ({
@@ -99,6 +109,7 @@ export const createCatalogs = (dictionary: Dictionary, ownerId: string) =>
     commitCards,
     prepareDrawers,
     commitDrawers,
-    commitFirstLevelDrawerCards,
+    prepareCardDrawerRelation,
+    commitCardDrawerRelation,
     prepareResult
   )({ dictionary, ownerId })
