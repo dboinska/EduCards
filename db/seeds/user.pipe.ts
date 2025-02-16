@@ -3,15 +3,16 @@ import { generatePerson } from "./user.seed"
 import { pipe } from "../utils/pipe"
 
 import type { User } from "../index"
+import type { GeneratedPerson } from "./user.seed"
 
 type UserPipelineData = {
-  user?: ReturnType<typeof generatePerson>[]
+  user?: GeneratedPerson[]
   savedUsers?: User[]
 }
 
 const prepareUsers = async (data: UserPipelineData): Promise<UserPipelineData> => ({
   ...data,
-  user: Array.from({ length: 10 }, generatePerson),
+  user: await Promise.all(Array.from({ length: 10 }, generatePerson)),
 })
 
 const commitUsers = async (data: UserPipelineData): Promise<UserPipelineData> => {

@@ -1,19 +1,23 @@
 import { faker } from "@faker-js/faker"
+import { SecurePassword } from "@blitzjs/auth/secure-password"
 
 import type { User } from "../index"
 
-type GeneratedPerson = Pick<
+export type GeneratedPerson = Pick<
   User,
   "name" | "email" | "imageUrl" | "cover" | "isPublic" | "hashedPassword"
 >
 
-const PASSWORD_HASH =
-  "JGFyZ29uMmlkJHY9MTkkbT02NTUzNix0PTIscD0xJEJsZi9WVHhBMkZnQ213SEliRWtjckEkbmJnN3Y0b3FhTnR5V21MdHBLYyt4Ni9NbTkrMXdOM200UkJUZ1FEWWlKUQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+const getPasswordHash = async (password: string) => {
+  return await SecurePassword.hash(password.trim())
+}
 
-export const generatePerson = (): GeneratedPerson => {
+export const generatePerson = async (): Promise<GeneratedPerson> => {
   const firstName = faker.person.firstName()
   const lastName = faker.person.lastName()
   const email = faker.internet.email({ firstName, lastName, provider: "example.com" })
+
+  const hashedPassword = await getPasswordHash(faker.internet.password({ length: 20 }))
 
   return {
     name: `${firstName} ${lastName}`,
@@ -21,6 +25,6 @@ export const generatePerson = (): GeneratedPerson => {
     imageUrl: faker.image.avatar(),
     cover: faker.image.urlPicsumPhotos(),
     isPublic: faker.datatype.boolean(),
-    hashedPassword: PASSWORD_HASH,
+    hashedPassword,
   }
 }
