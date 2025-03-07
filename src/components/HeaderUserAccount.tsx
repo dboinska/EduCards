@@ -66,7 +66,6 @@ export function HeaderUserAccount(auth) {
     }
 
     const handleLogout = async () => {
-      console.log("xxxxxxxxxxxxxxxxxxxxx")
       await logoutMutation()
     }
 
@@ -137,6 +136,29 @@ export function HeaderUserAccount(auth) {
                 Recommended words
               </Menu.Item>
             </Link>
+            {(loggedUser?.role === "ADMIN" || loggedUser?.role === "MODERATOR") && (
+              <>
+                <Menu.Label>Management Panel</Menu.Label>
+                <Link href={Routes.UsersManagementPage()}>
+                  <Menu.Item
+                    leftSection={
+                      <IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+                    }
+                  >
+                    User Management
+                  </Menu.Item>
+                </Link>
+                <Link href={Routes.CatalogsManagementPage()}>
+                  <Menu.Item
+                    leftSection={
+                      <IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+                    }
+                  >
+                    Catalog Management
+                  </Menu.Item>
+                </Link>
+              </>
+            )}
             <Menu.Label>Settings</Menu.Label>
             <Link href={Routes.UserPage()}>
               <Menu.Item
@@ -147,7 +169,6 @@ export function HeaderUserAccount(auth) {
                 Account settings
               </Menu.Item>
             </Link>
-
             <Menu.Item
               color="red"
               onClick={handleLogout}

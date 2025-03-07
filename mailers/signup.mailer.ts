@@ -12,10 +12,9 @@ export function signupMailer({ to, username }: SignupMailer) {
   return {
     async send() {
       const { data, error } = await resend.emails.send({
-        //from: "Educards <noreply@educards.pl>",
-        from: "Educards <onboarding@resend.dev>",
+        from: "Educards <noreply@educards.pl>",
         to: [to],
-        subject: "Your password reset instructions",
+        subject: "Welcome to Educards",
         react: WelcomeEmail({ username }),
       })
 

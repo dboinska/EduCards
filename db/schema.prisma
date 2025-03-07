@@ -23,6 +23,7 @@ model User {
   imageUrl       String?
   isPublic       Boolean  @default(false)
   cover          String?
+  isActive       Boolean  @default(true)
 
   tokens        Token[]
   sessions      Session[]

@@ -7,7 +7,6 @@ export const useNavigationLinks = () => {
   const pathname = usePathname()
 
   const menuLinks = !currentUser ? routes.filter((route) => !route.protected) : routes
-
   const authLinks = !currentUser ? authRoutes : []
 
   const isCurrentPath = (link: Omit<Route, "icon">) => pathname === link.path.pathname || undefined

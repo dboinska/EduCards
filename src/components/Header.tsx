@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Group, Box, Container, Flex } from "@mantine/core"
 import { useNavigationLinks } from "@/hooks/useNavigationLinks"
 import { HeaderUserAccount } from "./HeaderUserAccount"
+import { Logo } from "./Logo"
 
 export function Header() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false)
@@ -50,8 +51,10 @@ export function Header() {
                 closeDrawer()
               }}
               href={"/"}
+              className={classes.logoLink}
             >
-              {"EduCards"}
+              <Logo />
+              <div style={{ flexGrow: 1 }}>EduCards</div>
             </Link>
             <Flex>
               <Group gap={5} visibleFrom="md">

@@ -6,6 +6,9 @@ const { withBlitz } = require("@blitzjs/next")
  **/
 const config = {
   output: "standalone",
+  images: {
+    domains: ["localhost"],
+  },
 }
 
 module.exports = withBlitz(config)
