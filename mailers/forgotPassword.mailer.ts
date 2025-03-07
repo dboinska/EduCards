@@ -17,8 +17,7 @@ export function forgotPasswordMailer({ to, username, token }: ResetPasswordMaile
   return {
     async send() {
       const { data, error } = await resend.emails.send({
-        //from: "Educards <noreply@educards.pl>",
-        from: "Educards <onboarding@resend.dev>",
+        from: "Educards <noreply@educards.pl>",
         to: [to],
         subject: "Your password reset instructions",
         react: ResetPasswordEmail({ username, resetPasswordLink: resetUrl }),

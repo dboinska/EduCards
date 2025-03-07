@@ -204,7 +204,7 @@ export const EditProfileView = ({ user }: EditProfileProps) => {
         <main className={styles.main}>
           <Flex
             direction="column"
-            w={{ base: "100%", md: "60%" }}
+            w={{ base: "100%", md: "560px" }}
             m="0 auto"
             align="center"
             className={styles.border}

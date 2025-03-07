@@ -9,6 +9,8 @@ export default resolver.pipe(async () => {
       email: true,
       role: true,
       imageUrl: true,
+      createdAt: true,
+      isActive: true,
     },
   })
 

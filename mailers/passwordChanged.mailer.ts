@@ -13,10 +13,9 @@ export function passwordChangedMailer({ to, username, updatedDate }: PasswordCha
   return {
     async send() {
       const { data, error } = await resend.emails.send({
-        //from: "Educards <noreply@educards.pl>",
-        from: "Educards <onboarding@resend.dev>",
+        from: "Educards <noreply@educards.pl>",
         to: [to],
-        subject: "Your password reset instructions",
+        subject: "Your password has been changed",
         react: PasswordChangedEmail({ username, updatedDate }),
       })
 

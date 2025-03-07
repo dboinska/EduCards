@@ -18,7 +18,9 @@ interface WelcomeEmailProps {
 export const WelcomeEmail = ({ username }: WelcomeEmailProps) => (
   <Html>
     <Head />
-    <Preview>The sales intelligence platform that helps you uncover qualified leads.</Preview>
+    <Preview>
+      Welcome to Educards the learning platform that helps you learn and remember anything.
+    </Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={heading}>Educards</Heading>

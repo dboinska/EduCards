@@ -32,17 +32,24 @@ import getDailySuggestions from "@/modules/suggestion/queries/getDailySuggestion
 import getWeeklySuggestions from "@/modules/suggestion/queries/getWeeklySuggestions"
 
 export interface StatisticsViewProps {
-  id: number
+  id?: string
   image?: string
-  header: string
+  header?: string
   desc?: string
   isFavorite?: boolean
-  authorId: number
+  authorId?: number
 }
 
 const WEEKDAYS = ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."]
 const today = new Date()
 const weekStart = startOfWeek(today, { weekStartsOn: 1 })
+
+type CatalogData = {
+  catalogId: string
+  catalogName: string
+  duration: number
+  percent: number
+}
 
 interface StudyPlanBadge {
   color: string
@@ -92,7 +99,7 @@ const barChartOptions = {
   },
 }
 
-export const UserStatisticsView = ({}) => {
+export const UserStatisticsView = ({ id }: StatisticsViewProps) => {
   const currentUser = useCurrentUser()
   const [lastSessionStatistics] = useQuery(getLastSessionStatistics, currentUser?.id as string)
   const [lastWeekStatistics] = useQuery(getLastWeekStatistics, currentUser?.id as string)
@@ -101,15 +108,14 @@ export const UserStatisticsView = ({}) => {
   const [weeksCards] = useQuery(getWeeklyCards, {})
   const [weeksLearnedCards] = useQuery(getWeeksLearnedCards, {})
   const studyPlans = useQuery(getActiveStudyPlans, {})
-  console.log({ lastSessionStatistics, weeksLearnedCards, studyPlans })
+
   const studyPlansData = studyPlans[0]?.studyPlans
     ? studyPlans[0].studyPlans.map(convertStudyPlanToBadge)
     : []
   const practicedCatalogs = useQuery(getWeeksCatalogs, {})
-  console.log({ studyPlansData, practicedCatalogs })
 
   const dailyCompletedQuizzes = useQuery(getDailyCompletedQuizzes, {
-    userId: currentUser?.id as string,
+    userId: currentUser!.id,
   })
   const weeklyCompletedQuizzes = useQuery(getWeeklyCompletedQuizzes, {
     userId: currentUser?.id as string,
@@ -121,7 +127,6 @@ export const UserStatisticsView = ({}) => {
     userId: currentUser?.id as string,
   })
 
-  console.log({ weeksCards, dailyCompletedQuizzes })
   const lastSession = lastSessionStatistics || {}
 
   const addedCardsByDay = Array(7).fill(0)
@@ -137,7 +142,6 @@ export const UserStatisticsView = ({}) => {
     const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
     learnedCardsByDay[adjustedIndex] = day.learnedCards
   })
-  console.log({ addedCardsByDay, lastWeekStatistics })
 
   const lastSessionData = [
     {
@@ -261,21 +265,11 @@ export const UserStatisticsView = ({}) => {
     ],
   }
 
-  type CatalogData = {
-    catalogId: string
-    catalogName: string
-    duration: number
-    percent: number
-  }
-
   const catalogsData = practicedCatalogs?.[0]
 
   const filteredData = catalogsData
     .filter((catalog) => catalog && catalog.catalogName && catalog.duration > 0)
     .sort((a, b) => b.duration - a.duration)
-
-  console.log({ catalogsData, filteredData })
-  console.log({ catalogs: catalogsData.map((catalog) => catalog.catalogName) })
 
   const pieChartData = {
     labels: filteredData.map((catalog) => catalog.catalogName),
@@ -351,8 +345,6 @@ export const UserStatisticsView = ({}) => {
       },
     },
   }
-
-  console.log({ weeksLearning })
 
   return (
     <Layout title="Statistics">

@@ -165,8 +165,7 @@ export const QuizView = ({ catalog, numberOfQuestions }: QuizViewProps) => {
                 />
               )
             })
-          : // Display one question
-            questionIndex <= limitedCards.length - 1 && (
+          : questionIndex <= limitedCards.length - 1 && (
               <Question
                 id={limitedCards[questionIndex]?.cardId as string}
                 question={limitedCards[questionIndex]?.term as string}

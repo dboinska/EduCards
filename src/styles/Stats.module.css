@@ -1,0 +1,42 @@
+.value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title {
+  color: var(--mantine-color-dimmed);
+}
+
+.actionableStat {
+  all: unset;
+  cursor: pointer;
+
+  .stat,
+  .title {
+    transition: color 260ms ease, background-color 260ms ease;
+  }
+
+  &:hover,
+  &:focus {
+    .stat {
+      background-color: var(--mantine-primary-color-filled);
+      color: #fff;
+    }
+
+    .title {
+      color: #fff;
+    }
+  }
+}
+
+.active {
+  .stat {
+    border: 1px solid var(--mantine-primary-color-filled);
+    color: var(--mantine-primary-color-filled);
+  }
+
+  .title {
+    color: var(--mantine-primary-color-filled);
+  }
+}

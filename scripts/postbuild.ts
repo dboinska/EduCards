@@ -8,9 +8,11 @@ const __root = path.resolve(__dirname, "..")
 
 const SOURCE_DIR = path.resolve(__root, ".next/standalone")
 const STATIC_DIR = path.resolve(__root, ".next/static")
+const PUBLIC_DIR = path.resolve(__root, "public")
 const DIST_DIR = path.resolve(__root, "dist")
 const TARGET_DIR = path.resolve(DIST_DIR, "educards")
 const TARGET_STATIC_DIR = path.resolve(TARGET_DIR, ".next/static")
+const TARGET_PUBLIC_DIR = path.resolve(TARGET_DIR, "public")
 
 const getRelative = (to) => path.relative(__root, to)
 
@@ -45,6 +47,17 @@ async function postBuild(): Promise<void> {
     await fs.cp(STATIC_DIR, TARGET_STATIC_DIR, { recursive: true })
     console.timeEnd(
       `📁 Moving content of ${getRelative(STATIC_DIR)} into ${getRelative(TARGET_STATIC_DIR)}...`
+    )
+
+    console.time(
+      `🗃️ Moving content of ${getRelative(PUBLIC_DIR)} into ${getRelative(TARGET_PUBLIC_DIR)}...`
+    )
+    await fs.cp(PUBLIC_DIR, TARGET_PUBLIC_DIR, {
+      recursive: true,
+      filter: (src) => !src.includes(path.join(PUBLIC_DIR, "upload")),
+    })
+    console.timeEnd(
+      `🗃️ Moving content of ${getRelative(PUBLIC_DIR)} into ${getRelative(TARGET_PUBLIC_DIR)}...`
     )
 
     console.timeEnd("✅ Postbuild script finished in ")
