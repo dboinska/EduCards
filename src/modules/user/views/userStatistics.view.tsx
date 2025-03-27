@@ -31,6 +31,7 @@ import getWeeklyAddedCards from "../../card/queries/getWeeklyAddedCards"
 import getDailySuggestions from "@/modules/suggestion/queries/getDailySuggestions"
 import getWeeklySuggestions from "@/modules/suggestion/queries/getWeeklySuggestions"
 import { useMemo } from "react"
+import getWeeklyCatalogs from "../../catalog/queries/getWeeklyCatalogs"
 
 export interface StatisticsViewProps {
   id?: string
@@ -80,6 +81,9 @@ const barChartOptions = {
   scales: {
     y: {
       beginAtZero: true,
+      ticks: {
+        stepSize: 1,
+      },
     },
   },
   plugins: {
@@ -101,12 +105,39 @@ export const UserStatisticsView = ({ id }: StatisticsViewProps) => {
   const [weeksLearning] = useQuery(getWeeksLearning, {})
   const [weeksCards] = useQuery(getWeeklyAddedCards, {})
   const [weeksLearnedCards] = useQuery(getWeeksLearnedCards, {})
+  const [weeksCatalogs] = useQuery(getWeeklyCatalogs, {})
   const studyPlans = useQuery(getActiveStudyPlans, {})
 
   const studyPlansData = studyPlans[0]?.studyPlans
     ? studyPlans[0].studyPlans.map(convertStudyPlanToBadge)
     : []
   const practicedCatalogs = useQuery(getWeeksCatalogs, {})
+  const catalogNames = weeksCatalogs.map((catalog) => catalog.catalogName)
+  const durations = weeksCatalogs.map((catalog) => catalog.duration)
+
+  const chartData = {
+    labels: catalogNames,
+    datasets: [
+      {
+        label: "Learned Cards per Catalog",
+        data: durations,
+        backgroundColor: [
+          "rgba(54, 162, 235, 0.2)",
+          "rgba(75, 192, 192, 0.2)",
+          "rgba(153, 102, 255, 0.2)",
+          "rgba(255, 159, 64, 0.2)",
+        ],
+        borderColor: [
+          "rgba(54, 162, 235, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(153, 102, 255, 1)",
+          "rgba(255, 159, 64, 1)",
+        ],
+        borderWidth: 1,
+        cutout: "65%",
+      },
+    ],
+  }
 
   const dailyCompletedQuizzes = useQuery(getDailyCompletedQuizzes, {
     userId: currentUser!.id,
@@ -458,7 +489,7 @@ export const UserStatisticsView = ({ id }: StatisticsViewProps) => {
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Box p="var(--mantine-spacing-md)" className="border" h="100%">
               <h3>Catalogs practiced this week</h3>
-              <PieChart data={pieChartData} options={pieChartOptions} />
+              <PieChart data={chartData} options={pieChartOptions} />
             </Box>
           </Grid.Col>
         </Grid>
