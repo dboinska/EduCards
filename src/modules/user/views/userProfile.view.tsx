@@ -10,33 +10,6 @@ import styles from "src/styles/Catalogs.module.css"
 import type { User, Catalog, Card } from "db"
 import type { ParsedUrlQuery } from "node:querystring"
 
-const studyPlansData = [
-  {
-    color: "var(--mantine-color-yellow-6)",
-    header: "English",
-    label: "Grammar",
-    percent: 30,
-  },
-  {
-    color: "var(--mantine-color-lime-6)",
-    header: "Polish",
-    label: "Vocabulary",
-    percent: 23,
-  },
-  {
-    color: "var(--mantine-color-green-6)",
-    header: "French",
-    label: "Tenses",
-    percent: 12,
-  },
-  {
-    color: "var(--mantine-color-teal-6)",
-    header: "Deutch",
-    label: "Every week",
-    percent: 11,
-  },
-]
-
 interface UserProfile extends User {
   Catalog: Catalog[]
   Card: Card[]
@@ -48,6 +21,7 @@ interface UserProfileViewProps {
   totalCatalogs: number
   totalCards: number
   totalFavorites: number
+  studyPlans: any
 }
 
 export const UserProfileView = ({
@@ -56,9 +30,11 @@ export const UserProfileView = ({
   totalCards,
   totalCatalogs,
   totalFavorites,
+  studyPlans,
 }: UserProfileViewProps) => {
   console.log({ catalogs: user?.Catalog, totalCards, totalCatalogs })
   console.log({ user })
+  console.log({ studyPlans })
 
   return (
     <Layout title="User profile">
@@ -75,7 +51,26 @@ export const UserProfileView = ({
             <h3>Active study plans</h3>
 
             <div className={`${styles.justifyLeft} ${styles.maxWidth600}`}>
-              <DynamicBadge data={studyPlansData} />
+              {studyPlans?.length > 0 ? (
+                <div className={`${styles.justifyLeft}`}>
+                  {studyPlans.map((plan) => (
+                    <DynamicBadge
+                      key={plan.id}
+                      data={[
+                        {
+                          color: plan.color,
+                          header: plan.name,
+                          frequency: `${plan.daysPerWeek} days/week`,
+                          percent: Math.round((plan.wordsPerDay / plan.secondsPerDay) * 100),
+                        },
+                      ]}
+                      catalogId={plan.catalogId || ""}
+                    />
+                  ))}
+                </div>
+              ) : (
+                "No active study plans"
+              )}
             </div>
           </Box>
           <Flex className="border" direction="column">

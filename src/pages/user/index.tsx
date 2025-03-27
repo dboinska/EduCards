@@ -7,6 +7,7 @@ import getUser from "@/modules/user/queries/getUser"
 
 import type { InferGetServerSidePropsType } from "next"
 import type { BlitzPage } from "@blitzjs/next"
+import getActiveStudyPlans from "@/modules/user/queries/getActiveStudyPlans"
 
 const UserPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   user,
@@ -14,6 +15,7 @@ const UserPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
   totalCards,
   totalCatalogs,
   totalFavorites,
+  studyPlans,
 }) => (
   <UserProfileView
     user={user}
@@ -21,6 +23,7 @@ const UserPage: BlitzPage<InferGetServerSidePropsType<typeof getServerSideProps>
     totalCards={totalCards}
     totalCatalogs={totalCatalogs}
     totalFavorites={totalFavorites}
+    studyPlans={studyPlans}
   />
 )
 
@@ -48,9 +51,9 @@ export const getServerSideProps = gSSP(async ({ query, ctx }) => {
   // })
 
   const totalFavorites = 0
+  const studyPlans = await getActiveStudyPlans(query, ctx)
 
-  console.log({ totalCatalogs, totalCards })
-  return { props: { user, query, totalCatalogs, totalCards, totalFavorites } }
+  return { props: { user, query, totalCatalogs, totalCards, totalFavorites, studyPlans } }
 })
 
 export default UserPage

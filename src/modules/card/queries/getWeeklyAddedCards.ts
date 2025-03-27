@@ -2,7 +2,7 @@ import type { Ctx } from "blitz"
 import { startOfWeek, endOfWeek } from "date-fns"
 import db from "db"
 
-export default async function getWeeklyCards(_, ctx: Ctx) {
+export default async function getWeeklyAddedCards(_, ctx: Ctx) {
   ctx.session.$authorize()
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
