@@ -8,9 +8,10 @@ interface DynamicBadgeProps {
   data: any
   drawerProps?: any
   setDrawerProps?: any
+  catalogId: string | number
 }
 
-export const DynamicBadge = ({ data, drawerProps, setDrawerProps }: DynamicBadgeProps) => {
+export const DynamicBadge = ({ data, catalogId }: DynamicBadgeProps) => {
   const items = data.map((data, index) => (
     <Flex
       key={index}
@@ -23,21 +24,7 @@ export const DynamicBadge = ({ data, drawerProps, setDrawerProps }: DynamicBadge
       }}
       miw="110px"
     >
-      <Link
-        href={Routes.Drawer({ id: data.drawerId })}
-        style={{ height: "100%", minHeight: "100px" }}
-        onClick={() => {
-          if (!data.header) {
-            const level = `level ${Number(index + 1)}`
-            setDrawerProps({
-              header: `${level}`,
-              label: data.frequency,
-              color: data.color,
-            })
-            console.log(drawerProps)
-          }
-        }}
-      >
+      <Link href={`/catalogs/${catalogId}`} style={{ height: "100%", minHeight: "100px" }}>
         <Flex direction="column" justify="space-between" h="100%" maw="110px">
           <div className={styles.headerContainer}>
             <h2

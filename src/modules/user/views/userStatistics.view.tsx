@@ -27,9 +27,10 @@ import getActiveStudyPlans from "../queries/getActiveStudyPlans"
 import getWeeksCatalogs from "../../catalog/queries/getWeeklyCatalogs"
 import getDailyCompletedQuizzes from "@/modules/quiz/queries/getDailyCompletedQuizzes"
 import getWeeklyCompletedQuizzes from "@/modules/quiz/queries/getWeeklyCompletedQuizzes"
-import getWeeklyCards from "../../card/queries/getWeeklyLearnedCards"
+import getWeeklyAddedCards from "../../card/queries/getWeeklyAddedCards"
 import getDailySuggestions from "@/modules/suggestion/queries/getDailySuggestions"
 import getWeeklySuggestions from "@/modules/suggestion/queries/getWeeklySuggestions"
+import { useMemo } from "react"
 
 export interface StatisticsViewProps {
   id?: string
@@ -43,13 +44,6 @@ export interface StatisticsViewProps {
 const WEEKDAYS = ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."]
 const today = new Date()
 const weekStart = startOfWeek(today, { weekStartsOn: 1 })
-
-type CatalogData = {
-  catalogId: string
-  catalogName: string
-  duration: number
-  percent: number
-}
 
 interface StudyPlanBadge {
   color: string
@@ -105,7 +99,7 @@ export const UserStatisticsView = ({ id }: StatisticsViewProps) => {
   const [lastWeekStatistics] = useQuery(getLastWeekStatistics, currentUser?.id as string)
   const [todaysLearning] = useQuery(getDailyLearning, {})
   const [weeksLearning] = useQuery(getWeeksLearning, {})
-  const [weeksCards] = useQuery(getWeeklyCards, {})
+  const [weeksCards] = useQuery(getWeeklyAddedCards, {})
   const [weeksLearnedCards] = useQuery(getWeeksLearnedCards, {})
   const studyPlans = useQuery(getActiveStudyPlans, {})
 
@@ -128,12 +122,11 @@ export const UserStatisticsView = ({ id }: StatisticsViewProps) => {
   })
 
   const lastSession = lastSessionStatistics || {}
-
   const addedCardsByDay = Array(7).fill(0)
-  weeksCards?.forEach((card) => {
-    const dayIndex = new Date(card.date).getDay()
+  weeksCards?.forEach((day) => {
+    const dayIndex = new Date(day.createdAt).getDay()
     const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
-    addedCardsByDay[adjustedIndex]++
+    addedCardsByDay[adjustedIndex] += 1
   })
 
   const learnedCardsByDay = Array(7).fill(0)
@@ -433,8 +426,14 @@ export const UserStatisticsView = ({ id }: StatisticsViewProps) => {
           >
             <h3>Active study plans</h3>
 
-            <div className={`${styles.justifyLeft} `}>
-              <DynamicBadge data={studyPlansData} />
+            <div className={`${styles.justifyLeft}`}>
+              {studyPlansData.map((plan, index) => (
+                <DynamicBadge
+                  key={studyPlans[0]?.studyPlans[index]?.catalogId}
+                  data={[plan]}
+                  catalogId={studyPlans[0]?.studyPlans[index]?.catalogId || ""}
+                />
+              ))}
             </div>
           </Box>
         </div>
