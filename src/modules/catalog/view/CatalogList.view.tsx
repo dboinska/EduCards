@@ -178,7 +178,7 @@ export const CatalogListView = ({ query, catalogs, userId }: CatalogListViewProp
               Sort by:
             </label>
             <Box w="240px">
-              <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
+              <Picker options={sortBy} onChange={handleSortChange} id="sort" />
             </Box>
           </Flex>
         </div>

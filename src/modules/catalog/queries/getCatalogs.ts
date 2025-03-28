@@ -21,7 +21,7 @@ export default async function getCatalogs(input: CommonInputSchema, ctx: Ctx) {
 
   const catalogType = {
     own: { ownerId: ctx.session.userId },
-    public: { type: "public" },
+    public: { type: { equals: "public", mode: "insensitive" } },
     shared: {
       isShared: true,
       sharedCatalog: {

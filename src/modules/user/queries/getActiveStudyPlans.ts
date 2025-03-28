@@ -17,7 +17,5 @@ export default async function getActiveStudyPlans(_, ctx: Ctx): Promise<any> {
     },
   })
 
-  return {
-    studyPlans,
-  }
+  return studyPlans
 }

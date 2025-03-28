@@ -1,7 +1,7 @@
 import { Routes } from "@blitzjs/next"
 import { Button, Flex, rem } from "@mantine/core"
 import { IconCirclePlus, IconCards } from "@tabler/icons-react"
-import type { Ctx, RouteUrlObject } from "blitz"
+import type { RouteUrlObject } from "blitz"
 import Link from "next/link"
 
 import styles from "src/styles/CatalogHeader.module.css"
@@ -11,6 +11,7 @@ import { useMutation } from "@blitzjs/rpc"
 import deleteCatalog from "@/modules/catalog/mutations/deleteCatalog"
 import createLearnSession from "@/modules/drawer/mutations/createLearnSession"
 import { useState } from "react"
+import { useSession } from "@blitzjs/auth"
 
 interface CatalogHeaderProps {
   header: string
@@ -36,6 +37,7 @@ export function CatalogHeader({
   catalogId,
   drawerId,
 }: CatalogHeaderProps) {
+  const session = useSession({ suspense: false })
   const currentUser = useCurrentUser()
   const [isClicked, setIsClicked] = useState(false)
 
@@ -46,10 +48,10 @@ export function CatalogHeader({
     console.log("xxx")
   }
 
+  console.log({ drawerId })
+
   async function handleDeleteCatalog(catalogId: string) {
     try {
-      console.log("Attempting to delete catalog with ID:", catalogId)
-
       await deleteCatalogMutation(catalogId, { onSuccess: handleSuccess })
     } catch (error) {
       console.error("Failed to delete catalog:", error)
@@ -77,18 +79,11 @@ export function CatalogHeader({
     : []
 
   async function handleLearn() {
-    if (!currentUser) {
-      console.error("User not found")
-    }
     setIsClicked(true)
     try {
-      console.log("Attempting to create learn session")
-
-      console.log({ userId: currentUser?.id, catalog: catalogId, drawerId: drawerId })
-
       await createLearnSessionMutation(
         {
-          userId: currentUser?.id as string,
+          userId: (currentUser?.id as string) || "",
           catalogId: catalogId as string,
           drawerId: drawerId as string,
           sessionStart: new Date(),
@@ -104,14 +99,13 @@ export function CatalogHeader({
     <div className={styles.header}>
       <h1>{header}</h1>
       <Flex gap="16px" className={styles.links} align="center">
-        {learningMode && (
+        {(learningMode || !session.userId) && (
           <Button
             variant="gradient"
             gradient={{ from: "lime", to: "blue" }}
             radius="md"
             size="sm"
             component={Link}
-            //
             href={Routes.LearnPage({ id: drawerId as string, sliding: true })}
             onClick={handleLearn}
             loading={isClicked}

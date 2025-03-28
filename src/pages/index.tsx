@@ -1,9 +1,14 @@
 import { Container, Title, Text, Button } from "@mantine/core"
 import classes from "../styles/Home.module.css"
-import { BlitzPage } from "@blitzjs/next"
+import type { BlitzPage } from "@blitzjs/next"
+import { Routes } from "@blitzjs/next"
 import Layout from "@/layouts/Root.layout"
+import { useSession } from "@blitzjs/auth"
+import Link from "next/link"
 
 const Home: BlitzPage = () => {
+  const { userId } = useSession({ suspense: false })
+
   return (
     <Layout title="Home">
       <div className={classes.root}>
@@ -30,16 +35,35 @@ const Home: BlitzPage = () => {
                 field.
               </Text>
 
-              <Button
-                variant="gradient"
-                gradient={{ from: "lime", to: "blue" }}
-                radius="lg"
-                size="lg"
-                className={classes.control}
-                mt={40}
-              >
-                Sign up
-              </Button>
+              {userId && (
+                <Button
+                  variant="gradient"
+                  gradient={{ from: "lime", to: "blue" }}
+                  radius="lg"
+                  size="lg"
+                  className={classes.control}
+                  mt={40}
+                  component={Link}
+                  href={Routes.Catalogs()}
+                >
+                  Start learning
+                </Button>
+              )}
+
+              {!userId && (
+                <Button
+                  variant="gradient"
+                  gradient={{ from: "lime", to: "blue" }}
+                  radius="lg"
+                  size="lg"
+                  className={classes.control}
+                  mt={40}
+                  component={Link}
+                  href={Routes.SignupPage()}
+                >
+                  Sign up
+                </Button>
+              )}
             </div>
           </div>
         </Container>

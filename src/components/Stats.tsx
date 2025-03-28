@@ -3,6 +3,7 @@ import { Routes } from "@blitzjs/next"
 import { Text, Paper, Group, Flex, Button } from "@mantine/core"
 import Link from "next/link"
 import { Progress } from "./Progress"
+import { useSession } from "@blitzjs/auth"
 
 interface StatsProps {
   correct: number
@@ -22,6 +23,7 @@ export function Stats({
   backButtonHref,
   onClick,
 }: StatsProps) {
+  const session = useSession({ suspense: false })
   const all: number = Number(correct + wrong)
   const percent: number = Number(((correct / all) * 100).toFixed(0))
   const color = (percent: number): string => {
@@ -76,12 +78,13 @@ export function Stats({
                 {backButtonLabel}
               </Button>
             )}
-
-            <Link href={Routes.LearnPage({ id: newAttemptId as string })} passHref>
-              <Button color="var(--main-color)" radius="md">
-                Try again
-              </Button>
-            </Link>
+            {session.userId && (
+              <Link href={Routes.LearnPage({ id: newAttemptId as string })} passHref>
+                <Button color="var(--main-color)" radius="md">
+                  Try again
+                </Button>
+              </Link>
+            )}
           </Group>
         </Paper>
       </Flex>
