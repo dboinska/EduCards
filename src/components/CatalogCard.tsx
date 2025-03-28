@@ -107,18 +107,20 @@ export const CatalogCard = ({
       <div className={styles.cardContent}>
         <div className={styles.headerContainer}>
           <h2 onClick={handleClick}>{term}</h2>
-          <Button
-            variant="outline"
-            color="red"
-            className={styles.deleteButton}
-            onClick={open}
-            radius="50%"
-            w="30px"
-            h="30px"
-            p="var(--mantine-spacing-md) auto"
-          >
-            <IconX size="20" />
-          </Button>
+          {currentUser && (
+            <Button
+              variant="outline"
+              color="red"
+              className={styles.deleteButton}
+              onClick={open}
+              radius="50%"
+              w="30px"
+              h="30px"
+              p="var(--mantine-spacing-md) auto"
+            >
+              <IconX size="20" />
+            </Button>
+          )}
         </div>
         <h3>{description}</h3>
       </div>

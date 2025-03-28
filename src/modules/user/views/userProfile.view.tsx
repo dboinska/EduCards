@@ -34,8 +34,8 @@ export const UserProfileView = ({
 }: UserProfileViewProps) => {
   console.log({ catalogs: user?.Catalog, totalCards, totalCatalogs })
   console.log({ user })
-  console.log({ studyPlans })
-
+  console.log({ x: studyPlans })
+  const userStudyPlans = studyPlans || []
   return (
     <Layout title="User profile">
       <main className={styles.main}>
@@ -53,7 +53,7 @@ export const UserProfileView = ({
             <div className={`${styles.justifyLeft} ${styles.maxWidth600}`}>
               {studyPlans?.length > 0 ? (
                 <div className={`${styles.justifyLeft}`}>
-                  {studyPlans.map((plan) => (
+                  {userStudyPlans.map((plan) => (
                     <DynamicBadge
                       key={plan.id}
                       data={[

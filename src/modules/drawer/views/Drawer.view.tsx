@@ -105,7 +105,7 @@ export const DrawerView = ({ query, drawer, drawerCards, user }: DrawerViewProps
               Sort by:
             </label>
             <Box w="240px">
-              <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
+              <Picker options={sortBy} onChange={handleSortChange} id="sort" />
             </Box>
           </Flex>
         </div>

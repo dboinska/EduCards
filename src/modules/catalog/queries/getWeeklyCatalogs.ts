@@ -61,6 +61,6 @@ export default async function getWeeklyCatalogs(_, ctx: Ctx) {
 
   return result.map((catalog) => ({
     ...catalog,
-    percent: totalDuration > 0 ? Math.round((catalog.duration / totalDuration) * 100) : 0,
+    percent: totalDuration > 0 ? Math.round((catalog.duration / totalDuration) * 100) : 1,
   }))
 }

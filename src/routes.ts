@@ -22,18 +22,19 @@ export const routes: Route[] = [
     icon: mdiFolderOutline,
     className: "linkCatalogs",
   },
-  {
-    path: Routes.Favorites(),
-    alias: "Favorites",
-    icon: mdiHeartOutline,
-    className: "link",
-    protected: true,
-  },
+  // {
+  //   path: Routes.Favorites(),
+  //   alias: "Favorites",
+  //   icon: mdiHeartOutline,
+  //   className: "link",
+  //   protected: true,
+  // },
   {
     path: Routes.Quiz(),
     alias: "Quiz",
     icon: mdiPuzzle,
     className: "link",
+    protected: true,
   },
   {
     path: Routes.Chat(),

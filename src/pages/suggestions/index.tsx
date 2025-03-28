@@ -252,7 +252,6 @@ const Suggestions: BlitzPage = ({
                       setSelectedOption(selectedOption)
                     }}
                     id="select"
-                    hideImages
                     search
                   />
                 </Box>

@@ -18,7 +18,7 @@ import { CatalogCard } from "@/components/CatalogCard"
 import { DrawerCard } from "@/components/DrawerCard"
 import { Picker } from "@/components/Picker"
 
-import { actionTypes, dataReducer, initialState } from "@/reducers/dataReducer"
+import { actionTypes, catalogReducer, initialState } from "../reducers/catalogReducer"
 
 import { frequencyColorMap, frequencyDictionary } from "@/utils/frequency"
 import { isDateWithinRange } from "@/utils/isDateWithinRange"
@@ -106,9 +106,9 @@ interface EnhacedCatalog extends Catalog {
 interface CatalogViewProps {
   query: ParsedUrlQuery
   catalog: EnhacedCatalog
-  dailyAggregatedResult: Record<string, AggregatedResult>
-  studyPlanForCatalog: any
-  completionPercentage: number | string
+  dailyAggregatedResult?: Record<string, AggregatedResult>
+  studyPlanForCatalog?: any
+  completionPercentage?: number | string
 }
 
 export const CatalogView = ({
@@ -119,32 +119,40 @@ export const CatalogView = ({
   completionPercentage,
 }: CatalogViewProps) => {
   const router = useRouter()
-  const [_, dispatch] = useReducer(dataReducer, {
+  const [state, dispatch] = useReducer(catalogReducer, {
     ...initialState,
-    ...query,
+    ...(query.query ? { query: decodeURI(query.query as string) } : {}),
+    ...(query.sort ? { sort: decodeURI(query.sort as string) as SortType } : {}),
   })
   const [searchValue, setSearchValue] = useState(() => query.query || "")
-  const [cards, setCards] = useState(() => catalog?.cards || [])
   const [_catalogDrawers, setCatalogDrawers] = useState(catalog?.drawers || [])
 
+  useEffect(() => {
+    dispatch({
+      type: actionTypes.setData,
+      payload: {
+        data: catalog?.cards || [],
+      },
+    })
+  }, [])
+
   const drawers = catalog?.drawers
+
+  console.log({ drawers })
 
   const [cardCounts, setCardCounts] = useState(drawers?.map((drawer) => drawer?.numberOfCards))
 
   const { handleStudyPlanSuccess, handleTimeSuccess, handleCardSuccess, handleWeeklySuccess } =
     useNotifications()
 
-  console.log({ amount: catalog?.amountOfDrawers })
-
   const handleCardDelete = (cardId: string) => {
-    setCards((prevCards) => prevCards.filter((card) => card.cardId !== cardId))
+    dispatch({
+      type: actionTypes.removeCard,
+      payload: { cardId },
+    })
   }
 
-  console.log({ drawers })
-  console.log({ cards })
   const session = useSession({ suspense: false })
-
-  const ownerId = session?.userId || null
 
   const handleSortChange = async ({ value }: PickerOption) => {
     dispatch({
@@ -169,13 +177,22 @@ export const CatalogView = ({
     })
 
     const routerQuery = {
-      ...(query.length > 0 && { query, id: router.query.id }),
+      query: {
+        id: router.query.id,
+        ...(query.length > 0 && {
+          query: encodeURIComponent(query),
+        }),
+      },
     }
 
     await router.push(routerQuery)
   }, 500)
 
   useEffect(() => {
+    if (!dailyAggregatedResult && !studyPlanForCatalog) {
+      return
+    }
+
     if (!dailyAggregatedResult || typeof dailyAggregatedResult !== "object") {
       console.warn("dailyAggregatedResult is invalid:", dailyAggregatedResult)
       return
@@ -192,13 +209,6 @@ export const CatalogView = ({
 
     const totalDays = Object.keys(dailyAggregatedResult).length
 
-    console.log({
-      totalCardsSum,
-      studyPlanForCatalog,
-      studyPlanCards: studyPlanForCatalog[0]?.wordsPerDay,
-      totalDurationMins,
-    })
-
     if (Number(totalCardsSum) >= Number(studyPlanForCatalog[0]?.wordsPerDay)) {
       handleCardSuccess()
     }
@@ -207,14 +217,9 @@ export const CatalogView = ({
       ? Number((Number(studyPlanForCatalog[0].secondsPerDay) / 60).toFixed(2))
       : 0
 
-    console.log({ requiredStudyTime })
-
     if (totalDurationMins && Number(totalDurationMins) >= requiredStudyTime) {
       handleTimeSuccess()
     }
-
-    console.log({ totalDays })
-    console.log({ dailyAggregatedResult, studyPlanForCatalog })
 
     if (Number(totalDays) >= Number(studyPlanForCatalog[0]?.daysPerWeek)) {
       handleWeeklySuccess()
@@ -236,94 +241,114 @@ export const CatalogView = ({
   }, [catalog?.catalogId, cardCounts, drawers])
 
   useEffect(() => {
-    console.log({ cardCounts, catalogCards: catalog?.numberOfCards })
-  }, [cardCounts, catalog?.numberOfCards])
+    if (!completionPercentage) {
+      return
+    }
 
-  const catalogItems = cards.map((c) => (
-    <CatalogCard
-      key={c.cardId}
-      imageUrl={c.imageUrl}
-      term={c.term}
-      description={c.description}
-      owner={catalog?.owner || { id: "", email: "", imageUrl: null, name: null }}
-      cardId={c.cardId}
-      catalogId={c.catalogId}
-      onDelete={handleCardDelete}
-    />
-  ))
-
-  useEffect(() => {
-    console.log({
-      completionPercentage,
-      completionDate: studyPlanForCatalog[0]?.completionDate,
-    })
     if (
       Number(completionPercentage) === 100 &&
       studyPlanForCatalog[0]?.completionDate &&
       isDateWithinRange(studyPlanForCatalog[0].completionDate)
     ) {
-      console.log(true)
       handleStudyPlanSuccess()
     }
   }, [completionPercentage])
+  console.log({ catalogId: catalog?.catalogId, catalog })
 
+  const drawerId = (catalog?.drawers[0]?.drawerId as string) ?? ""
+
+  const catalogId = catalog.catalogId ?? ""
   return (
     <Layout title={`Catalog ${catalog?.name}`}>
       <main className={styles.main}>
-        <CatalogHeader
-          header={`Catalog ${catalog?.name}`}
-          link={Routes.AddCard({ id: catalog?.catalogId as string })}
-          ownerId={catalog?.ownerId}
-          settings
-          catalogId={catalog?.catalogId}
-        />
-        <Box>
-          {Number(catalog?.amountOfDrawers) > 0 && Number(catalog?.cards) > 0 && <h2>Drawers:</h2>}
-          <Flex m="0 auto" gap="8px" miw="100%" className={styles.drawersContainer}>
-            {catalog?.drawers.map((drawer, index) => (
-              <DrawerCard
-                key={drawer?.drawerId as string}
-                id={drawer?.drawerId as string}
-                header={`${index + 1} level`}
-                frequency={frequencyDictionary[drawer?.frequency!]}
-                color={frequencyColorMap[drawer?.frequency!]}
-                numberOfCards={drawers?.[index]?.numberOfCards}
-              />
-            ))}
-          </Flex>
-        </Box>
-        {catalogItems.length > 0 && (
-          <>
-            <h2>All cards:</h2>
-            <div className={styles.filters}>
-              <Flex align="center" justify="space-between">
-                <label
-                  style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}
-                  htmlFor="search"
-                >
-                  Search:
-                </label>
-                <Box w="240px">
-                  <TextInput value={searchValue} onChange={handleTextChange} id="search" />
-                </Box>
-              </Flex>
-              <Flex align={"center"} justify={"space-between"}>
-                <label
-                  style={{
-                    fontSize: "var(--mantine-font-size-sm)",
-                    fontWeight: 500,
-                  }}
-                >
-                  Sort by:
-                </label>
-                <Box w="270px">
-                  <Picker options={sortBy} hideImages onChange={handleSortChange} id="sort" />
-                </Box>
-              </Flex>
-            </div>
-            <div className={styles.gridCatalogs}>{catalogItems}</div>
-          </>
+        {!session?.userId ? (
+          <CatalogHeader
+            header={"Catalog xfdgfg"}
+            learningMode
+            drawerId={drawerId}
+            catalogId={catalogId}
+          />
+        ) : (
+          <CatalogHeader
+            header={`Catalog ${catalog?.name}`}
+            link={Routes.AddCard({ id: catalog?.catalogId as string })}
+            ownerId={catalog?.ownerId}
+            settings
+            catalogId={catalog?.catalogId}
+          />
         )}
+
+        {session.userId && (
+          <Box>
+            {Number(catalog?.amountOfDrawers) > 0 && Number(catalog?.cards) > 0 && (
+              <h2>Drawers:</h2>
+            )}
+            <Flex m="0 auto" gap="8px" miw="100%" className={styles.drawersContainer}>
+              {catalog?.drawers.map((drawer, index) => (
+                <DrawerCard
+                  key={drawer?.drawerId as string}
+                  id={drawer?.drawerId as string}
+                  header={`${index + 1} level`}
+                  frequency={frequencyDictionary[drawer?.frequency!]}
+                  color={frequencyColorMap[drawer?.frequency!]}
+                  numberOfCards={drawers?.[index]?.numberOfCards}
+                />
+              ))}
+            </Flex>
+          </Box>
+        )}
+        <>
+          <h2>All cards:</h2>
+          <div className={styles.filters}>
+            <Flex align="center" justify="space-between">
+              <label
+                style={{ fontSize: "var(--mantine-font-size-sm)", fontWeight: 500 }}
+                htmlFor="search"
+              >
+                Search:
+              </label>
+              <Box w="240px">
+                <TextInput value={searchValue} onChange={handleTextChange} id="search" />
+              </Box>
+            </Flex>
+            <Flex align={"center"} justify={"space-between"}>
+              <label
+                style={{
+                  fontSize: "var(--mantine-font-size-sm)",
+                  fontWeight: 500,
+                }}
+              >
+                Sort by:
+              </label>
+              <Box w="270px">
+                <Picker options={sortBy} onChange={handleSortChange} id="sort" />
+              </Box>
+            </Flex>
+          </div>
+
+          {state.filteredData.length > 0 && (
+            <div className={styles.gridCatalogs}>
+              {state.filteredData.map((c) => (
+                <CatalogCard
+                  key={c.cardId}
+                  imageUrl={c.imageUrl}
+                  term={c.term}
+                  description={c.description}
+                  owner={catalog?.owner || { id: "", email: "", imageUrl: null, name: null }}
+                  cardId={c.cardId}
+                  catalogId={c.catalogId}
+                  onDelete={handleCardDelete}
+                />
+              ))}
+            </div>
+          )}
+
+          {state.filteredData.length === 0 && (
+            <div className={styles.noResults}>
+              <h2>No results found</h2>
+            </div>
+          )}
+        </>
       </main>
     </Layout>
   )

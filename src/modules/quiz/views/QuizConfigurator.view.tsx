@@ -112,7 +112,6 @@ export const QuizConfiguratorView = ({ simplifiedCatalogs }: QuizConfiguratorVie
                       })
                     }}
                     id="sort"
-                    hideImages
                     search
                   />
                 </Flex>

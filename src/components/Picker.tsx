@@ -8,11 +8,10 @@ type PickerProps = {
   onChange?: (value: PickerOption) => void
   defaultValue?: string
   id: string
-  hideImages?: boolean
   search?: boolean
 }
 
-export function Picker({ defaultValue, options, onChange, id, hideImages, search }: PickerProps) {
+export function Picker({ defaultValue, options, onChange, id, search }: PickerProps) {
   const [selected, setSelected] = useState<PickerOption | undefined>(
     options.find((opt) => opt.value === defaultValue) || options[0]
   )
