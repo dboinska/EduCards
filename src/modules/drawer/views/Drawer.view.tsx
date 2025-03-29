@@ -69,7 +69,7 @@ export const DrawerView = ({ query, drawer, drawerCards, user }: DrawerViewProps
     <Layout title="Catalog">
       <main className={styles.main}>
         <CatalogHeader
-          header={"Catalog xfdgfg"}
+          header={""}
           settings
           learningMode
           drawerId={drawer?.drawerId as string}

@@ -99,7 +99,7 @@ export function CatalogHeader({
     <div className={styles.header}>
       <h1>{header}</h1>
       <Flex gap="16px" className={styles.links} align="center">
-        {(learningMode || !session.userId) && (
+        {(learningMode || (!session.userId && learningMode)) && (
           <Button
             variant="gradient"
             gradient={{ from: "lime", to: "blue" }}
@@ -126,36 +126,38 @@ export function CatalogHeader({
             <IconCards /> Let&apos;s learn
           </Button>
         )}
-        {link && ((!ownerId && currentUser?.id) || ownerId === currentUser?.id) && (
-          <Button
-            component={Link}
-            href={link}
-            radius="md"
-            styles={{
-              root: {
-                padding: rem(2),
-                border: 0,
-                backgroundImage: gradient,
-              },
+        {link &&
+          currentUser?.id &&
+          ((!ownerId && currentUser?.id) || ownerId === currentUser?.id) && (
+            <Button
+              component={Link}
+              href={link}
+              radius="md"
+              styles={{
+                root: {
+                  padding: rem(2),
+                  border: 0,
+                  backgroundImage: gradient,
+                },
 
-              inner: {
-                background: "var(--mantine-color-body)",
-                color: "var(--mantine-color-blue-filled)",
-                borderRadius: "calc(var(--button-radius) - 2px)",
-                paddingLeft: "var(--mantine-spacing-md)",
-                paddingRight: "var(--mantine-spacing-md)",
-              },
+                inner: {
+                  background: "var(--mantine-color-body)",
+                  color: "var(--mantine-color-blue-filled)",
+                  borderRadius: "calc(var(--button-radius) - 2px)",
+                  paddingLeft: "var(--mantine-spacing-md)",
+                  paddingRight: "var(--mantine-spacing-md)",
+                },
 
-              label: {
-                backgroundImage: gradient,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              },
-            }}
-          >
-            <IconCirclePlus /> Add new
-          </Button>
-        )}
+                label: {
+                  backgroundImage: gradient,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                },
+              }}
+            >
+              <IconCirclePlus /> Add new
+            </Button>
+          )}
 
         {settings && ownerId === currentUser?.id && (
           <ToggleMenu item={"catalog"} settings={catalogSettings} />

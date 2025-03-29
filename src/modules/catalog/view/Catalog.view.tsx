@@ -263,7 +263,7 @@ export const CatalogView = ({
       <main className={styles.main}>
         {!session?.userId ? (
           <CatalogHeader
-            header={"Catalog xfdgfg"}
+            header={`Catalog ${catalog?.name}`}
             learningMode
             drawerId={drawerId}
             catalogId={catalogId}
